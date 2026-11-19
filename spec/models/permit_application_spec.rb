@@ -120,10 +120,8 @@ RSpec.describe PermitApplication, type: :model do
       expect(application.submitter_membership).to eq(primary)
     end
 
-    it "reassigns submitter applications to the primary contact when the member is removed" do
+    it "clears the submitter when the member is removed and leaves the application" do
       project = create(:permit_project)
-      primary =
-        project.project_memberships.find_by!(contact_designation: :primary)
       member =
         create(
           :project_membership,
@@ -151,12 +149,12 @@ RSpec.describe PermitApplication, type: :model do
 
       submitted.reload
       draft.reload
-      expect(submitted.submitter_membership).to eq(primary)
+      expect(submitted.submitter_membership_id).to be_nil
       expect(submitted.orphaned_at).to be_nil
       expect(submitted.discarded_at).to be_nil
       expect(submitted).not_to be_orphaned
-      expect(submitted.submitter).to eq(primary.user)
-      expect(draft.submitter_membership).to eq(primary)
+      expect(submitted.submitter).to be_nil
+      expect(draft.submitter_membership_id).to be_nil
       expect(draft.orphaned_at).to be_nil
       expect(draft).not_to be_orphaned
     end

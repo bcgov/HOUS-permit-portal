@@ -68,6 +68,52 @@ RSpec.describe OrphanCleanupJob, type: :job do
         expect(non_orphan.reload).to be_present
       end
 
+      it "deletes discarded records orphaned longer than the retention period" do
+        discarded_old =
+          create(:permit_application, :newly_submitted, submitter: nil)
+        discarded_recent =
+          create(:permit_application, :newly_submitted, submitter: nil)
+        discarded_old.update_columns(
+          orphaned_at: now - (retention_days + 1).days,
+          discarded_at: now - (retention_days + 1).days
+        )
+        discarded_recent.update_columns(
+          orphaned_at: now - (retention_days - 1).days,
+          discarded_at: now - (retention_days - 1).days
+        )
+
+        subject.perform
+
+        expect(PermitApplication.unscoped.exists?(discarded_old.id)).to be false
+        expect(
+          PermitApplication.unscoped.exists?(discarded_recent.id)
+        ).to be true
+      end
+
+      it "deletes an abandoned project and its applications after the retention period" do
+        project = create(:permit_project)
+        application =
+          create(
+            :permit_application,
+            :newly_submitted,
+            permit_project: project,
+            submitter: project.owner,
+            jurisdiction: project.jurisdiction
+          )
+        project.update_columns(
+          orphaned_at: now - (retention_days + 1).days,
+          discarded_at: now - (retention_days + 1).days
+        )
+        application.update_columns(
+          discarded_at: now - (retention_days + 1).days
+        )
+
+        subject.perform
+
+        expect(PermitProject.unscoped.exists?(project.id)).to be false
+        expect(PermitApplication.unscoped.exists?(application.id)).to be false
+      end
+
       it "iterates through registered models" do
         # Just checking that it covers multiple types if they exist
         revision_request = create(:revision_request)

@@ -897,7 +897,7 @@ export class Api {
     })
   }
 
-  async updateSubmitter(id: string, submitterMembershipId: string) {
+  async updateSubmitter(id: string, submitterMembershipId: string | null) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter`, {
       permitApplication: { submitterMembershipId },
     })

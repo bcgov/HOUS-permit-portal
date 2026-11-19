@@ -40,6 +40,7 @@ class PermitProject < ApplicationRecord
   before_validation :assign_unique_number, if: -> { number.blank? }
   before_save :normalize_pid
   before_save :fetch_coordinates, if: -> { pid_changed? }
+  before_destroy :destroy_retained_children
 
   delegate :name, to: :owner, prefix: true
 
@@ -369,6 +370,16 @@ class PermitProject < ApplicationRecord
     )
   end
 
+  # Account deletion of the last Full member. A submitted application is kept
+  # with the project. A drafts-only project is destroyed now.
+  def abandon_if_unattended!
+    return if destroyed? || orphaned? || @abandoning
+    return if active_full_members.exists?
+
+    @abandoning = true
+    public_record? ? abandon_with_children! : destroy!
+  end
+
   def ensure_creator_membership!
     return if owner_id.blank?
 
@@ -390,6 +401,49 @@ class PermitProject < ApplicationRecord
   end
 
   private
+
+  def active_full_members
+    project_memberships.where(access: :full).where.not(user_id: nil)
+  end
+
+  def abandon_with_children!
+    now = Time.current
+    remember_user!
+    update_columns(orphaned_at: now, discarded_at: now, updated_at: now)
+    PermitApplication
+      .unscoped
+      .where(permit_project_id: id)
+      .find_each do |application|
+        application.remember_user!
+        next if application.discarded_at.present?
+
+        application.update_columns(discarded_at: now, updated_at: now)
+        application.reindex if application.respond_to?(:search_data)
+      end
+    StepCode
+      .unscoped
+      .where(permit_project_id: id)
+      .find_each do |step_code|
+        next if step_code.discarded_at.present?
+
+        step_code.update_columns(discarded_at: now, updated_at: now)
+      end
+    reindex if respond_to?(:search_data)
+  end
+
+  # Foreign keys are RESTRICT, and Discard hides the rows abandon! kept.
+  def destroy_retained_children
+    applications = PermitApplication.unscoped.where(permit_project_id: id)
+    application_ids = applications.pluck(:id)
+    if application_ids.any?
+      StepCode
+        .unscoped
+        .where(permit_application_id: application_ids)
+        .find_each(&:destroy!)
+    end
+    StepCode.unscoped.where(permit_project_id: id).find_each(&:destroy!)
+    applications.find_each(&:destroy!)
+  end
 
   def send_state_changed_webhook
     payload = {

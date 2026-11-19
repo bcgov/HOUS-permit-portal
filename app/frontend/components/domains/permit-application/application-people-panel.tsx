@@ -252,7 +252,6 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   }
 
   const saveContact = async () => {
-    if (!contactId) return
     setSaving(true)
     const ok = await permitApplication.updateSubmitter(contactId)
     if (ok) setView("summary")
@@ -441,6 +440,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
               <Text color="text.secondary">{t("permitApplication.people.contactChoose")}</Text>
               <AsyncSelect<IOption, false>
                 isCreatable={false}
+                isClearable
                 defaultOptions={storedContactOption ? [storedContactOption] : []}
                 loadOptions={loadContactOptions}
                 value={selectedContactOption}

@@ -14,7 +14,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
   end
 
   # Access and contact designation. Hard Full block, not a grant.
-  # The last Full member and the primary contact are model validations.
+  # The last Full member and a pending invite are model validations.
   def update_standing?
     project_access.manage_member_standing?
   end
@@ -25,7 +25,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
 
   # Canceling a pending or expired invite matches invite. Removing someone else is standing.
   # Leaving is removing your own active membership, at any access level.
-  # ProjectMembership still refuses the last Full member and the primary.
+  # ProjectMembership still refuses the last Full member.
   def destroy?
     return may_send_invite?(record) unless record.active?
     return true if own_membership?

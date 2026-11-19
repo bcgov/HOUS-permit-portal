@@ -870,7 +870,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
         }
         return response
       }),
-      updateSubmitter: flow(function* (membershipId: string) {
+      updateSubmitter: flow(function* (membershipId: string | null) {
         const response = yield self.environment.api.updateSubmitter(self.id, membershipId)
         if (response.ok) {
           const { data: permitApplication } = response.data

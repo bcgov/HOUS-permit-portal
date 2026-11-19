@@ -47,16 +47,19 @@ class User < ApplicationRecord
            class_name: "StepCode",
            foreign_key: "creator_id",
            inverse_of: :creator,
-           dependent: :destroy
+           dependent: :nullify
   has_many :overheating_codes,
            foreign_key: "creator_id",
            inverse_of: :creator,
            dependent: :destroy
 
+  # Destroy memberships before nullifying owner_id, so the last Full member
+  # can still snapshot the creator while abandoning the project.
+  has_many :project_memberships, dependent: :destroy
   has_many :permit_projects,
            class_name: "PermitProject",
            foreign_key: :owner_id,
-           dependent: :destroy,
+           dependent: :nullify,
            inverse_of: :owner
   has_many :project_meetings,
            foreign_key: :requested_by_id,
@@ -67,7 +70,6 @@ class User < ApplicationRecord
   has_many :pinned_permit_projects,
            through: :pinned_projects,
            source: :permit_project
-  has_many :project_memberships, dependent: :destroy
   has_many :permit_applications, through: :project_memberships
 
   # New intermediate association for jurisdictions applied for via permit applications
@@ -81,7 +83,7 @@ class User < ApplicationRecord
 
   has_many :license_agreements,
            class_name: "UserLicenseAgreement",
-           dependent: :destroy
+           dependent: :nullify
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :collaborations,
            foreign_key: "user_id",
@@ -93,7 +95,7 @@ class User < ApplicationRecord
            foreign_key: :previewer_id
 
   # Shared resources that should not be deleted with the user
-  has_many :revision_requests, dependent: :destroy
+  has_many :revision_requests, dependent: :nullify
   # Draft template versions assigned to this user
   has_many :assigned_template_versions,
            class_name: "TemplateVersion",
@@ -139,6 +141,9 @@ class User < ApplicationRecord
                :reindex_jurisdiction_review_manager_email
   before_save :create_default_preference
   before_validation :normalize_phone_number, if: :phone_number_attribute?
+  # prepend: dependent :nullify is itself a before_destroy, and it clears the
+  # user foreign key before a callback registered later can read it.
+  before_destroy :release_retained_records, prepend: true
 
   # Stub this for now since we do not want to use IP Tracking at the moment - Jan 30, 2024
   attr_accessor :current_sign_in_ip, :last_sign_in_ip
@@ -311,6 +316,15 @@ class User < ApplicationRecord
     return if valid_providers[role.to_sym].include?(omniauth_provider)
 
     errors.add(:omniauth_provider, "Invalid for role")
+  end
+
+  def release_retained_records
+    license_agreements.find_each(&:abandon!)
+    revision_requests.find_each(&:remember_user!)
+    created_step_codes.where(
+      permit_project_id: nil,
+      permit_application_id: nil
+    ).find_each(&:destroy!)
   end
 
   def destroy_jurisdiction_collaborator

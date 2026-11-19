@@ -2170,6 +2170,20 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:forbidden)
       expect(application.reload.submitter_membership).to eq(member)
       expect(application.submitter).to eq(member.user)
+
+      sign_in submitter
+      patch "/api/permit_applications/#{application.id}/submitter",
+            params: {
+              permit_application: {
+                submitter_membership_id: nil
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(application.reload.submitter_membership_id).to be_nil
+      expect(application).not_to be_orphaned
     end
   end
 end
