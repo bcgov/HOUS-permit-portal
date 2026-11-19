@@ -6,7 +6,6 @@ import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { IPermitProject } from "../../../models/permit-project"
-import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { PermitApplicationStatusTag } from "../permit-applications/permit-application-status-tag"
@@ -31,8 +30,6 @@ const calloutBannerTextProps = {
 
 export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCardProps) => {
   const { t } = useTranslation()
-  const { userStore } = useMst()
-  const currentUser = userStore.currentUser
 
   // Get the first permit application to display some of its details, if available
   const displayApplication = permitProject.recentPermitApplications?.[0]
@@ -47,9 +44,8 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
   const viewedAt = displayApplication?.viewedAt
   const status = displayApplication?.status
 
-  // Submitter details from the first permit application
-  const projectSubmitter = displayApplication?.submitter
-  const isSubmissionCollaboration = projectSubmitter?.id !== currentUser?.id
+  const access = permitProject.currentUserAccess
+  const isSubmissionCollaboration = !!access && !access.editApplication
 
   // Simplified routing for project card - link to project view/edit
   const routingButtonText = t("ui.view")
@@ -129,7 +125,7 @@ export const PermitProjectCard = observer(({ permitProject }: IPermitProjectCard
                   t={t}
                   components={{ 1: <Text as="span" fontWeight="bold" /> }}
                   values={{
-                    authorName: projectSubmitter?.name || projectSubmitter?.fullName, // Use available name fields
+                    authorName: displayApplication?.createdBy?.name,
                   }}
                 />
               </Text>

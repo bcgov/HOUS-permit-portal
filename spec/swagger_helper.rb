@@ -417,7 +417,10 @@ in this document.
                   "Tags associated with the permit application's requirement template."
               },
               account_holder: {
-                "$ref" => "#/components/schemas/AccountHolder"
+                allOf: [{ "$ref" => "#/components/schemas/AccountHolder" }],
+                nullable: true,
+                description:
+                  "The application contact. Null when no contact is set."
               },
               permit_version: {
                 "$ref" => "#/components/schemas/PermitVersion"

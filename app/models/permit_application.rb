@@ -3,7 +3,6 @@ class PermitApplication < ApplicationRecord
                nickname
                full_address
                template_tags
-               submitter
                status
                review_delegatee_name
              ],
@@ -106,7 +105,6 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_validation :assign_created_by_from_submitter, on: :create
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -120,10 +118,6 @@ class PermitApplication < ApplicationRecord
                if: :status_changed_to_intake?
   after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
   after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
-  scope :with_submitter_role,
-        -> do
-          joins(submitter_membership: :user).where(users: { role: "submitter" })
-        end
 
   scope :unviewed,
         -> do
@@ -362,14 +356,11 @@ class PermitApplication < ApplicationRecord
       full_address: full_address,
       template_tags: template_tag_list&.join(", "),
       template_nickname: template_nickname,
-      submitter:
-        (submitter.present? ? "#{submitter.name} #{submitter.email}" : nil),
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction&.id,
-      submitter_id: submitter_id,
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
@@ -849,7 +840,6 @@ class PermitApplication < ApplicationRecord
     aggregates =
       PermitApplication
         .joins(template_version: :requirement_template)
-        .joins(submitter_membership: :user)
         .joins(
           "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
         )
@@ -862,7 +852,6 @@ class PermitApplication < ApplicationRecord
         .joins(
           "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
         )
-        .where(users: { role: "submitter" })
         .where(permit_projects: { sandbox_id: nil })
         .group(
           "jurisdictions.id",
@@ -975,10 +964,6 @@ class PermitApplication < ApplicationRecord
   # The project's own sandbox, so a model check never depends on the request.
   def project_access_for(user)
     ProjectAccess.new(user, permit_project&.sandbox, permit_project)
-  end
-
-  def assign_created_by_from_submitter
-    self.created_by ||= submitter_membership&.user
   end
 
   def primary_contact_membership(project)
@@ -1221,17 +1206,6 @@ class PermitApplication < ApplicationRecord
   # TODO: Also enqueue project when a meeting request is made
   def enqueue_permit_project_if_draft
     permit_project&.enqueue! if permit_project&.draft?
-  end
-
-  def submitter_must_have_role
-    unless submitter&.submitter?
-      errors.add(
-        :submitter,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.submitter.incorrect_role"
-        )
-      )
-    end
   end
 
   def jurisdiction_has_matching_submission_contact

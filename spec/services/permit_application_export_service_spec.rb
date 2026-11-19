@@ -48,5 +48,27 @@ RSpec.describe PermitApplicationExportService do
         [live_jurisdiction.qualified_name]
       )
     end
+
+    it "counts an application that has no submitter" do
+      jurisdiction = create(:sub_district)
+      application =
+        create(
+          :permit_application,
+          jurisdiction: jurisdiction,
+          submitter: nil,
+          ensure_submitter_membership: false
+        )
+
+      expect(application.submitter).to be_nil
+
+      stats = PermitApplication.stats_by_template_jurisdiction_and_status
+
+      expect(stats).to include(
+        a_hash_including(
+          jurisdiction_name: jurisdiction.qualified_name,
+          draft_applications: 1
+        )
+      )
+    end
   end
 end

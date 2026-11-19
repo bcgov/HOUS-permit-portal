@@ -3,7 +3,7 @@
 require "rails_helper"
 
 RSpec.describe PermitApplicationBlueprint do
-  it "reports the submitter when created_by was never stored" do
+  it "does not use the submitter when created_by was never stored" do
     application = create(:permit_application)
     application.update_columns(created_by_type: nil, created_by_id: nil)
 
@@ -12,12 +12,8 @@ RSpec.describe PermitApplicationBlueprint do
         described_class.render(application, view: :jurisdiction_review_inbox)
       )
 
-    expect(json["created_by"]).to include(
-      "type" => "User",
-      "id" => application.submitter_id,
-      "name" => application.submitter.name,
-      "role" => application.submitter.role
-    )
+    expect(application.submitter).to be_present
+    expect(json["created_by"]).to be_nil
   end
 
   it "includes status on the summary row a member who cannot open the application receives" do
