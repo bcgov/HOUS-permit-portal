@@ -44,15 +44,21 @@ export const Part3StepCodeModel = types.snapshotProcessor(
         const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
         return self.checklists.find((checklist) => checklist.stage === stage) || self.checklist
       },
+    }))
+    .views((self) => ({
       get checklistForPdf() {
         return self.currentChecklist
       },
       stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
         return stageStatusFor(stage, self.checklists, self.stageCompletions)
       },
+    }))
+    .views((self) => ({
       isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
         return self.stageStatus(stage) === EStepCodeStageStatus.complete
       },
+    }))
+    .views((self) => ({
       get isComplete() {
         return self.isStageComplete()
       },

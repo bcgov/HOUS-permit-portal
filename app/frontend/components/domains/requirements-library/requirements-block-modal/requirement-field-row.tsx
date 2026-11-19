@@ -265,6 +265,7 @@ export const RequirementFieldRow = ({
             multiOptionProps={
               isMultiOptionRequirement(requirementType)
                 ? {
+                    emptyOption: { value: "", label: "" },
                     useFieldArrayProps: {
                       control,
                       name: `requirementsAttributes.${index}.inputOptions.valueOptions`,

@@ -88,12 +88,12 @@ export const PermitApplicationInboxSearchSharedFragment = types
   }))
 
 type IInboxApplicationFilterSlice = {
-  requirementTemplateIdFilter: { length: number; readonly [n: number]: string }
-  statusFilter: { length: number; readonly [n: number]: EPermitApplicationStatus }
+  requirementTemplateIdFilter: readonly string[]
+  statusFilter: readonly EPermitApplicationStatus[]
   unreadFilter: ERadioFilterValue
   meetingRequestFilter: ERadioFilterValue
   daysInQueueFilter: { operator: string; days: number } | null
-  assignedFilter: { length: number; readonly [n: number]: string }
+  assignedFilter: readonly string[]
 }
 
 export function buildJurisdictionPermitApplicationSearchFilters(

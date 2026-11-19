@@ -5072,6 +5072,7 @@ Thank you,
           createAccount: "Proceed with your account creation",
           omniauthProviders: {
             idir: "IDIR",
+            bceidboth: "BCeID",
             bceidbasic: "Basic BCeID",
             bceidbusiness: "Business BCeID",
             bcsc: "BC Services Card Account",

@@ -9,6 +9,7 @@ import {
   EBaselinePerformanceRequirement,
   ECollaborationType,
   ECollaboratorType,
+  EConditionalOperator,
   EDocumentReferenceDocumentType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
@@ -170,7 +171,7 @@ export interface IRequirementOptions {
   conditional?: TConditional
   computedCompliance?: TComputedCompliance
   energyStepCode?: string
-  dataValidation?: Object
+  dataValidation?: import("./api-request").IDataValidation
 }
 
 export interface IFormJson {
@@ -433,7 +434,6 @@ export interface ITemplateCustomization {
 
 export interface IDownloadableFile {
   id: string
-  submissionVersionId?: string
   dataKey?: string
   fileUrl: string
   fileName: string
@@ -599,7 +599,7 @@ export type TConditional = {
   show: boolean
   when: string
   eq: string
-  operator: string
+  operator: EConditionalOperator
 }
 
 export interface ILinkItem {

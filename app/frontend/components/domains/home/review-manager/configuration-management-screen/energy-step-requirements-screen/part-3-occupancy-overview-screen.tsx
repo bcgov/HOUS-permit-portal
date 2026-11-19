@@ -1,5 +1,6 @@
 import { Box, Button, Container, Flex, Heading, Tag, Text, VStack } from "@chakra-ui/react"
 import { ArrowRight, CaretLeft } from "@phosphor-icons/react"
+import { TFunction } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -20,11 +21,7 @@ import { i18nPrefix } from "./i18n-prefix"
 type TOverviewPrefix = `${typeof i18nPrefix}.part3Overview`
 const p: TOverviewPrefix = `${i18nPrefix}.part3Overview`
 
-function formatPathwayTag(
-  t: ReturnType<typeof useTranslation>["t"],
-  energyStep: number,
-  zeroCarbon: number | null
-): string {
+function formatPathwayTag(t: TFunction, energyStep: number, zeroCarbon: number | null): string {
   const zc = zeroCarbon !== null ? `EL-${zeroCarbon}` : (t(`${p}.zeroCarbonNA`) as string)
   return t(`${p}.complianceTag`, { energyStep, zeroCarbon: zc }) as string
 }

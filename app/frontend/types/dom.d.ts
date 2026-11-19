@@ -15,7 +15,8 @@ declare global {
       listener: (this: Document, ev: ICustomEventMap[K]) => void
     ): void
 
-    dispatchEvent<K extends keyof ICustomEventMap>(ev: ICustomEventMap[K]): void
+    dispatchEvent<K extends keyof ICustomEventMap>(ev: ICustomEventMap[K]): boolean
+    dispatchEvent(ev: Event): boolean
   }
 }
 export {} //needed for TS compiler.
