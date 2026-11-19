@@ -38,7 +38,7 @@ services:
       timeout: 5s
       retries: 30
   redis:
-    image: redis:7.2.5-alpine
+    image: redis:8.10.3@sha256:1f88291b4c57bdf249f02eb085a8669889b2d2954e91d4de5118a5da6b78dd53
     command: [redis-server, --appendonly, "yes"]
     ports:
       - "127.0.0.1:${REDIS_HOST_PORT:-16379}:6379"
