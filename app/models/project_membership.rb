@@ -60,8 +60,8 @@ class ProjectMembership < ApplicationRecord
   validate :keeps_a_full_member, on: :update
 
   # dependent: :nullify is registered with has_many and runs in definition
-  # order. Prepend so a blocked destroy aborts before the snapshot, and the
-  # snapshot runs before the foreign key is cleared.
+  # order. Prepend so a blocked destroy aborts first, and a manual removal
+  # reassigns the submitter before the foreign key is cleared.
   before_destroy :orphan_public_record_applications, prepend: true
   before_destroy :keep_full_member_and_primary_contact, prepend: true
   before_update :remember_role_names
@@ -259,11 +259,14 @@ class ProjectMembership < ApplicationRecord
     throw :abort if errors.any?
   end
 
-  # A submitted application is already orphaned once this contact is gone.
-  # Copy the name first, and stamp orphaned_at so retention can find it.
-  # Do not discard it here.
+  # A manual removal moves the submitter to the primary contact. Removing the
+  # project or the account still snapshots submitted applications and leaves
+  # the foreign key to nullify. Do not discard them here.
   def orphan_public_record_applications
     return if user.blank?
+    if !destroyed_by_association && reassign_submitter_applications_to_primary
+      return
+    end
 
     PermitApplication
       .unscoped
@@ -281,6 +284,33 @@ class ProjectMembership < ApplicationRecord
           updated_at: Time.current
         )
       end
+  end
+
+  def reassign_submitter_applications_to_primary
+    primary =
+      self
+        .class
+        .where(
+          permit_project_id: permit_project_id,
+          contact_designation: :primary
+        )
+        .where.not(user_id: nil)
+        .where.not(id: id)
+        .first
+    return false unless primary
+
+    application_ids =
+      PermitApplication.unscoped.where(submitter_membership_id: id).pluck(:id)
+    return true if application_ids.empty?
+
+    PermitApplication
+      .unscoped
+      .where(id: application_ids)
+      .update_all(submitter_membership_id: primary.id, updated_at: Time.current)
+    if Searchkick.callbacks?
+      PermitApplication.unscoped.where(id: application_ids).reindex
+    end
+    true
   end
 
   def other_active_full_members
