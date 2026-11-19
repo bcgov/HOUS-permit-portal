@@ -148,16 +148,17 @@ class PermitApplication < ApplicationRecord
     !new_draft?
   end
 
-  # A submitted application with no contact is orphaned. A draft is not.
+  # The project carries the retention clock. A blank contact is not abandonment.
+  # Rows already stamped orphaned_at stay frozen.
   def orphaned?
-    orphaned_at.present? || (public_record? && submitter_membership_id.blank?)
+    orphaned_at.present? || permit_project&.orphaned? || false
   end
 
-  # The membership's user, or the snapshot left when that contact is gone.
+  # The membership's user, or the snapshot left when that account is gone.
   def submitter
     user = submitter_membership&.user
     return user if user.present?
-    return nil unless orphaned?
+    return nil unless orphaned? || submitter_name_snapshot?
 
     record_id = id
     User
@@ -176,6 +177,11 @@ class PermitApplication < ApplicationRecord
 
   def submitter_id
     submitter_membership&.user_id
+  end
+
+  def submitter_name_snapshot?
+    omniauth_username_snapshot.present? || first_name_snapshot.present? ||
+      last_name_snapshot.present?
   end
 
   def submitter=(user)

@@ -56,17 +56,17 @@ class ProjectMembership < ApplicationRecord
             if: -> { user_id.nil? }
   validate :unique_pending_or_active_invited_email, if: -> { user_id.nil? }
   validate :one_primary_contact
-  validate :primary_contact_stays
   validate :keeps_a_full_member, on: :update
 
-  # dependent: :nullify is registered with has_many and runs in definition
-  # order. Prepend so a blocked destroy aborts first, and a manual removal
-  # reassigns the submitter before the foreign key is cleared.
-  before_destroy :orphan_public_record_applications, prepend: true
-  before_destroy :keep_full_member_and_primary_contact, prepend: true
+  # dependent: :nullify runs in definition order. Prepend so a blocked
+  # destroy aborts before the name is copied, and the copy runs before the
+  # foreign key is cleared.
+  before_destroy :remember_submitter_for_account_deletion, prepend: true
+  before_destroy :keep_last_full_member, prepend: true
   before_update :remember_role_names
   after_create :audit_invitation_sent
   after_update :audit_role_names
+  after_destroy :abandon_unattended_project
 
   after_commit :reindex_permit_project
 
@@ -170,7 +170,6 @@ class ProjectMembership < ApplicationRecord
   end
 
   # update_all would skip the activity row for the person who lost primary.
-  # Validation stays off: the current primary cannot be cleared except by a transfer.
   def release_other_primary_contact
     self
       .class
@@ -225,21 +224,6 @@ class ProjectMembership < ApplicationRecord
     )
   end
 
-  def primary_contact_stays
-    return unless active? && user_id_was.present?
-    return unless will_save_change_to_contact_designation?
-    return unless was_primary?
-    return if primary?
-
-    errors.add(:contact_designation, :primary_locked)
-  end
-
-  def was_primary?
-    previous = contact_designation_was
-    previous == "primary" ||
-      previous == self.class.contact_designations.fetch("primary")
-  end
-
   def keeps_a_full_member
     return unless active? && will_save_change_to_access?
     return unless access_was == "full"
@@ -248,69 +232,38 @@ class ProjectMembership < ApplicationRecord
     errors.add(:access, :last_full_member)
   end
 
-  # Removing the project removes every row.
-  def keep_full_member_and_primary_contact
+  # Removing the project removes every row. Account deletion is allowed to
+  # remove the last Full member; that is what abandons the project.
+  def keep_last_full_member
     return if destroyed_by_association || !active?
+    # The saved row, not an unsaved access assignment. A failed demotion
+    # leaves access as Limited in memory while the database row is still Full.
+    return unless access_was == "full"
+    return if other_active_full_members.exists?
 
-    if full? && !other_active_full_members.exists?
-      errors.add(:base, :last_full_member)
-    end
-    errors.add(:base, :primary_contact) if primary?
-    throw :abort if errors.any?
+    errors.add(:base, :last_full_member)
+    throw :abort
   end
 
-  # A manual removal moves the submitter to the primary contact. Removing the
-  # project or the account still snapshots submitted applications and leaves
-  # the foreign key to nullify. Do not discard them here.
-  def orphan_public_record_applications
+  # Manual removal just clears the contact. Account deletion keeps the name
+  # so a project that still has a Full member can show who submitted.
+  def remember_submitter_for_account_deletion
+    return unless destroyed_by_association&.active_record == User
     return if user.blank?
-    if !destroyed_by_association && reassign_submitter_applications_to_primary
-      return
-    end
 
     PermitApplication
       .unscoped
       .where(submitter_membership_id: id)
-      .find_each do |application|
-        next unless application.public_record?
-        next if application.orphaned_at.present?
-
-        application.update_columns(
-          omniauth_username_snapshot:
-            user.omniauth_username.presence || user.email,
-          first_name_snapshot: user.first_name,
-          last_name_snapshot: user.last_name,
-          orphaned_at: Time.current,
-          updated_at: Time.current
-        )
-      end
+      .find_each(&:remember_user!)
   end
 
-  def reassign_submitter_applications_to_primary
-    primary =
-      self
-        .class
-        .where(
-          permit_project_id: permit_project_id,
-          contact_designation: :primary
-        )
-        .where.not(user_id: nil)
-        .where.not(id: id)
-        .first
-    return false unless primary
+  def abandon_unattended_project
+    return unless destroyed_by_association&.active_record == User
 
-    application_ids =
-      PermitApplication.unscoped.where(submitter_membership_id: id).pluck(:id)
-    return true if application_ids.empty?
+    project = PermitProject.unscoped.find_by(id: permit_project_id)
+    return if project.blank? || project.destroyed?
 
-    PermitApplication
-      .unscoped
-      .where(id: application_ids)
-      .update_all(submitter_membership_id: primary.id, updated_at: Time.current)
-    if Searchkick.callbacks?
-      PermitApplication.unscoped.where(id: application_ids).reindex
-    end
-    true
+    project.abandon_if_unattended!
   end
 
   def other_active_full_members

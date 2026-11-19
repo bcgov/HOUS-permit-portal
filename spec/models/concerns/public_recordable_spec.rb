@@ -38,39 +38,41 @@ RSpec.describe PublicRecordable, type: :model do
     end
   end
 
-  describe "#take_user_snapshots!" do
-    it "copies user details to snapshot columns" do
-      permit_application.take_user_snapshots!
+  describe "#remember_user!" do
+    it "copies user details without starting the retention clock" do
+      permit_application.remember_user!
       permit_application.reload
 
-      # Verify data was copied from User to PermitApplication
       expect(permit_application.first_name_snapshot).to eq("Jane")
       expect(permit_application.last_name_snapshot).to eq("Doe")
-      # Omniauth username defaults to email if not present
       expect(permit_application.omniauth_username_snapshot).to eq(
         "jane@example.com"
       )
-      expect(permit_application.orphaned_at).to be_present
+      expect(permit_application.orphaned_at).to be_nil
+      expect(permit_application.discarded_at).to be_nil
     end
 
     it "uses omniauth_username if present" do
       user.update(omniauth_username: "janedoe123")
-      permit_application.take_user_snapshots!
+      permit_application.remember_user!
       expect(permit_application.omniauth_username_snapshot).to eq("janedoe123")
     end
+  end
 
-    it "does nothing if not a public record" do
-      draft = create(:permit_application, status: :new_draft, submitter: user)
-      draft.take_user_snapshots!
-      # Should NOT set orphaned_at because it's not a public record
-      expect(draft.orphaned_at).to be_nil
+  describe "#abandon!" do
+    it "snapshots the user, stamps the clock, and discards the record" do
+      permit_application.abandon!
+      permit_application.reload
+
+      expect(permit_application.first_name_snapshot).to eq("Jane")
+      expect(permit_application.orphaned_at).to be_present
+      expect(permit_application.discarded_at).to be_present
     end
   end
 
   describe "orphaned record user accessor" do
     before do
-      # Manually orphan the record to simulate the cleanup job
-      permit_application.take_user_snapshots!
+      permit_application.abandon!
       permit_application.update!(submitter_membership: nil)
       permit_application.reload
     end
@@ -106,7 +108,7 @@ RSpec.describe PublicRecordable, type: :model do
 
   describe "immutability" do
     before do
-      permit_application.take_user_snapshots!
+      permit_application.abandon!
       permit_application.reload
     end
 
@@ -134,38 +136,77 @@ RSpec.describe PublicRecordable, type: :model do
   end
 
   describe "interaction with user destruction" do
-    let(:user) { create(:user) }
+    let(:user) { create(:user, first_name: "Ada", last_name: "Owner") }
 
-    context "PermitProject (dependent: :destroy)" do
-      let!(:public_project) { create(:permit_project, owner: user) }
-      let!(:private_project) { create(:permit_project, owner: user) }
-
-      before do
-        # Simulate public record logic: manually orphan the public one
-        # PermitProject relies on permit_applications for public_record?
-        allow(public_project).to receive(:public_record?).and_return(true)
-        allow(private_project).to receive(:public_record?).and_return(false)
-
-        # The job does this sequence: snapshot -> nullify owner -> destroy user
-        public_project.take_user_snapshots!
-        public_project.update(owner: nil)
-      end
-
-      it "destroys the private project when user is destroyed" do
-        user.destroy
-        # Private project still had owner_id set, so cascade delete got it
-        expect { private_project.reload }.to raise_error(
-          ActiveRecord::RecordNotFound
+    it "discards a project with a submitted application when its last Full member is deleted" do
+      project = create(:permit_project, owner: user)
+      application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: project,
+          submitter: user,
+          jurisdiction: project.jurisdiction
         )
-      end
 
-      it "preserves the orphaned public project" do
-        user.destroy
-        # Public project had owner_id=nil, so it survived the user deletion
-        expect(public_project.reload).to be_present
-        expect(public_project.owner).to be_a(User)
-        expect(public_project.owner).to be_readonly
-      end
+      user.destroy!
+
+      project.reload
+      application.reload
+      expect(project.orphaned_at).to be_present
+      expect(project.discarded_at).to be_present
+      expect(project.owner_id).to be_nil
+      expect(project.owner).to be_readonly
+      expect(project.owner.name).to eq("Ada Owner")
+      expect(application.orphaned_at).to be_nil
+      expect(application.discarded_at).to be_present
+      expect(application).to be_orphaned
+      expect(application.submitter).to be_readonly
+    end
+
+    it "destroys a drafts-only project when its last Full member is deleted" do
+      project = create(:permit_project, owner: user)
+      draft =
+        create(
+          :permit_application,
+          permit_project: project,
+          submitter: user,
+          status: :new_draft,
+          jurisdiction: project.jurisdiction
+        )
+
+      user.destroy!
+
+      expect(PermitProject.unscoped.exists?(project.id)).to be false
+      expect(PermitApplication.unscoped.exists?(draft.id)).to be false
+    end
+
+    it "keeps the project when another Full member remains" do
+      project = create(:permit_project, owner: user)
+      create(:project_membership, permit_project: project, access: :full)
+      application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: project,
+          submitter: user,
+          jurisdiction: project.jurisdiction
+        )
+
+      user.destroy!
+
+      project.reload
+      application.reload
+      expect(project.orphaned_at).to be_nil
+      expect(project.discarded_at).to be_nil
+      expect(project.owner_id).to be_nil
+      expect(application.orphaned_at).to be_nil
+      expect(application.discarded_at).to be_nil
+      expect(application.submitter_membership_id).to be_nil
+      expect(application.first_name_snapshot).to eq("Ada")
+      expect(application).not_to be_orphaned
+      expect(application.submitter).to be_readonly
+      expect(application.submitter.name).to eq("Ada Owner")
     end
   end
 end

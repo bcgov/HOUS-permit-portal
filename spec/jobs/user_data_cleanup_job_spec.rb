@@ -177,36 +177,100 @@ RSpec.describe UserDataCleanupJob, type: :job do
         expect(recently_discarded_user.reload).to be_present
       end
 
-      it "orphans public records and takes snapshots" do
-        # Ensure permit application is public record
+      it "discards a project with a submitted application when its last Full member is deleted" do
         expect(permit_application).to be_public_record
+        project = permit_application.permit_project
 
         travel_to(now) { subject.perform }
 
+        project.reload
         permit_application.reload
-        # Verify the link to the user is gone
+        expect(project.orphaned_at).to be_present
+        expect(project.discarded_at).to be_present
+        expect(project.owner_id).to be_nil
         expect(permit_application.submitter_id).to be_nil
-        # Verify snapshots were taken
+        expect(permit_application.orphaned_at).to be_nil
+        expect(permit_application.discarded_at).to be_present
         expect(permit_application.omniauth_username_snapshot).to be_present
         expect(permit_application.first_name_snapshot).to be_present
-        expect(permit_application.orphaned_at).to be_present
-        # Check that we can access the "submitter" via the readonly User
-        expect(permit_application.submitter).to be_a(User)
+        expect(permit_application).to be_orphaned
         expect(permit_application.submitter).to be_readonly
         expect(permit_application.submitter.name).to eq(
           "#{user_to_delete.first_name} #{user_to_delete.last_name}"
         )
       end
 
-      it "cascades delete for non-public records (drafts)" do
+      it "destroys a drafts-only project when its last Full member is deleted" do
         expect(draft_application).not_to be_public_record
+        project = draft_application.permit_project
 
         travel_to(now) { subject.perform }
 
-        # Draft should be gone because it belongs_to user (dependent: :destroy)
-        expect { draft_application.reload }.to raise_error(
-          ActiveRecord::RecordNotFound
+        expect(PermitProject.unscoped.exists?(project.id)).to be false
+        expect(PermitApplication.unscoped.exists?(draft_application.id)).to be(
+          false
         )
+      end
+
+      it "keeps a submitted application when another Full member remains" do
+        project = create(:permit_project, owner: user_to_delete)
+        create(:project_membership, permit_project: project, access: :full)
+        kept =
+          create(
+            :permit_application,
+            :newly_submitted,
+            permit_project: project,
+            submitter: user_to_delete,
+            jurisdiction: project.jurisdiction
+          )
+
+        travel_to(now) { subject.perform }
+
+        project.reload
+        kept.reload
+        expect(project.orphaned_at).to be_nil
+        expect(kept.orphaned_at).to be_nil
+        expect(kept.discarded_at).to be_nil
+        expect(kept.submitter_membership_id).to be_nil
+        expect(kept.first_name_snapshot).to eq(user_to_delete.first_name)
+        expect(kept.submitter).to be_readonly
+      end
+
+      it "abandons a license agreement instead of deleting it" do
+        agreement =
+          EndUserLicenseAgreement.create!(variant: :open, active: true)
+        acceptance =
+          UserLicenseAgreement.create!(
+            user: user_to_delete,
+            agreement: agreement,
+            accepted_at: Time.current
+          )
+
+        travel_to(now) { subject.perform }
+
+        acceptance.reload
+        expect(acceptance.user_id).to be_nil
+        expect(acceptance.orphaned_at).to be_present
+        expect(acceptance.first_name_snapshot).to eq(user_to_delete.first_name)
+      end
+
+      it "keeps a revision request and remembers the reviewer" do
+        reviewer =
+          create(
+            :user,
+            :reviewer,
+            :discarded,
+            discarded_at: now - (delete_after + 1).days
+          )
+        revision = create(:revision_request, user: reviewer)
+
+        travel_to(now) { subject.perform }
+
+        expect(RevisionRequest.exists?(revision.id)).to be true
+        revision.reload
+        expect(revision.user_id).to be_nil
+        expect(revision.orphaned_at).to be_nil
+        expect(revision.first_name_snapshot).to eq(reviewer.first_name)
       end
 
       context "when deletion fails" do
