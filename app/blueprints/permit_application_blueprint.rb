@@ -43,8 +43,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     end
 
     field :created_by do |pa, _options|
-      # ponytail: applications created before created_by was stored only have a submitter
-      creator = pa.created_by || pa.submitter
+      creator = pa.created_by
       next unless creator
 
       if creator.is_a?(User)
