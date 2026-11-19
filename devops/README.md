@@ -11,7 +11,7 @@ There are helm charts available for each major service / application. Right now 
 - anycable-go (websocket service)
 - ha-postgres-crunchydb (HA Postgres, makes use of https://github.com/bcgov/crunchy-postgres)
 - ha-elasticsearch (HA Elasticsearch based off bitnami/elasticsearch)
-- ha-redis (HA Redis with Sentinels based off bitnami/redis)
+- redis-v8 (Redis 8 with Sentinel, deployed with the CloudPirates chart)
 - gotenberg (internal HTML-to-PDF conversion for application and step-code reports)
 
 Run each helm chart by going into the respective folder and issuing helm commands, here are some examples:

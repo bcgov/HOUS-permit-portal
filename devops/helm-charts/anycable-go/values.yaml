@@ -20,7 +20,7 @@ anycable-go:
     anycableRpcHost: hous-permit-portal-anycable-rpc:50051
     # Sentinel mode expects the master-set name without a data-node port.
     anycableRedisUrl: "redis://redisMasterSet/1"
-    anycableRedisSentinels: "redis-ha-headless:26379"
+    anycableRedisSentinels: "redis-v8-headless:26379"
   ingress:
     enable: true
     path: /cable

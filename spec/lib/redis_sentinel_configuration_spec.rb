@@ -36,6 +36,18 @@ RSpec.describe RedisSentinelConfiguration do
     )
   end
 
+  it "discovers CloudPirates Sentinel pods using the configured SRV name" do
+    sentinel_env["REDIS_SENTINEL_SERVICE_PORT_NAME"] = "sentinel"
+    expect(dns).to receive(:getresources).with(
+      "_sentinel._tcp.#{service}",
+      Resolv::DNS::Resource::IN::SRV
+    ).and_return(records)
+
+    expect(described_class.sentinels).to eq(
+      [{ host: hostnames.first, port: 26_379 }]
+    )
+  end
+
   it "uses the configured Sentinel port" do
     sentinel_env["REDIS_SENTINEL_PORT"] = "26380"
 

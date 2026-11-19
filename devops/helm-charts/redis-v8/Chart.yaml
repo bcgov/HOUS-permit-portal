@@ -1,0 +1,10 @@
+apiVersion: v2
+name: redis-v8
+description: Building Permit Hub Redis with Sentinel
+type: application
+version: 0.1.0
+appVersion: "8.10.3"
+dependencies:
+  - name: redis
+    version: "0.39.6"
+    repository: oci://registry-1.docker.io/cloudpirates
