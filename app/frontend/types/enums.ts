@@ -23,6 +23,7 @@ export enum EFileUploadAttachmentType {
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
   InfoDocument = "InfoDocument",
+  ExplainerDocument = "ExplainerDocument",
 }
 
 export enum EProjectMeetingStatus {

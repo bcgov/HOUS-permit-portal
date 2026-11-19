@@ -2,12 +2,14 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IExplainer } from "../../models/explainer"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IHelpVideo } from "../../models/help-video"
 import { IHelpVideoSection } from "../../models/help-video-section"
 import { IInfoDocument } from "../../models/info-document"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IExplainerPermit, IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
@@ -32,6 +34,7 @@ import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import { IStepCode } from "../../stores/step-code-store"
 import {
+  IExplainerParams,
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
   IPermitProjectUpdateParams,
@@ -84,6 +87,7 @@ import {
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
   INoteAttachmentDraft,
+  IOption,
   IPart9ChecklistSelectOptions,
   IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
@@ -111,6 +115,13 @@ interface ITemplateVersionFeedback {
   updatedAt: Date
   user?: IUser
   resolvedBy?: IUser | null
+}
+
+type TExplainerMeta = {
+  relatedTemplateOptions?: IOption[]
+  jurisdictionExplainers?: IJurisdictionExplainer[]
+  relatedPermits?: IExplainerPermit[]
+  permit?: IExplainerPermit | null
 }
 
 export class Api {
@@ -868,6 +879,36 @@ export class Api {
 
   async fetchRequirementTemplate(id: string) {
     return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
+  }
+
+  async fetchExplainer(requirementTemplateId: string) {
+    return this.client.get<IApiResponse<IExplainer | null, TExplainerMeta>>(
+      `/requirement_templates/${requirementTemplateId}/explainer`
+    )
+  }
+
+  async saveExplainer(requirementTemplateId: string, explainer: IExplainerParams) {
+    return this.client.patch<IApiResponse<IExplainer | null, TExplainerMeta>>(
+      `/requirement_templates/${requirementTemplateId}/explainer`,
+      { explainer }
+    )
+  }
+
+  async fetchJurisdictionExplainer(requirementTemplateId: string, jurisdictionId: string) {
+    return this.client.get<IApiResponse<IJurisdictionExplainer | null, {}>>(
+      `/requirement_templates/${requirementTemplateId}/jurisdiction_explainers/${jurisdictionId}`
+    )
+  }
+
+  async saveJurisdictionExplainer(
+    requirementTemplateId: string,
+    jurisdictionId: string,
+    jurisdictionExplainer: { localContextHtml: string }
+  ) {
+    return this.client.patch<IApiResponse<IJurisdictionExplainer | null, {}>>(
+      `/requirement_templates/${requirementTemplateId}/jurisdiction_explainers/${jurisdictionId}`,
+      { jurisdictionExplainer }
+    )
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {

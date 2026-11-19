@@ -33,6 +33,7 @@ import { EFlashMessageStatus } from "../../../types/enums"
 import { IRequirementTemplateConfigError } from "../../../types/types"
 import { DatePicker } from "../../shared/date-picker"
 import { ConfigErrorsList } from "./config-errors-list"
+import { PermitInformationReminderLink } from "./permit-information-reminder-link"
 import { TemplateAccessSidebar } from "./template-access-sidebar"
 import { VersionNoteField, normalizedVersionNote } from "./version-note-field"
 
@@ -207,6 +208,7 @@ export const PublishScheduleModal = observer(function PublishScheduleModal({
                     }}
                   />
                 </Text>
+                <PermitInformationReminderLink requirementTemplateId={requirementTemplate?.id} mt={4} />
                 <Stack spacing={1} mt={6}>
                   <Text>
                     <Trans

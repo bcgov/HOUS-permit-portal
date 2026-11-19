@@ -180,6 +180,22 @@ export interface IIntegrationMappingUpdateParams {
   simplifiedMap?: ISimplifiedRequirementsMap
 }
 
+export interface IExplainerDocumentAttribute {
+  id?: string
+  _destroy?: boolean
+  file?: IUppyAttachmentFile
+}
+
+export interface IExplainerParams {
+  introductionHtml?: string
+  beforeYouApplyHtml?: string
+  steps?: { title: string; description: string }[]
+  links?: { title: string; url: string }[]
+  documentsAttributes?: IExplainerDocumentAttribute[]
+  relatedTemplateIds?: string[]
+  publish?: boolean
+}
+
 // Added for Permit Project Updates
 export interface IProjectDocumentAttribute {
   id?: string
