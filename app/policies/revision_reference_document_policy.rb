@@ -1,4 +1,5 @@
 class RevisionReferenceDocumentPolicy < ApplicationPolicy
+  # Same view check as the application, and only after the package is published.
   def download?
     return false unless user && record.revision_request
 
@@ -8,12 +9,11 @@ class RevisionReferenceDocumentPolicy < ApplicationPolicy
 
     return true if user.review_staff_of?(application.jurisdiction_id)
 
-    # MEMBERSHIP COMMENT: later, authorize from membership.
-    # owner_id only identifies the creator.
-    submitter =
-      application.submitter_id == user.id ||
-        application.permit_project&.owner_id == user.id
-    return false unless submitter
+    opened =
+      access.on(application.permit_project).view_application? ||
+        application.application_granted_to?(user) ||
+        application.block_granted_to?(user)
+    return false unless opened
 
     version.request_package_visible_to_submitter?
   end

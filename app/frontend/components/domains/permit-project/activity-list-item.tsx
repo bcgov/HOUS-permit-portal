@@ -25,7 +25,7 @@ export const ActivityListItem = observer(({ projectAudit, fromInbox = false }: I
   const suppressPermitApplicationLink =
     permitApplicationStatus === EPermitApplicationStatus.newDraft &&
     !!userStore.currentUser?.isReviewStaff &&
-    !currentProject?.isOwner &&
+    !currentProject?.currentUserAccess?.viewApplication &&
     !currentProject?.hasActiveProjectMeeting
 
   return (

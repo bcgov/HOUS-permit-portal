@@ -94,6 +94,51 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
     expect(ids).to match_array([p1_draft.id, p2_sub.id, p3_resub.id])
   end
 
+  it "as a Limited member hides applications they cannot open when asked" do
+    limited = create(:user, :submitter)
+    membership =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: limited,
+        access: :limited
+      )
+    create(
+      :project_grant,
+      :application,
+      project_membership: membership,
+      permit_application: p1_draft
+    )
+    allow(controller).to receive(:current_user).and_return(limited)
+
+    controller.perform_permit_application_search
+    ids =
+      controller
+        .instance_variable_get(:@permit_application_search)
+        .results
+        .map(&:id)
+    expect(ids).to match_array([p1_draft.id, p2_sub.id, p3_resub.id])
+
+    allow(controller).to receive(:params).and_return(
+      ActionController::Parameters.new(
+        {
+          id: project.id,
+          query: "",
+          page: 1,
+          per_page: 50,
+          accessible_only: true
+        }
+      )
+    )
+    controller.perform_permit_application_search
+    ids =
+      controller
+        .instance_variable_get(:@permit_application_search)
+        .results
+        .map(&:id)
+    expect(ids).to match_array([p1_draft.id])
+  end
+
   it "as unrelated non-review user sees only their own submissions (none here)" do
     allow(controller).to receive(:current_user).and_return(
       unrelated_nonreview_user

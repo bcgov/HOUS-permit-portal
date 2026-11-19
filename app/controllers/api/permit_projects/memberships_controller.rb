@@ -4,17 +4,20 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   before_action :set_permit_project
   before_action :set_membership, only: %i[update destroy reinvite]
 
-  # The payload includes the owner, who is not a membership row.
+  # Authorized by the project; rows are filtered in membership_where.
   skip_after_action :verify_policy_scoped, only: :index
 
   def index
-    # MEMBERSHIP COMMENT - currently this shows all project memebers to everyone - confirm this later
     authorize @permit_project, :show?
     perform_project_membership_search
 
     render_success @project_membership_search.results,
                    nil,
-                   { meta: project_people_meta }
+                   {
+                     blueprint: ProjectMembershipBlueprint,
+                     blueprint_opts: membership_blueprint_opts,
+                     meta: project_people_meta
+                   }
   end
 
   def create
@@ -25,20 +28,29 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
         invited_email: create_membership_params[:email],
         contact_designation:
           create_membership_params[:contact_designation].presence || :none,
-        access: create_membership_params[:access].presence || :standard,
+        access: create_membership_params[:access].presence || :limited,
         role_tags: create_membership_params[:role_tags] || []
       )
     raw_token = issue_invitation!(@membership)
     authorize @membership
 
-    unless @membership.save
+    grant_error = nil
+    ProjectMembership.transaction do
+      raise ActiveRecord::Rollback unless @membership.save
+
+      grant_error = create_requested_invite_grant
+      raise ActiveRecord::Rollback if grant_error
+    end
+
+    if grant_error || !ProjectMembership.exists?(@membership.id)
       return(
         render_error(
           "project_membership.create_error",
           {
             status: :unprocessable_content,
             message_opts: {
-              error_message: @membership.errors.full_messages.join(", ")
+              error_message:
+                grant_error || @membership.errors.full_messages.join(", ")
             },
             log_args: {
               errors: @membership.errors.full_messages
@@ -51,9 +63,16 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
     deliver_invitation(@membership, raw_token)
     refresh_membership_index(@membership)
 
-    render_success @membership.reload, nil, { status: :created }
+    render_success @membership.reload,
+                   nil,
+                   {
+                     blueprint: ProjectMembershipBlueprint,
+                     blueprint_opts: membership_blueprint_opts,
+                     status: :created
+                   }
   end
 
+  # Re-sends to the same invited_email. A different address is a new invite.
   def reinvite
     authorize @membership
 
@@ -66,10 +85,6 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
       )
     end
 
-    @membership.invited_email =
-      reinvite_membership_params[:email] if reinvite_membership_params[
-      :email
-    ].present?
     raw_token = issue_invitation!(@membership)
 
     unless @membership.save
@@ -91,18 +106,37 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
 
     deliver_invitation(@membership, raw_token)
 
-    render_success @membership.reload
+    render_success @membership.reload,
+                   nil,
+                   {
+                     blueprint: ProjectMembershipBlueprint,
+                     blueprint_opts: membership_blueprint_opts
+                   }
   end
 
   def update
-    authorize @membership
+    authorize @membership, update_query
 
-    unless @membership.update(membership_params)
+    saved = false
+    grant_error = nil
+    ProjectMembership.transaction do
+      saved = @membership.update(membership_params)
+      raise ActiveRecord::Rollback unless saved
+
+      grant_error = sync_invite_grant
+      raise ActiveRecord::Rollback if grant_error
+    end
+
+    if grant_error || !saved
       return(
         render_error(
           "project_membership.update_error",
           {
             status: :unprocessable_content,
+            message_opts: {
+              error_message:
+                grant_error || @membership.errors.full_messages.join(", ")
+            },
             log_args: {
               errors: @membership.errors.full_messages,
               params: membership_params.to_h
@@ -112,33 +146,38 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
       )
     end
 
-    render_success @membership.reload
+    render_success @membership.reload,
+                   nil,
+                   {
+                     blueprint: ProjectMembershipBlueprint,
+                     blueprint_opts: membership_blueprint_opts
+                   }
   end
 
   def destroy
     authorize @membership
 
-    # MEMBERSHIP COMMENT - currently blocks removing owner_id; revisit when
-    # full-access members can manage people and primary contact rules are finalized.
-    if @membership.user_id.present? &&
-         @membership.user_id == @permit_project.owner_id
+    unless @membership.destroy
       return(
         render_error(
-          "project_membership.destroy_creator_error",
-          { status: :forbidden }
+          "project_membership.destroy_error",
+          {
+            status: :unprocessable_content,
+            message_opts: {
+              error_message: @membership.errors.full_messages.join(", ")
+            }
+          }
         )
       )
     end
 
-    @membership.destroy!
     render_success nil
   end
 
   private
 
   def set_permit_project
-    # MEMBERSHIP COMMENT - currently depends on owner
-    scope = PermitProject.includes(:owner)
+    scope = PermitProject.all
     scope = scope.for_sandbox(current_sandbox) unless current_user.super_admin?
     @permit_project = scope.find(params[:permit_project_id])
   end
@@ -146,6 +185,56 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   def set_membership
     @membership =
       @permit_project.project_memberships.includes(:user).find(params[:id])
+  end
+
+  def membership_blueprint_opts
+    { project_access: project_access }
+  end
+
+  # Role tags are a lower bar than access and contact designation.
+  def update_query
+    standing =
+      membership_params.key?(:access) ||
+        membership_params.key?(:contact_designation) || allow_invite_requested?
+    standing ? :update_standing? : :update_role_tags?
+  end
+
+  # The invitation already authorized this actor to invite. The grant rides
+  # along when they say yes. Changing it later is standing (Full).
+  def create_requested_invite_grant
+    return unless allow_invite_param
+    return unless @membership.expanded?
+
+    grant = @membership.project_grants.create(kind: :invite)
+    return if grant.persisted?
+
+    grant.errors.full_messages.join(", ")
+  end
+
+  def sync_invite_grant
+    return unless allow_invite_requested?
+    return unless @membership.expanded?
+
+    if allow_invite_param
+      return if @membership.project_grants.invite.exists?
+
+      grant = @membership.project_grants.create(kind: :invite)
+      return if grant.persisted?
+
+      grant.errors.full_messages.join(", ")
+    else
+      @membership.project_grants.invite.destroy_all
+      nil
+    end
+  end
+
+  def allow_invite_requested?
+    params[:membership].respond_to?(:key?) &&
+      params[:membership].key?(:allow_invite)
+  end
+
+  def allow_invite_param
+    ActiveModel::Type::Boolean.new.cast(params.dig(:membership, :allow_invite))
   end
 
   def create_membership_params
@@ -157,10 +246,6 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
       :access,
       role_tags: []
     )
-  end
-
-  def reinvite_membership_params
-    params.fetch(:membership, {}).permit(:email)
   end
 
   def issue_invitation!(membership)

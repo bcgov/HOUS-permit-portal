@@ -19,4 +19,64 @@ RSpec.describe PermitApplicationBlueprint do
       "role" => application.submitter.role
     )
   end
+
+  it "includes status on the summary row a member who cannot open the application receives" do
+    application = create(:permit_application)
+    view =
+      PermitProjectBlueprint.application_row_view(
+        project_access: instance_double(ProjectAccess, view_application?: false)
+      )
+
+    expect(view).to eq(:summary)
+    json = JSON.parse(described_class.render(application, view: view))
+    expect(json["status"]).to eq(application.status)
+  end
+
+  it "puts can_archive_draft on the summary row" do
+    application = create(:permit_application)
+    access = instance_double(ProjectAccess)
+    allow(access).to receive(:archive_draft?).with(application).and_return(true)
+
+    json =
+      JSON.parse(
+        described_class.render(
+          application,
+          view: :summary,
+          project_access: access
+        )
+      )
+
+    expect(json["can_archive_draft"]).to be true
+  end
+
+  it "marks a summary row openable when the member holds a block grant" do
+    project = create(:permit_project)
+    application = create(:permit_application, permit_project: project)
+    user = create(:user, :submitter)
+    membership =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: user,
+        access: :limited
+      )
+    create(
+      :project_grant,
+      project_membership: membership,
+      permit_application: application
+    )
+    access = ProjectAccess.new(user, project.sandbox, project)
+
+    json =
+      JSON.parse(
+        described_class.render(
+          application,
+          view: :summary,
+          current_user: user,
+          project_access: access
+        )
+      )
+
+    expect(json["can_open"]).to be true
+  end
 end

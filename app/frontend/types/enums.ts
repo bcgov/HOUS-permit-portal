@@ -317,6 +317,11 @@ export enum EPermitBlockStatus {
   ready = "ready",
 }
 
+export enum ECollaborationType {
+  submission = "submission",
+  review = "review",
+}
+
 export enum EStepCodeChecklistStage {
   preConstruction = "pre_construction",
   midConstruction = "mid_construction",
@@ -776,7 +781,7 @@ export enum EPermitProjectRollupStatus {
 }
 
 export enum EProjectAccess {
-  standard = "standard",
+  limited = "limited",
   expanded = "expanded",
   full = "full",
 }

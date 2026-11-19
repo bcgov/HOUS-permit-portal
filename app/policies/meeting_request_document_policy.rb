@@ -2,7 +2,8 @@ class MeetingRequestDocumentPolicy < ApplicationPolicy
   def download?
     return false unless user && permit_project
 
-    user_is_owner? || user_is_review_staff_for_jurisdiction?
+    access.on(permit_project).manage_meetings? ||
+      user_is_review_staff_for_jurisdiction?
   end
 
   private
@@ -13,12 +14,6 @@ class MeetingRequestDocumentPolicy < ApplicationPolicy
 
   def project_meeting
     record.project_meeting
-  end
-
-  # MEMBERSHIP COMMENT: later, authorize from membership.
-  # owner_id only identifies the creator.
-  def user_is_owner?
-    permit_project.owner_id == user.id
   end
 
   def user_is_review_staff_for_jurisdiction?

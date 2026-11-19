@@ -147,6 +147,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  accessibleOnly?: boolean
   publishedOnly?: boolean
   releaseType?: EReleaseNoteType
   year?: number
@@ -696,12 +697,39 @@ export interface IProjectPerson {
   userId: string | null
   name: string
   firstName?: string | null
-  phone?: string | null
   organization?: string | null
   roleTags: string[]
   access: EProjectAccess | null
   contactDesignation: EProjectContactDesignation
   status: EProjectMembershipStatus
+  canEditRoleTags: boolean
+  allowInvite?: boolean
+}
+
+export interface IProjectGrant {
+  id: string
+  kind: "block" | "application" | "invite"
+  projectMembershipId: string
+  permitApplicationId: string | null
+  requirementBlockId: string | null
+  memberName?: string | null
+}
+
+// The caller's project access (ProjectAccess#to_h). The API is the check.
+export interface IProjectAccess {
+  level: EProjectAccess | null
+  editProject: boolean
+  invitePeople: boolean
+  manageMemberStanding: boolean
+  viewInvitations: boolean
+  addApplication: boolean
+  viewApplication: boolean
+  editApplication: boolean
+  submitApplication: boolean
+  deleteStepCode: boolean
+  manageMeetings: boolean
+  viewProjectNotes: boolean
+  viewActivity: boolean
 }
 
 export interface IProjectInvitation {
@@ -709,6 +737,7 @@ export interface IProjectInvitation {
   projectTitle: string
   invitedByName?: string | null
   status: EProjectMembershipStatus
+  alreadyMember?: boolean
 }
 
 export interface IPermitProjectSearchFilters {

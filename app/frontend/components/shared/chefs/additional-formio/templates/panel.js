@@ -46,6 +46,17 @@ export const overridePanelTemplate = (ctx) => {
         ((__t = ctx.component.tooltip) == null ? "" : __t) +
         '"></i>\n      '
     }
+    if (ctx.component.editAccess && ctx.component.id) {
+      const label = String(ctx.component.editAccessLabel || "Edit access")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+      __p +=
+        '\n      <a href="#" class="edit-block-access">' +
+        '<i class="ph-fill ph-users" aria-hidden="true"></i>' +
+        label +
+        "</a>\n      "
+    }
     __p += "\n    </span>\n  </div>\n  "
   }
   __p += "\n  "

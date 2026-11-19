@@ -258,9 +258,10 @@ class PermitProject < ApplicationRecord
         .includes(
           :submission_versions,
           :permit_collaborations,
-          :submitter,
           :created_by,
           :template_version,
+          submitter_membership: :user,
+          application_contact_membership: :user,
           requirement_template: :taggings
         )
         .order(updated_at: :desc)
@@ -272,7 +273,8 @@ class PermitProject < ApplicationRecord
   end
 
   def project_documents(user = nil)
-    # Limit project documents to owner for now
+    # Project documents are disabled. The creator check is a closed door;
+    # if the feature returns, use project access.
     base = association(:project_documents).reader
     return ProjectDocument.none if user.nil?
 
@@ -347,7 +349,8 @@ class PermitProject < ApplicationRecord
   end
 
   # owner_id is the user who created the project. The column name stays so
-  # other branches keep reading owner_id.
+  # other branches keep reading owner_id. It is metadata; authorization is
+  # ProjectAccess.
   def creator
     owner
   end
@@ -356,21 +359,34 @@ class PermitProject < ApplicationRecord
     owner_id
   end
 
+  # Accepted members whose access passes a ProjectAccess check.
+  def members_who(check)
+    User.joins(:project_memberships).where(
+      project_memberships: {
+        permit_project_id: id,
+        access: ProjectAccess.levels(check)
+      }
+    )
+  end
+
   def ensure_creator_membership!
     return if owner_id.blank?
 
-    project_memberships
-      .where(contact_designation: :primary)
-      .where.not(user_id: owner_id)
-      .update_all(
-        contact_designation:
-          ProjectMembership.contact_designations.fetch("none")
-      )
+    # The owner backfill and a new project's owner row are not people changes.
+    ProjectMembership.without_auditing do
+      project_memberships
+        .where(contact_designation: :primary)
+        .where.not(user_id: owner_id)
+        .update_all(
+          contact_designation:
+            ProjectMembership.contact_designations.fetch("none")
+        )
 
-    membership = project_memberships.find_or_initialize_by(user_id: owner_id)
-    membership.access = :full
-    membership.contact_designation = :primary
-    membership.save!
+      membership = project_memberships.find_or_initialize_by(user_id: owner_id)
+      membership.access = :full
+      membership.contact_designation = :primary
+      membership.save!
+    end
   end
 
   private

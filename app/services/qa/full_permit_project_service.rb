@@ -13,19 +13,21 @@ class Qa::FullPermitProjectService
         PermitProject.create!(
           title: @title,
           jurisdiction: @jurisdiction,
-          owner: project_owner,
+          owner: @current_user,
           sandbox: @current_sandbox
         )
 
       template_versions = available_template_versions
       permit_applications =
         template_versions.map do |template_version|
-          PermitApplication.create!(
-            submitter: @current_user,
-            permit_project: project,
-            template_version_id: template_version.id,
-            jurisdiction: @jurisdiction
-          )
+          permit_application =
+            PermitApplication.new(
+              permit_project: project,
+              template_version_id: template_version.id,
+              jurisdiction: @jurisdiction
+            )
+          permit_application.assign_creation_actors(@current_user)
+          permit_application.save!
         end
 
       { project: project, permit_applications: permit_applications }
@@ -33,12 +35,6 @@ class Qa::FullPermitProjectService
   end
 
   private
-
-  def project_owner
-    return nil if @current_user.jurisdiction_staff? && @current_sandbox.blank?
-
-    @current_user
-  end
 
   def available_template_versions
     status = @current_sandbox&.template_version_status_scope || :published

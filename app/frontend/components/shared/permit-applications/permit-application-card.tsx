@@ -39,6 +39,10 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
 
   const showNewVersionWarning = !usingCurrentTemplateVersion && !permitApplication.isSubmitted
 
+  // MEMBERSHIP COMMENT: only PermitApplicationIndexScreen renders this card,
+  // and no route mounts that screen. A project member who is not the
+  // submitter is not a block collaborator (HUB-5783). Use currentUserAccess
+  // if this card comes back.
   const isSubmissionCollaboration = permitApplication.submitter?.id !== currentUser?.id
 
   const routingButtonText = (() => {

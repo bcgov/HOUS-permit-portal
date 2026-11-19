@@ -469,7 +469,7 @@ const ReportSection = observer(function ReportSection() {
                 isLoading={formState.isSubmitting}
                 isDisabled={!checklist.canMarkComplete}
               >
-                {t("stepCode.saveAndExit")}
+                {t("stepCode.markAsComplete")}
               </Button>
             </Flex>
             <Button type="button" variant="link" onClick={handleRegenerateReport} isLoading={isRegenerating}>

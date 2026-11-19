@@ -11,15 +11,20 @@ class ProjectMembershipBlueprint < Blueprinter::Base
     membership.user&.first_name || membership.invited_first_name
   end
 
-  field :phone do |membership|
-    membership.user&.phone_number
-  end
-
   field :organization do |membership|
     membership.user&.organization
   end
 
   field :role_tags do |membership|
     membership.role_list.to_a
+  end
+
+  field :can_edit_role_tags do |membership, options|
+    options[:project_access]&.edit_role_tags?(membership) || false
+  end
+
+  # The invite-grant row. It authorizes only while the member is Expanded.
+  field :allow_invite do |membership|
+    membership.project_grants.invite.exists?
   end
 end

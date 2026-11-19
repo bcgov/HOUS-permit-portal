@@ -9,6 +9,7 @@ module AuditDoubleHelpers
       associated_type: nil,
       associated: nil,
       action: "create",
+      comment: nil,
       audited_changes: {
       }
     }

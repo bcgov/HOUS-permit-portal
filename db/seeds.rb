@@ -816,8 +816,8 @@ else
   member_profiles = [
     [:full, :none, ["Architect"]],
     [:expanded, :alternate, ["Coordinating registered professional"]],
-    [:standard, :none, ["Builder"]],
-    [:standard, :none, []]
+    [:limited, :none, ["Builder"]],
+    [:limited, :none, []]
   ]
 
   half_projects.each do |project|
@@ -894,7 +894,12 @@ else
     end
 
   submitter_ids_with_apps =
-    PermitApplication.kept.live.distinct.pluck(:submitter_id)
+    PermitApplication
+      .kept
+      .live
+      .joins(:submitter_membership)
+      .distinct
+      .pluck("project_memberships.user_id")
   jurisdiction_ids_with_submissions =
     SubmissionVersion
       .joins(permit_application: :permit_project)

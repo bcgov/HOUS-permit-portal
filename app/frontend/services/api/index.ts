@@ -59,6 +59,7 @@ import {
   IUsersResponse,
 } from "../../types/api-responses"
 import {
+  ECollaborationType,
   ECollaboratorType,
   EJurisdictionSortFields,
   EPermitApplicationInboxSortFields,
@@ -91,6 +92,7 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectGrant,
   IProjectInvitation,
   IProjectMeetingInboxSearchFilters,
   IProjectPerson,
@@ -510,6 +512,7 @@ export class Api {
       roleTags?: string[]
       contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
+      allowInvite?: boolean
     }
   ) {
     return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
@@ -518,10 +521,9 @@ export class Api {
     )
   }
 
-  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string, email?: string) {
+  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string) {
     return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
-      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`,
-      { membership: email ? { email } : {} }
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`
     )
   }
 
@@ -532,6 +534,7 @@ export class Api {
       roleTags?: string[]
       contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
+      allowInvite?: boolean
     }
   ) {
     return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
@@ -846,9 +849,11 @@ export class Api {
     {
       requirementBlockId,
       status,
+      collaborationType,
     }: {
       requirementBlockId: string
       status: EPermitBlockStatus
+      collaborationType: ECollaborationType
     }
   ) {
     return this.client.post<ApiResponse<IPermitCollaboration>>(
@@ -856,6 +861,7 @@ export class Api {
       {
         requirementBlockId,
         status,
+        collaborationType,
       }
     )
   }
@@ -887,6 +893,34 @@ export class Api {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
       permitApplication: { submitterNote },
     })
+  }
+
+  async updateSubmitter(id: string, submitterMembershipId: string) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter`, {
+      permitApplication: { submitterMembershipId },
+    })
+  }
+
+  async fetchProjectGrants(permitApplicationId: string) {
+    return this.client.get<IApiResponse<IProjectGrant[], {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants`
+    )
+  }
+
+  async createProjectGrant(
+    permitApplicationId: string,
+    grant: { membershipId: string; kind: "block" | "application"; requirementBlockId?: string | null }
+  ) {
+    return this.client.post<IApiResponse<IProjectGrant, {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants`,
+      { grant }
+    )
+  }
+
+  async destroyProjectGrant(permitApplicationId: string, id: string) {
+    return this.client.delete<IApiResponse<null, {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants/${id}`
+    )
   }
 
   async submitPermitApplication(id, params) {

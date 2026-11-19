@@ -6,10 +6,12 @@ import { IErrorsBoxData } from "../../../types/types"
 import { ScrollLink } from "../../shared/permit-applications/scroll-link"
 
 interface IErrorBoxProps {
-  data: IErrorsBoxData[] //need to add types
+  data: IErrorsBoxData[]
+  // People panel width. The box is fixed to the viewport, so it has to step left.
+  sideOffset?: number
 }
 
-export const ErrorsBox = ({ data }: IErrorBoxProps) => {
+export const ErrorsBox = ({ data, sideOffset = 0 }: IErrorBoxProps) => {
   const { t } = useTranslation()
   const { isOpen, onToggle } = useDisclosure()
   if (data.length == 0) {
@@ -26,7 +28,7 @@ export const ErrorsBox = ({ data }: IErrorBoxProps) => {
       maxH="calc(100vh - 360px)"
       maxW="340px"
       position="fixed"
-      right="6"
+      right={sideOffset ? `calc(var(--chakra-space-6) + ${sideOffset}px)` : 6}
       top="220px"
       zIndex={14}
       p={4}

@@ -19,7 +19,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
   const location = useLocation()
   const { t } = useTranslation()
   const { stepCodeStore } = useMst()
-  const { type, permitProjectTitle, fullAddress, updatedAt, targetPath, isDiscarded } = stepCode as any
+  const { type, permitProjectTitle, fullAddress, updatedAt, targetPath, isDiscarded, canArchive } = stepCode as any
 
   const handleArchive = async (e?: React.MouseEvent | null) => {
     e?.stopPropagation()
@@ -73,30 +73,32 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
           />
           <MenuList>
             {isDiscarded ? (
-              <ConfirmationModal
-                title={t("ui.confirmRestore")}
-                onConfirm={(closeModal) => {
-                  handleRestore()
-                  closeModal()
-                }}
-                renderTriggerButton={({ onClick }) => (
-                  <MenuItem
-                    icon={<ClockClockwise size={16} />}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onClick(e)
-                    }}
-                    color="semantic.success"
-                  >
-                    {t("ui.restore")}
-                  </MenuItem>
-                )}
-                renderConfirmationButton={(props) => (
-                  <Button {...props} colorScheme="green">
-                    {t("ui.restore")}
-                  </Button>
-                )}
-              />
+              canArchive && (
+                <ConfirmationModal
+                  title={t("ui.confirmRestore")}
+                  onConfirm={(closeModal) => {
+                    handleRestore()
+                    closeModal()
+                  }}
+                  renderTriggerButton={({ onClick }) => (
+                    <MenuItem
+                      icon={<ClockClockwise size={16} />}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onClick(e)
+                      }}
+                      color="semantic.success"
+                    >
+                      {t("ui.restore")}
+                    </MenuItem>
+                  )}
+                  renderConfirmationButton={(props) => (
+                    <Button {...props} colorScheme="green">
+                      {t("ui.restore")}
+                    </Button>
+                  )}
+                />
+              )
             ) : (
               <>
                 <MenuItem
@@ -112,30 +114,32 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
                   {t("ui.open")}
                 </MenuItem>
 
-                <ConfirmationModal
-                  title={t("ui.confirmArchive")}
-                  onConfirm={(closeModal) => {
-                    handleArchive()
-                    closeModal()
-                  }}
-                  renderTriggerButton={({ onClick }) => (
-                    <MenuItem
-                      icon={<Archive size={16} />}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        onClick(e)
-                      }}
-                      color="semantic.error"
-                    >
-                      {t("ui.archive")}
-                    </MenuItem>
-                  )}
-                  renderConfirmationButton={(props) => (
-                    <Button {...props} colorScheme="red">
-                      {t("ui.archive")}
-                    </Button>
-                  )}
-                />
+                {canArchive && (
+                  <ConfirmationModal
+                    title={t("ui.confirmArchive")}
+                    onConfirm={(closeModal) => {
+                      handleArchive()
+                      closeModal()
+                    }}
+                    renderTriggerButton={({ onClick }) => (
+                      <MenuItem
+                        icon={<Archive size={16} />}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onClick(e)
+                        }}
+                        color="semantic.error"
+                      >
+                        {t("ui.archive")}
+                      </MenuItem>
+                    )}
+                    renderConfirmationButton={(props) => (
+                      <Button {...props} colorScheme="red">
+                        {t("ui.archive")}
+                      </Button>
+                    )}
+                  />
+                )}
               </>
             )}
           </MenuList>

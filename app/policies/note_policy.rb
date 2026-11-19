@@ -1,11 +1,11 @@
 class NotePolicy < ApplicationPolicy
+  # Project notes and meeting notes. Full and Expanded see both
+  # (view_project_notes? and manage_meetings? are the same levels).
   class Scope < Scope
     def resolve
       return scope.none unless user
 
-      # MEMBERSHIP COMMENT: later, authorize from membership.
-      # owner_id only identifies the creator.
-      clauses = ["permit_projects.owner_id = :uid"]
+      clauses = [ProjectAccess.member_sql(:view_project_notes?)]
       values = { uid: user.id }
 
       if user.review_staff?

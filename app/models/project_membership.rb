@@ -1,19 +1,38 @@
 class ProjectMembership < ApplicationRecord
   INVITATION_EXPIRY = 72.hours
+  # Decline destroys the invite. The comment tells that destroy from a cancel.
+  INVITE_DECLINED_AUDIT = "declined"
 
   searchkick searchable: %i[name], word_start: %i[name]
+
+  # Names only. Email and the invitation token stay out of the activity feed.
+  audited on: %i[update destroy],
+          only: %i[
+            user_id
+            invitation_sent_at
+            access
+            contact_designation
+            invited_first_name
+            invited_last_name
+          ],
+          associated_with: :permit_project
 
   belongs_to :user, optional: true
   belongs_to :permit_project
   belongs_to :invited_by, class_name: "User", optional: true
+  has_many :project_grants, dependent: :destroy
+  has_many :permit_applications,
+           foreign_key: :submitter_membership_id,
+           dependent: :nullify,
+           inverse_of: :submitter_membership
 
   acts_as_taggable_on :roles
   # The API calls these role_tags. Tagging stores them on role_list.
   alias_method :role_tags=, :role_list=
 
   enum :access,
-       { standard: 0, expanded: 1, full: 2 },
-       default: :standard,
+       { limited: 0, expanded: 1, full: 2 },
+       default: :limited,
        validate: true
   # scopes: false — the value `none` would override ActiveRecord::Relation.none
   enum :contact_designation,
@@ -38,6 +57,16 @@ class ProjectMembership < ApplicationRecord
   validate :unique_pending_or_active_invited_email, if: -> { user_id.nil? }
   validate :one_primary_contact
   validate :primary_contact_stays
+  validate :keeps_a_full_member, on: :update
+
+  # dependent: :nullify is registered with has_many and runs in definition
+  # order. Prepend so a blocked destroy aborts before the snapshot, and the
+  # snapshot runs before the foreign key is cleared.
+  before_destroy :orphan_public_record_applications, prepend: true
+  before_destroy :keep_full_member_and_primary_contact, prepend: true
+  before_update :remember_role_names
+  after_create :audit_invitation_sent
+  after_update :audit_role_names
 
   after_commit :reindex_permit_project
 
@@ -124,12 +153,13 @@ class ProjectMembership < ApplicationRecord
   # validation. A failed save rolls the demotion back. before_validation
   # would also run from valid? and change rows that are never saved.
   def with_primary_transfer
+    result = nil
     self.class.transaction do
       release_other_primary_contact if claiming_primary_contact?
       result = yield
       raise ActiveRecord::Rollback unless result
-      result
     end
+    result
   end
 
   def claiming_primary_contact?
@@ -139,6 +169,8 @@ class ProjectMembership < ApplicationRecord
       (will_save_change_to_user_id? && user_id_was.nil?)
   end
 
+  # update_all would skip the activity row for the person who lost primary.
+  # Validation stays off: the current primary cannot be cleared except by a transfer.
   def release_other_primary_contact
     self
       .class
@@ -148,9 +180,49 @@ class ProjectMembership < ApplicationRecord
       )
       .where.not(user_id: nil)
       .where.not(id: id)
-      .update_all(
-        contact_designation: self.class.contact_designations.fetch("none")
-      )
+      .find_each do |membership|
+        membership.contact_designation = :none
+        membership.save!(validate: false)
+      end
+  end
+
+  # A membership created with a user is the project owner, not an invitation.
+  def audit_invitation_sent
+    return if user_id.present?
+
+    write_audit(action: "create", audited_changes: audited_attributes)
+  end
+
+  def remember_role_names
+    @role_names_before_save = tags_on("roles").map(&:name).sort
+  end
+
+  # Role tags are not columns, so the audited update does not see them.
+  # Tags chosen on the original invite are not a change.
+  def audit_role_names
+    return if @role_names_before_save.nil?
+
+    new_names = role_list.to_a.map(&:to_s).sort
+    return if new_names == @role_names_before_save
+
+    write_audit(
+      action: "update",
+      audited_changes: {
+        "role_tags" => [@role_names_before_save, new_names]
+      }
+    )
+  end
+
+  def after_audit
+    audit = audits.order(version: :desc).first
+    return if audit.blank? || audit.audited_changes["person_name"].present?
+
+    name = display_name.presence
+    return if name.blank?
+
+    audit.update_columns(
+      audited_changes: audit.audited_changes.merge("person_name" => name)
+    )
   end
 
   def primary_contact_stays
@@ -166,6 +238,57 @@ class ProjectMembership < ApplicationRecord
     previous = contact_designation_was
     previous == "primary" ||
       previous == self.class.contact_designations.fetch("primary")
+  end
+
+  def keeps_a_full_member
+    return unless active? && will_save_change_to_access?
+    return unless access_was == "full"
+    return if other_active_full_members.exists?
+
+    errors.add(:access, :last_full_member)
+  end
+
+  # Removing the project removes every row.
+  def keep_full_member_and_primary_contact
+    return if destroyed_by_association || !active?
+
+    if full? && !other_active_full_members.exists?
+      errors.add(:base, :last_full_member)
+    end
+    errors.add(:base, :primary_contact) if primary?
+    throw :abort if errors.any?
+  end
+
+  # A submitted application is already orphaned once this contact is gone.
+  # Copy the name first, and stamp orphaned_at so retention can find it.
+  # Do not discard it here.
+  def orphan_public_record_applications
+    return if user.blank?
+
+    PermitApplication
+      .unscoped
+      .where(submitter_membership_id: id)
+      .find_each do |application|
+        next unless application.public_record?
+        next if application.orphaned_at.present?
+
+        application.update_columns(
+          omniauth_username_snapshot:
+            user.omniauth_username.presence || user.email,
+          first_name_snapshot: user.first_name,
+          last_name_snapshot: user.last_name,
+          orphaned_at: Time.current,
+          updated_at: Time.current
+        )
+      end
+  end
+
+  def other_active_full_members
+    self
+      .class
+      .where(permit_project_id: permit_project_id, access: :full)
+      .where.not(user_id: nil)
+      .where.not(id: id)
   end
 
   def one_primary_contact

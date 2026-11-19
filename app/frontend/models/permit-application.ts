@@ -1,9 +1,10 @@
 import { t } from "i18next"
-import { cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
+import { applySnapshot, cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import {
+  ECollaborationType,
   ECollaboratorType,
   EPermitApplicationStatus,
   EPermitBlockStatus,
@@ -21,6 +22,7 @@ import {
   IFormJson,
   IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
+  IProjectAccess,
   IReportGenerationIssue,
   ISubmissionData,
   ISubmissionVersion,
@@ -35,6 +37,7 @@ import {
   combineRevisionButtons,
   highlightPublishedElectives,
   processFieldsForEphemeral,
+  stampEditAccessLinks,
 } from "../utils/formio-component-traversal"
 import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
 
@@ -46,6 +49,7 @@ import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
+import { ProjectGrantModel } from "./project-grant"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
 import { TemplateVersionModel } from "./template-version"
@@ -112,6 +116,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
       permitCollaborationMap: types.map(PermitCollaborationModel),
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
+      projectGrantMap: types.map(ProjectGrantModel),
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
@@ -120,6 +125,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
       daysInQueue: types.maybeNull(types.number),
+      // Project list rows only. Full: any draft. Expanded: drafts they created.
+      canArchiveDraft: types.optional(types.boolean, false),
+      // This application, including a block or application grant.
+      canOpen: types.optional(types.boolean, false),
+      // The caller's project access, on the full application payload.
+      currentUserAccess: types.maybeNull(types.frozen<IProjectAccess>()),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -144,11 +155,17 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isLockedForReviewStaff() {
         const user = self.rootStore.userStore.currentUser
         if (!user?.isReviewStaff || !this.isNewDraft) return false
-        if (self.submitter?.id === user.id) return false
+        if (self.currentUserAccess?.viewApplication) return false
         if (self.hasActiveProjectMeeting) return false
 
+        // MEMBERSHIP COMMENT: a member who is also review staff opens drafts as
+        // a member. Reviewers accepting invitations is out of scope.
         const project = self.rootStore.permitProjectStore.currentPermitProject
-        if (project?.id === self.projectId && (project.isOwner || project.hasActiveProjectMeeting)) return false
+        if (
+          project?.id === self.projectId &&
+          (project.currentUserAccess?.viewApplication || project.hasActiveProjectMeeting)
+        )
+          return false
         return true
       },
       get isDraft() {
@@ -318,8 +335,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         const currentUser = self.rootStore.userStore.currentUser
-        const submitterCanEditDraft =
-          forSubmitterEdit && self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
+        const submitterCanEditDraft = forSubmitterEdit && self.isDraft && !!self.currentUserAccess?.editApplication
         const disableRequirementFields = submitterCanEditDraft
           ? self.isViewingPastRequests
           : self.isSubmitted ||
@@ -336,6 +352,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         if (self.isEphemeral) {
           return injectOptionalElectivesButtons(revisionModeFormJson, t("templateVersionPreview.viewOptionalElectives"))
+        }
+
+        if (forSubmitterEdit && self.currentUserAccess?.editApplication) {
+          return stampEditAccessLinks(revisionModeFormJson, t("permitApplication.blockAccess.editAccess"))
         }
 
         return revisionModeFormJson
@@ -542,8 +562,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       get currentUserShouldSeeApplicationDiff() {
-        const currentUser = self.rootStore.userStore.currentUser
-        return currentUser?.id === self.submitter?.id
+        return !!self.currentUserAccess?.editApplication
       },
       getCollaborationAssigneesByBlockIdMap() {
         return self.getCollaborationAssignees().reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
@@ -570,7 +589,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       canUserSubmit(user: IUser) {
         if (!user) return false
 
-        return self.submitter?.id === user.id
+        return !!self.currentUserAccess?.submitApplication
       },
       canUserManageCollaborators(user: IUser) {
         if (!user) return false
@@ -710,10 +729,15 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return false
       }),
-      createOrUpdatePermitBlockStatus: flow(function* (requirementBlockId: string, status: EPermitBlockStatus) {
+      createOrUpdatePermitBlockStatus: flow(function* (
+        requirementBlockId: string,
+        status: EPermitBlockStatus,
+        collaborationType: ECollaborationType
+      ) {
         const response = yield self.environment.api.createOrUpdatePermitBlockStatus(self.id, {
           requirementBlockId,
           status,
+          collaborationType,
         })
 
         if (!response.ok) {
@@ -727,47 +751,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
         return self.permitBlockStatusMap.get(permitBlockStatus.id)
       }),
     }))
+    .views((self) => ({
+      get projectGrants() {
+        return Array.from(self.projectGrantMap.values())
+      },
+      get grantedPeopleCount() {
+        return new Set(
+          Array.from(self.projectGrantMap.values())
+            .filter((grant) => grant.kind !== "invite")
+            .map((grant) => grant.projectMembershipId)
+        ).size
+      },
+      grantsFor(membershipId: string) {
+        return Array.from(self.projectGrantMap.values()).filter(
+          (grant) => grant.projectMembershipId === membershipId && grant.kind !== "invite"
+        )
+      },
+    }))
     .actions((self) => ({
       __mergeUpdate: (resourceData) => {
-        let jurisdiction = resourceData["jurisdiction"]
-        let submitter = resourceData["submitter"]
-        let templateVersion = resourceData["templateVersion"]
-        let publishedTemplateVersion = resourceData["publishedTemplateVersion"]
-        const permitCollaborations = resourceData["permitCollaborations"]
-
-        if (jurisdiction && typeof jurisdiction !== "string") {
-          self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
-          jurisdiction = jurisdiction["id"]
-        }
-        if (submitter && typeof submitter !== "string") {
-          self.rootStore.userStore.mergeUpdate(submitter, "usersMap")
-          submitter = submitter["id"]
-        }
-        if (templateVersion && typeof templateVersion !== "string") {
-          self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
-          templateVersion = templateVersion["id"]
-        }
-        if (publishedTemplateVersion && typeof publishedTemplateVersion !== "string") {
-          self.rootStore.templateVersionStore.mergeUpdate(publishedTemplateVersion, "templateVersionMap")
-          publishedTemplateVersion = publishedTemplateVersion["id"]
-        }
-
-        if (permitCollaborations && Array.isArray(permitCollaborations)) {
-          const collaborators = R.map(R.prop("collaborator"), permitCollaborations)
-
-          self.rootStore.collaboratorStore.mergeUpdateAll(
-            R.uniqBy((c) => c.id, collaborators),
-            "collaboratorMap"
-          )
-        }
-
-        const newData = R.mergeRight(resourceData, {
-          jurisdiction,
-          submitter,
-          templateVersion,
-          publishedTemplateVersion,
-        })
-        self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
+        applySnapshot(self, preprocessPermitApplicationSnapshot(R.mergeLeft(resourceData, getSnapshot(self))))
       },
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
@@ -864,6 +867,41 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
         return response
+      }),
+      updateSubmitter: flow(function* (membershipId: string) {
+        const response = yield self.environment.api.updateSubmitter(self.id, membershipId)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response.ok
+      }),
+      fetchProjectGrants: flow(function* () {
+        const response = yield self.environment.api.fetchProjectGrants(self.id)
+        if (!response.ok) return false
+
+        const grants = response.data?.data ?? []
+        self.projectGrantMap.clear()
+        grants.forEach((grant) => self.projectGrantMap.put(grant))
+        return true
+      }),
+      createProjectGrant: flow(function* (grant: {
+        membershipId: string
+        kind: "block" | "application"
+        requirementBlockId?: string | null
+      }) {
+        const response = yield self.environment.api.createProjectGrant(self.id, grant)
+        if (!response.ok || !response.data?.data) return false
+
+        self.projectGrantMap.put(response.data.data)
+        return true
+      }),
+      destroyProjectGrant: flow(function* (id: string) {
+        const response = yield self.environment.api.destroyProjectGrant(self.id, id)
+        if (!response.ok) return false
+
+        self.projectGrantMap.delete(id)
+        return true
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
@@ -1022,21 +1060,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
       }),
     })),
   {
-    preProcessor: (snapshot: any) => {
-      const processedSnapshot = { ...snapshot }
-
-      if (Array.isArray(snapshot.permitCollaborations)) {
-        processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
-      }
-
-      if (Array.isArray(snapshot.permitBlockStatuses)) {
-        processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
-      }
-
-      return processedSnapshot
-    },
+    preProcessor: preprocessPermitApplicationSnapshot,
   }
 )
+
+// put() runs this preprocessor. applySnapshot does not, so __mergeUpdate calls it too.
+function preprocessPermitApplicationSnapshot(snapshot: any) {
+  const processedSnapshot = { ...snapshot }
+
+  if (Array.isArray(snapshot.permitCollaborations)) {
+    processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
+  }
+  delete processedSnapshot.permitCollaborations
+
+  if (Array.isArray(snapshot.permitBlockStatuses)) {
+    processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
+  }
+  delete processedSnapshot.permitBlockStatuses
+
+  return processedSnapshot
+}
 
 export const reasonCodes = [
   "non_compliant",

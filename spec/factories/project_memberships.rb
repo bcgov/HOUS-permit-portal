@@ -2,7 +2,7 @@ FactoryBot.define do
   factory :project_membership do
     association :permit_project
     association :user
-    access { :standard }
+    access { :limited }
     contact_designation { :none }
 
     trait :pending_invitation do

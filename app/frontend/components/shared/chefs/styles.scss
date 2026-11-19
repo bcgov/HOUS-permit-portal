@@ -446,6 +446,48 @@
     i {
       order: 2;
     }
+
+    .edit-block-access {
+      order: 1;
+      margin-left: auto;
+      margin-right: var(--chakra-space-3);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--chakra-colors-text-link);
+      font-weight: normal;
+      font-size: var(--chakra-fontSizes-sm);
+      text-decoration: none;
+      white-space: nowrap;
+
+      i {
+        order: 0;
+        font-size: 1rem;
+      }
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+
+    .formio-collapse-icon {
+      order: 3;
+    }
+  }
+}
+
+// A block conditional hides the panel. Keep the title and replace the fields.
+.formio-component-panel.formio-hidden {
+  display: block !important;
+
+  > .card > .card-body {
+    display: none;
+  }
+
+  > .card::after {
+    content: "Hidden by an answer in another fieldset. You do not need to complete this fieldset.";
+    display: block;
+    padding: var(--chakra-space-2) var(--chakra-space-6) var(--chakra-space-4);
   }
 }
 
@@ -1126,9 +1168,36 @@
 
 #requirement-form-wrapper {
   .card-title {
-    display: inline-grid;
+    display: flex;
+    align-items: center;
     width: 100%;
-    grid-template-columns: 1fr auto 20px;
+    justify-content: flex-start;
+
+    .block-header-controls {
+      order: 1;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .edit-block-access {
+      order: 2;
+      margin-left: var(--chakra-space-4);
+      flex-shrink: 0;
+    }
+
+    &:not(:has(.block-header-controls)) .edit-block-access {
+      margin-left: auto;
+    }
+
+    .formio-collapse-icon {
+      order: 3;
+      margin-left: var(--chakra-space-4);
+      flex-shrink: 0;
+    }
+
+    &:not(:has(.block-header-controls)):not(:has(.edit-block-access)) .formio-collapse-icon {
+      margin-left: auto;
+    }
   }
 
   // style default error box that to look similar to our floating error alert box

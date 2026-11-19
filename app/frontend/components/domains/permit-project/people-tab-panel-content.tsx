@@ -12,6 +12,11 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
   Text,
   VStack,
 } from "@chakra-ui/react"
@@ -19,7 +24,7 @@ import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { useMatch } from "react-router-dom"
+import { Navigate, useMatch, useNavigate } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
@@ -43,18 +48,23 @@ const PEOPLE_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1fr 1fr 60px"
 
 interface IProps {
   permitProject: IPermitProject
+  readOnly?: boolean
 }
 
-export const PeopleTabPanelContent = observer(({ permitProject }: IProps) => {
+export const PeopleTabPanelContent = observer(({ permitProject, readOnly = false }: IProps) => {
   const isNew = Boolean(useMatch("/projects/:permitProjectId/people/new"))
+  if (isNew && !permitProject.currentUserAccess?.invitePeople) {
+    return <Navigate to={`/projects/${permitProject.id}/people`} replace />
+  }
   if (isNew) return <AddProjectPersonForm permitProject={permitProject} />
 
-  return <PeopleList permitProject={permitProject} />
+  return <PeopleList permitProject={permitProject} readOnly={readOnly} />
 })
 
-const PeopleList = observer(({ permitProject }: IProps) => {
+const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
   const { t } = useTranslation()
-  const { projectPeopleStore, userStore } = useMst()
+  const navigate = useNavigate()
+  const { projectPeopleStore, permitProjectStore, userStore } = useMst()
   const currentUser = userStore.currentUser
   const {
     tablePeople,
@@ -102,18 +112,25 @@ const PeopleList = observer(({ permitProject }: IProps) => {
     roleTags?: string[]
     contactDesignation?: EProjectContactDesignation
     access?: EProjectAccess
+    allowInvite?: boolean
   }) => {
     if (!selectedPerson) return
+    const changingOwnAccess = Boolean(
+      selectedPerson.userId === currentUser?.id && (changes.access || changes.allowInvite !== undefined)
+    )
     setIsSaving(true)
     const updated = await updateProjectPerson(selectedPerson.id, changes)
+    if (changingOwnAccess && updated) {
+      await permitProjectStore.fetchPermitProject(permitProject.id)
+    }
     setIsSaving(false)
     setSelectedPerson(updated)
   }
 
-  const handleReinvite = async (email?: string) => {
+  const handleReinvite = async () => {
     if (!selectedPerson) return false
     setIsSaving(true)
-    const updated = await reinviteProjectPerson(selectedPerson.id, email)
+    const updated = await reinviteProjectPerson(selectedPerson.id)
     setIsSaving(false)
     if (updated) {
       setSelectedPerson(updated)
@@ -124,11 +141,29 @@ const PeopleList = observer(({ permitProject }: IProps) => {
 
   const handleRemove = async () => {
     if (!selectedPerson) return
+    const leavingSelf =
+      selectedPerson.status === EProjectMembershipStatus.active && selectedPerson.userId === currentUser?.id
     setIsSaving(true)
     const removed = await destroyProjectPerson(selectedPerson.id)
     setIsSaving(false)
-    if (removed) setSelectedPerson(null)
+    if (!removed) return
+    if (leavingSelf) {
+      navigate("/projects")
+      return
+    }
+    setSelectedPerson(null)
   }
+
+  const projectAccess = permitProject.currentUserAccess
+  const selectedIsActive = selectedPerson?.status === EProjectMembershipStatus.active
+  const leavingSelf = selectedIsActive && Boolean(selectedPerson?.userId && selectedPerson.userId === currentUser?.id)
+  // The API also refuses the last Full member and the primary contact.
+  const canRemoveSelected =
+    leavingSelf ||
+    (selectedIsActive
+      ? !!projectAccess?.manageMemberStanding &&
+        selectedPerson?.contactDesignation !== EProjectContactDesignation.primary
+      : !!projectAccess?.invitePeople)
 
   const accessOptions = Object.values(EProjectAccess).map((access) => ({
     value: access,
@@ -147,13 +182,43 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                 {t("permitProject.details.people")}
               </Heading>
             </Flex>
-            <RouterLinkButton
-              variant="primary"
-              leftIcon={<Icon as={Plus} />}
-              to={`/projects/${permitProject.id}/people/new`}
-            >
-              {t("permitProject.people.addPerson")}
-            </RouterLinkButton>
+            {!readOnly &&
+              (projectAccess?.invitePeople ? (
+                <RouterLinkButton
+                  variant="primary"
+                  leftIcon={<Icon as={Plus} />}
+                  to={`/projects/${permitProject.id}/people/new`}
+                >
+                  {t("permitProject.people.addPerson")}
+                </RouterLinkButton>
+              ) : (
+                <Popover trigger="hover" placement="bottom-end" isLazy openDelay={200}>
+                  <PopoverTrigger>
+                    <Box as="span" display="inline-block">
+                      <Button variant="primary" leftIcon={<Icon as={Plus} />} isDisabled>
+                        {t("permitProject.people.addPerson")}
+                      </Button>
+                    </Box>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    bg="gray.700"
+                    color="whiteAlpha.900"
+                    border="none"
+                    borderRadius="sm"
+                    boxShadow="md"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    w="auto"
+                    maxW="280px"
+                    sx={{ "--popper-arrow-bg": "var(--chakra-colors-gray-700)" }}
+                  >
+                    <PopoverArrow bg="gray.700" />
+                    <PopoverBody px={2} py={1}>
+                      {t("permitProject.people.inviteDisabled")}
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              ))}
           </Flex>
 
           <Flex direction="column" gap={4} w="full">
@@ -200,7 +265,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
           </Flex>
 
           <SearchGrid
-            templateColumns={PEOPLE_GRID_TEMPLATE_COLUMNS}
+            templateColumns={readOnly ? "2fr 1.5fr 1fr 1fr" : PEOPLE_GRID_TEMPLATE_COLUMNS}
             gridRowClassName="project-people-grid-row"
             isEmpty={!isSearching && tablePeople.length === 0}
             emptyTitle={t("permitProject.people.emptyTitle")}
@@ -213,7 +278,7 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                   <Text px={4}>{t(`permitProject.people.columns.${column}`)}</Text>
                 </GridHeader>
               ))}
-              <GridHeader role="columnheader" />
+              {!readOnly && <GridHeader role="columnheader" />}
             </Box>
             {isSearching ? (
               <Flex gridColumn="1 / -1" justify="center" align="center" minH="200px">
@@ -223,8 +288,8 @@ const PeopleList = observer(({ permitProject }: IProps) => {
               tablePeople.map((person) => (
                 <SearchGridRow
                   key={person.id}
-                  onClick={() => selectPerson(person)}
-                  bg={selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
+                  onClick={readOnly ? undefined : () => selectPerson(person)}
+                  bg={!readOnly && selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
                 >
                   <SearchGridItem>
                     <Flex align="center" gap={2.5}>
@@ -260,29 +325,31 @@ const PeopleList = observer(({ permitProject }: IProps) => {
                         ? t("permitProject.people.statusPending")
                         : t("permitProject.people.statusActive")}
                   </SearchGridItem>
-                  <SearchGridItem justifyContent="flex-end" px={2}>
-                    <Menu>
-                      <MenuButton
-                        as={IconButton}
-                        aria-label={t("ui.options")}
-                        icon={<DotsThreeVertical size={20} />}
-                        variant="ghost"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                      <MenuList boxShadow="elevations.elevation04" borderColor="border.base" minW="220px">
-                        <MenuItem
-                          icon={<Info size={16} />}
-                          fontSize="sm"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            selectPerson(person)
-                          }}
-                        >
-                          {t("permitProject.people.details")}
-                        </MenuItem>
-                      </MenuList>
-                    </Menu>
-                  </SearchGridItem>
+                  {!readOnly && (
+                    <SearchGridItem justifyContent="flex-end" px={2}>
+                      <Menu>
+                        <MenuButton
+                          as={IconButton}
+                          aria-label={t("ui.options")}
+                          icon={<DotsThreeVertical size={20} />}
+                          variant="ghost"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <MenuList boxShadow="elevations.elevation04" borderColor="border.base" minW="220px">
+                          <MenuItem
+                            icon={<Info size={16} />}
+                            fontSize="sm"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              selectPerson(person)
+                            }}
+                          >
+                            {t("permitProject.people.details")}
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    </SearchGridItem>
+                  )}
                 </SearchGridRow>
               ))
             )}
@@ -304,14 +371,14 @@ const PeopleList = observer(({ permitProject }: IProps) => {
           </Flex>
         </VStack>
       </Flex>
-      {selectedPerson && (
-        // MEMBERSHIP COMMENT: canEdit and canRemove currently depend on permitProject.isOwner;
-        // revisit when full-access members can manage project people.
+      {selectedPerson && !readOnly && (
         <PersonDetailsPanel
           person={selectedPerson}
           isSelf={Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
-          canEdit={permitProject.isOwner}
-          canRemove={permitProject.isOwner && selectedPerson.userId !== permitProject.ownerId}
+          canEditRoleTags={selectedPerson.canEditRoleTags}
+          canManageStanding={!!projectAccess?.manageMemberStanding}
+          canResend={!!projectAccess?.invitePeople}
+          canRemove={canRemoveSelected}
           primaryContactName={primaryContactName}
           alternateContactNames={alternateContactNames.slice()}
           isSaving={isSaving}

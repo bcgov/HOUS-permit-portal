@@ -18,6 +18,22 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
     request.headers["ACCEPT"] = "application/json"
   end
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "POST #create" do
     context "when permit_application_id is provided (find or create)" do
       it "finds the existing Part3StepCode for the permit application" do
@@ -60,6 +76,43 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
 
         expect(response).to have_http_status(:success)
         expect(JSON.parse(response.body).dig("data", "checklist")).to be_present
+      end
+
+      it "denies a Full member of a different project" do
+        outsider, other_application = full_member_of_another_project
+        sign_in outsider
+
+        expect {
+          post :create,
+               params: {
+                 step_code: {
+                   permit_application_id: permit_application.id,
+                   pre_construction_checklist_attributes: {
+                     section_completion_status: {
+                     }
+                   }
+                 }
+               },
+               as: :json
+        }.not_to change(Part3StepCode, :count)
+
+        expect(response).to have_http_status(:forbidden)
+
+        expect {
+          post :create,
+               params: {
+                 step_code: {
+                   permit_application_id: other_application.id,
+                   pre_construction_checklist_attributes: {
+                     section_completion_status: {
+                     }
+                   }
+                 }
+               },
+               as: :json
+        }.to change(Part3StepCode, :count).by(1)
+
+        expect(response).to have_http_status(:success)
       end
     end
 
@@ -178,6 +231,15 @@ RSpec.describe Api::Part3Building::StepCodesController, type: :controller do
 
     it "returns forbidden for unauthorized user" do
       sign_in create(:user, :submitter)
+
+      get :show, params: { id: step_code.id }
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
 
       get :show, params: { id: step_code.id }
 

@@ -81,6 +81,7 @@ export const ProjectPeopleStoreModel = types
       roleTags?: string[]
       contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
+      allowInvite?: boolean
     }) {
       const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
       if (!permitProjectId) return null
@@ -92,11 +93,11 @@ export const ProjectPeopleStoreModel = types
       yield self.search()
       return created
     }),
-    reinviteProjectPerson: flow(function* (membershipId: string, email?: string) {
+    reinviteProjectPerson: flow(function* (membershipId: string) {
       const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
       if (!permitProjectId) return null
 
-      const response = yield self.environment.api.reinvitePermitProjectMembership(permitProjectId, membershipId, email)
+      const response = yield self.environment.api.reinvitePermitProjectMembership(permitProjectId, membershipId)
       if (!response.ok || !response.data?.data) return null
 
       const updated: IProjectPerson = response.data.data
@@ -109,6 +110,7 @@ export const ProjectPeopleStoreModel = types
         roleTags?: string[]
         contactDesignation?: EProjectContactDesignation
         access?: EProjectAccess
+        allowInvite?: boolean
       }
     ) {
       const permitProjectId = self.rootStore.permitProjectStore.currentPermitProject?.id
@@ -130,6 +132,13 @@ export const ProjectPeopleStoreModel = types
 
       const response = yield self.environment.api.destroyPermitProjectMembership(permitProjectId, membershipId)
       if (!response.ok) return false
+
+      const currentUserId = self.rootStore.userStore.currentUser?.id
+      const leftProject = self.tablePeople.some(
+        (person) => person.id === membershipId && person.userId && person.userId === currentUserId
+      )
+      // The people list is project show?, which this user no longer passes.
+      if (leftProject) return true
 
       yield self.search()
       self.tablePeople = cast(self.tablePeople.filter((person) => person.id !== membershipId))

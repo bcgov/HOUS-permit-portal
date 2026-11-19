@@ -3,9 +3,15 @@ class PermitBlockStatus < ApplicationRecord
   belongs_to :permit_application
 
   enum :status, { draft: 0, in_progress: 1, ready: 2 }, default: 0
+  # Whose draft / in progress / ready this is. A block can have one of each.
+  enum :collaboration_type, { submission: 0, review: 1 }, default: :submission
 
   validates :requirement_block_id, presence: true
-  validates :permit_application_id, uniqueness: { scope: :requirement_block_id }
+  validates :collaboration_type, presence: true
+  validates :permit_application_id,
+            uniqueness: {
+              scope: %i[requirement_block_id collaboration_type]
+            }
 
   after_commit :send_status_change_websocket
   after_commit :send_status_ready_email
@@ -50,12 +56,14 @@ class PermitBlockStatus < ApplicationRecord
   end
 
   def users_to_notify_status_ready
-    users_to_notify = []
+    if submission?
+      return [permit_application.application_message_recipient].compact
+    end
 
-    users_to_notify +=
+    users_to_notify =
       permit_application.users_by_collaboration_options(
         collaborator_type: :delegatee
-      )
+      ).to_a
 
     users_to_notify +=
       permit_application.users_by_collaboration_options(
@@ -80,14 +88,16 @@ class PermitBlockStatus < ApplicationRecord
 
     user_ids_to_send = users_to_notify_status_ready.pluck(:id)
 
-    # as all review staff have access to status we send the status update websocket regardless if they are a collaborator
-    user_ids_to_send +=
-      permit_application
-        .jurisdiction
-        .users
-        .kept
-        .where(role: %i[review_manager reviewer regional_review_manager])
-        .pluck(:id)
+    if review?
+      # Review staff can see this status without a collaborator row.
+      user_ids_to_send +=
+        permit_application
+          .jurisdiction
+          .users
+          .kept
+          .where(role: %i[review_manager reviewer regional_review_manager])
+          .pluck(:id)
+    end
 
     WebsocketBroadcaster.push_update_to_relevant_users(
       user_ids_to_send.uniq,
@@ -109,7 +119,7 @@ class PermitBlockStatus < ApplicationRecord
         (Rails.env.development? ? 10.seconds : 5.minutes).to_i
       lock_key =
         "permit_block_status_ready_summary:" \
-          "#{permit_application_id}:#{user.id}"
+          "#{permit_application_id}:#{collaboration_type}:#{user.id}"
       Rails.logger.info(
         "[PermitBlockStatus] Scheduling debounced email job with lock_key: #{lock_key}"
       )
@@ -120,6 +130,7 @@ class PermitBlockStatus < ApplicationRecord
         "NotificationAggregators::PermitBlockReadySummary",
         {
           "permit_application_id" => permit_application_id,
+          "collaboration_type" => collaboration_type,
           "user_id" => user.id
         },
         "PermitHubMailer",

@@ -179,7 +179,7 @@ export const EditableInputWithControls = observer(function EditableInputWithCont
       {...editableProps}
     >
       <CustomEditablePreview initialHint={initialHint} {...editablePreviewProps} />
-      <Input as={EditableInput} {...editableInputProps} />
+      <Input as={EditableInput} {...editableInputProps} textAlign="left" />
       <EditableControls {...controlsProps} compact={compact} />
     </Editable>
   )

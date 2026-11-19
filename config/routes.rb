@@ -217,6 +217,9 @@ Rails.application.routes.draw do
     end
 
     resources :permit_applications, only: %i[update show destroy] do
+      resources :project_grants,
+                only: %i[index create destroy],
+                controller: "project_grants"
       collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",
@@ -245,6 +248,7 @@ Rails.application.routes.draw do
       patch "revision_requests",
             on: :member,
             to: "permit_applications#update_revision_requests"
+      patch "submitter", on: :member, to: "permit_applications#update_submitter"
       patch "submitter_note",
             on: :member,
             to: "permit_applications#update_submitter_note"
@@ -286,6 +290,9 @@ Rails.application.routes.draw do
                 controller: "permit_projects/memberships" do
         post "search", on: :collection, to: "permit_projects/memberships#index"
         post :reinvite, on: :member
+        resources :project_grants,
+                  only: %i[create destroy],
+                  controller: "project_grants"
       end
 
       resources :project_meetings, path: "meetings", only: %i[create update] do

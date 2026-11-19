@@ -16,7 +16,10 @@ class Api::StepCodesController < Api::ApplicationController
                    nil,
                    {
                      meta: page_meta(@step_code_search),
-                     blueprint: StepCodeBlueprint
+                     blueprint: StepCodeBlueprint,
+                     blueprint_opts: {
+                       pundit_user:
+                     }
                    }
   end
 
@@ -37,7 +40,7 @@ class Api::StepCodesController < Api::ApplicationController
     end
 
     begin
-      # disallow updating Step Code if it's tied to a permit application and the user is not the submitter (for now)
+      # Reassigning onto an application follows edit_application? on the target.
       if step_code_params[:permit_application_id].present?
         target_pa =
           ensure_in_sandbox!(

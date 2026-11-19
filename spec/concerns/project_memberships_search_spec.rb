@@ -37,7 +37,7 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
         :project_membership,
         user: builder,
         permit_project: project,
-        access: :standard
+        access: :limited
       )
     membership.role_list = ["Builder"]
     membership.save!

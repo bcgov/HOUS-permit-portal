@@ -158,21 +158,23 @@ RSpec.describe "Api::QaTools", type: :request do
       )
     end
 
-    it "creates a project for review staff without requiring a sandbox" do
+    it "rejects a live project from review staff" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
       sign_in review_manager
 
-      post "/api/qa_tools/permit_projects/full",
-           params: {
-             qa_full_permit_project: {
-               jurisdiction_id: jurisdiction.id
-             }
-           },
-           headers: headers,
-           as: :json
+      expect do
+        post "/api/qa_tools/permit_projects/full",
+             params: {
+               qa_full_permit_project: {
+                 jurisdiction_id: jurisdiction.id
+               }
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(PermitProject, :count)
 
-      expect(response).to have_http_status(:created)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 
@@ -189,6 +191,9 @@ RSpec.describe "Api::QaTools", type: :request do
     it "autofills a draft permit application" do
       allow(ENV).to receive(:[]).and_call_original
       allow(ENV).to receive(:[]).with("VITE_QA_MODE").and_return("true")
+      expect(AutomatedCompliance::AutopopulateJob).to receive(
+        :perform_async
+      ).with(permit_application.id)
       sign_in submitter
 
       post "/api/qa_tools/permit_applications/#{permit_application.id}/autofill",
