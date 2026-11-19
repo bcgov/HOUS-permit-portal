@@ -17,7 +17,7 @@ export const setupReactotron = async (api) => {
   const { mst } = await import("reactotron-mst")
   const { default: apisaucePlugin } = await import("reactotron-apisauce")
 
-  reactotron
+  const configuredReactotron = reactotron
     .configure({ name: "HOUS-permit-portal" })
     .use(apisaucePlugin())
     .use(
@@ -30,6 +30,6 @@ export const setupReactotron = async (api) => {
     )
     .connect()
 
-  api.addMonitor(reactotron.apisauce)
-  return reactotron
+  api.addMonitor(configuredReactotron.apisauce)
+  return configuredReactotron
 }

@@ -20,10 +20,16 @@ export const UnreadFilter = observer(function UnreadFilter({ value, onChange, on
     { value: ERadioFilterValue.onlyShow, label: t("submissionInbox.filters.onlyShow") },
     { value: ERadioFilterValue.hide, label: t("submissionInbox.filters.hide") },
   ]
+  const title =
+    value === ERadioFilterValue.onlyShow
+      ? t("submissionInbox.filters.isUnread")
+      : value === ERadioFilterValue.hide
+        ? t("submissionInbox.filters.unreadHidden")
+        : t("submissionInbox.filters.unread")
 
   return (
     <InboxFilter
-      title={t("submissionInbox.filters.unread")}
+      title={title}
       badgeCount={badgeCount}
       showResultsBadge
       isMulti={false}

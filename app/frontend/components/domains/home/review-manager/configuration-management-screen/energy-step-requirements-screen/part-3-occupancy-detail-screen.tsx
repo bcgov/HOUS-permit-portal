@@ -18,6 +18,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { CaretDown, CaretLeft, Plus, Trash } from "@phosphor-icons/react"
+import { TFunction } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
@@ -33,8 +34,6 @@ import { i18nPrefix } from "./i18n-prefix"
 
 type TDetailPrefix = `${typeof i18nPrefix}.occupancyDetail`
 const d: TDetailPrefix = `${i18nPrefix}.occupancyDetail`
-
-type TFunction = ReturnType<typeof useTranslation>["t"]
 
 function formatStepLabel(t: TFunction, step: number): string {
   // @ts-ignore

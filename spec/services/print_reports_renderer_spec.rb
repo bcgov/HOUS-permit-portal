@@ -667,7 +667,8 @@ RSpec.describe PrintReports::Renderer do
               "Submission version 2",
               "Submission date",
               "Export date",
-              "application information saved at submission",
+              "Application / reference number",
+              tags.any? ? "Tags" : "Template",
               tags.any? ? "Residential | Addition" : "Housing permit"
             )
             expect(pages[1].text).to include("Saved answer")
@@ -1107,6 +1108,7 @@ RSpec.describe PrintReports::Renderer do
           .render(fixture) do |path|
             text = PDF::Reader.new(path).pages.map(&:text).join(" ")
             expect(text).to include("88.76", "54.32")
+            expect(text).to match(/ACH\s+1\.23\s+NLA\s+9\.87\s+NLR\s+6\.54/)
             expect(text).not_to include("Not provided")
             # Each failed criterion and its overall table result must show Fail,
             # even though the unrelated MEUI and CO2 checks passed.

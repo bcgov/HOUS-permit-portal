@@ -5,8 +5,8 @@ import React from "react"
 interface IProps<T extends string> {
   value?: T | null
   options: readonly T[]
-  label: (value: T) => string
-  onChange: (value: T) => void
+  label: (value: NoInfer<T>) => string
+  onChange: (value: NoInfer<T>) => void
   placeholder?: string
   isInvalid?: boolean
   isDisabled?: boolean

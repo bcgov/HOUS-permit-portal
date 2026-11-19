@@ -37,6 +37,27 @@ RSpec.describe ApplicationMailer do
     ).and_return("Other")
   end
 
+  describe ".deliver_later" do
+    it "enqueues mail only after the transaction commits" do
+      expect {
+        ApplicationRecord.transaction do
+          expect {
+            TestMailer.test_email(to: "to@example.com").deliver_later
+          }.not_to have_enqueued_mail(TestMailer, :test_email)
+        end
+      }.to have_enqueued_mail(TestMailer, :test_email).once
+    end
+
+    it "discards mail when the transaction rolls back" do
+      expect {
+        ApplicationRecord.transaction do
+          TestMailer.test_email(to: "to@example.com").deliver_later
+          raise ActiveRecord::Rollback
+        end
+      }.not_to have_enqueued_mail(TestMailer, :test_email)
+    end
+  end
+
   it "builds subject and uses template_key as template_name" do
     mailer = TestMailer.new
     captured = nil

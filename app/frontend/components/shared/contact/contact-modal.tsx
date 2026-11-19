@@ -22,13 +22,23 @@ import { IContact, IOption } from "../../../types/types"
 import { convertPhoneNumberToFormioFormat, isSafari } from "../../../utils/utility-functions"
 import { ContactSelect } from "../select/selectors/contact-select"
 
-export interface IContactModalProps extends Partial<ReturnType<typeof useDisclosure>> {
-  permitApplication?: IPermitApplication
-  autofillContactKey?: string
-  onContactChange?: (option: IOption<IContact>) => void
-  submissionState: any
-  setSubmissionState: (any) => void
-}
+export type IContactModalProps = Partial<ReturnType<typeof useDisclosure>> &
+  (
+    | {
+        onContactChange: (option: IOption<IContact>) => void
+        permitApplication?: never
+        autofillContactKey?: never
+        submissionState?: never
+        setSubmissionState?: never
+      }
+    | {
+        onContactChange?: never
+        permitApplication: IPermitApplication
+        autofillContactKey: string
+        submissionState: any
+        setSubmissionState: (state: any) => void
+      }
+  )
 
 const isValidContactType = (requirementKey: string, contactTypeValue: string): boolean => {
   const isGeneralContact = requirementKey.includes(ERequirementType.generalContact)

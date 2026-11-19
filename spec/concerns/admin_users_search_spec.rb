@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::Concerns::Search::AdminUsers, type: :controller do
+RSpec.describe Api::Concerns::Search::AdminUsers,
+               type: :controller,
+               search: true do
   # This assumes you have a dummy controller for testing the concern
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::AdminUsers
@@ -30,7 +32,7 @@ RSpec.describe Api::Concerns::Search::AdminUsers, type: :controller do
       user_search_params
     )
     allow(controller).to receive(:params).and_return(user_search_params)
-    User.reindex
+    reindex_search(User)
   end
 
   describe "perform_user_search" do

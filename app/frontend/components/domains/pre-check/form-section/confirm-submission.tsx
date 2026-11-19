@@ -78,8 +78,8 @@ export const ConfirmSubmission = observer(function ConfirmSubmission() {
               )}
               modalProps={{
                 isCentered: true,
-                zIndex: 2001,
               }}
+              modalContentProps={{ containerProps: { zIndex: 2001 } }}
               confirmButtonProps={{
                 isLoading: isSubmitting,
               }}

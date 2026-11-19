@@ -240,6 +240,8 @@ export const Part3StepCodeChecklistModel = types
     clearReportGenerationPending() {
       self.reportGenerationPending = false
     },
+  }))
+  .actions((self) => ({
     load: flow(function* () {
       const response = yield self.environment.api.fetchPart3Checklist(self.id)
       if (response.ok) {

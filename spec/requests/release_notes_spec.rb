@@ -337,7 +337,7 @@ RSpec.describe "ReleaseNotes", type: :request do
     end
   end
 
-  describe "#index" do
+  describe "#index", search: true do
     let!(:earliest_release_note) do
       create(
         :release_note,
@@ -357,7 +357,7 @@ RSpec.describe "ReleaseNotes", type: :request do
       )
     end
 
-    before { ReleaseNote.reindex }
+    before { reindex_search(ReleaseNote) }
 
     it "returns all release notes for super admins" do
       sign_in super_admin
@@ -380,8 +380,7 @@ RSpec.describe "ReleaseNotes", type: :request do
           name: "Step Code wording",
           release_date: 3.days.ago
         )
-      ReleaseNote.reindex
-
+      reindex_search(ReleaseNote)
       sign_in super_admin
 
       get release_notes_path, params: { release_type: "software" }
@@ -447,8 +446,7 @@ RSpec.describe "ReleaseNotes", type: :request do
           version: "0.9.0",
           release_date: Date.new(2024, 12, 31)
         )
-      ReleaseNote.reindex
-
+      reindex_search(ReleaseNote)
       sign_in super_admin
       get release_notes_path, params: { year: 2024 }
 
@@ -481,10 +479,10 @@ RSpec.describe "ReleaseNotes", type: :request do
     end
   end
 
-  describe "#index with no release notes" do
+  describe "#index with no release notes", search: true do
     before do
       ReleaseNote.find_each(&:destroy)
-      ReleaseNote.reindex
+      reindex_search(ReleaseNote)
     end
 
     it "returns an empty response" do

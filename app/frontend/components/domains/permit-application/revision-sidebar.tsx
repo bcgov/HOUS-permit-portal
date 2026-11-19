@@ -666,7 +666,7 @@ const RevisionRequestListItem = ({ revisionRequest, forSubmitter, fieldChanged }
             color="text.link"
             textDecoration="underline"
             onClick={clickHandleView}
-            isDisabled={!requirementKey}
+            disabled={!requirementKey}
           >
             {t("permitApplication.show.revision.viewRequest")}
           </Link>

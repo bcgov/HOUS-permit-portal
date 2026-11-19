@@ -12,7 +12,7 @@ RSpec.describe "Api::Collaborators", type: :request, search: true do
 
   before do
     sign_in owner
-    Collaborator.reindex
+    reindex_search(Collaborator)
   end
 
   describe "POST /api/collaborators/collaboratorable/:collaboratorable_id/search" do

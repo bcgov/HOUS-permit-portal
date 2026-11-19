@@ -1,4 +1,5 @@
 import { IPart3Occupancy, IPart3OccupancyGroup } from "../types/types"
+export type { IPart3Occupancy, IPart3OccupancyGroup } from "../types/types"
 
 /**
  * Canonical reference table of Part 3 occupancies with Energy Step Code

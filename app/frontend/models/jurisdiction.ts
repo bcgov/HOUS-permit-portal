@@ -23,7 +23,7 @@ import {
   ISubmissionContact,
   TLatLngTuple,
 } from "../types/types"
-import { ExternalApiKeyModel } from "./external-api-key"
+import { ExternalApiKeyModel, IExternalApiKey } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 import { SandboxModel } from "./sandbox"
 
@@ -96,7 +96,7 @@ export const JurisdictionModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
-    get externalApiKeys() {
+    get externalApiKeys(): IExternalApiKey[] {
       return Array.from(self.externalApiKeysMap.values()).sort((a, b) => (b.createdAt as any) - (a.createdAt as any))
     },
     get primaryContact() {
@@ -113,16 +113,16 @@ export const JurisdictionModel = types
     getRequiredStep(id: string): IJurisdictionStepRequirement | undefined {
       return self.jurisdictionStepRequirements.find((rs) => rs.id == id)
     },
-    getExternalApiKey(externalApiKeyId: string) {
+    getExternalApiKey(externalApiKeyId: string): IExternalApiKey | undefined {
       return self.externalApiKeysMap.get(externalApiKeyId)
     },
-    energyStepRequiredTranslation(energyStepRequired?: EEnergyStep) {
+    energyStepRequiredTranslation(energyStepRequired?: EEnergyStep): string {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
       return energyStepRequired
         ? t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
         : t(`${i18nPrefix}.notRequired`)
     },
-    zeroCarbonLevelTranslation(zeroCarbonStepRequired?: EZeroCarbonStep) {
+    zeroCarbonLevelTranslation(zeroCarbonStepRequired?: EZeroCarbonStep): string {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
       return zeroCarbonStepRequired
         ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
@@ -184,7 +184,7 @@ export const JurisdictionModel = types
     setUnviewedProjectMeetingsCount: (count: number) => {
       self.unviewedProjectMeetingsCount = count
     },
-    update: flow(function* (params) {
+    update: flow(function* (params): Generator<Promise<unknown>, boolean> {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))
       if (ok) {
         self.rootStore.jurisdictionStore.mergeUpdate(response.data, "jurisdictionMap")
@@ -294,5 +294,4 @@ export const JurisdictionModel = types
     }),
   }))
 
-//@ts-ignore
-export type IJurisdiction = Instance<typeof JurisdictionModel>
+export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}
