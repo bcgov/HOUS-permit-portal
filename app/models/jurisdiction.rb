@@ -61,7 +61,8 @@ class Jurisdiction < ApplicationRecord
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
-  has_many :submitters, through: :permit_applications, source: :submitter
+  has_many :submitter_memberships, through: :permit_applications
+  has_many :submitters, through: :submitter_memberships, source: :user
   has_many :jurisdiction_requirement_templates, dependent: :destroy
   has_many :enabled_requirement_templates,
            through: :jurisdiction_requirement_templates,

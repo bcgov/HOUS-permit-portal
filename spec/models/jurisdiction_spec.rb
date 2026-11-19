@@ -8,8 +8,8 @@ RSpec.describe Jurisdiction, type: :model do
 
     # Testing has_many :through association
     it do
-      should have_many(:submitters).through(:permit_applications).source(
-               :submitter
+      should have_many(:submitters).through(:submitter_memberships).source(
+               :user
              )
     end
   end

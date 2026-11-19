@@ -29,7 +29,7 @@ class PermitApplicationPolicy < ApplicationPolicy
 
   # Full and Expanded only. A block grant can save the draft and still
   # cannot choose who the building authority contacts.
-  def update_application_contact?
+  def update_submitter?
     return false if record.discarded?
 
     project_access.edit_application?

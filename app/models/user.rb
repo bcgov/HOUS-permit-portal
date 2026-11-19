@@ -43,11 +43,6 @@ class User < ApplicationRecord
            as: :notifiable,
            dependent: :destroy
 
-  has_many :permit_applications,
-           foreign_key: "submitter_id",
-           dependent: :destroy,
-           inverse_of: :submitter
-
   has_many :created_step_codes,
            class_name: "StepCode",
            foreign_key: "creator_id",
@@ -73,6 +68,7 @@ class User < ApplicationRecord
            through: :pinned_projects,
            source: :permit_project
   has_many :project_memberships, dependent: :destroy
+  has_many :permit_applications, through: :project_memberships
 
   # New intermediate association for jurisdictions applied for via permit applications
   has_many :application_projects,

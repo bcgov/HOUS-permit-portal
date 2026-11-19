@@ -146,10 +146,10 @@ en:
           attributes:
             submitter:
               incorrect_role: "must have the submitter role"
+              inactive_member: "must be an active member of this project"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
-              no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
         permit_project:
           staff_owned_live_must_be_discarded: "review staff cannot own an active permit project outside of a sandbox"
@@ -785,7 +785,7 @@ en:
       submit_state_error:
         title: Error
         message: "This application cannot be submitted or re-submitted"
-      update_application_contact_error:
+      update_submitter_error:
         title: Error
         message: "%{error_message}"
       digital_seal_checks_pending:

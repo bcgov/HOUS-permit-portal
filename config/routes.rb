@@ -248,9 +248,7 @@ Rails.application.routes.draw do
       patch "revision_requests",
             on: :member,
             to: "permit_applications#update_revision_requests"
-      patch "application_contact",
-            on: :member,
-            to: "permit_applications#update_application_contact"
+      patch "submitter", on: :member, to: "permit_applications#update_submitter"
       patch "submitter_note",
             on: :member,
             to: "permit_applications#update_submitter_note"

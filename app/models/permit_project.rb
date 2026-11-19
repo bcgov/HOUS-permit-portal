@@ -258,9 +258,9 @@ class PermitProject < ApplicationRecord
         .includes(
           :submission_versions,
           :permit_collaborations,
-          :submitter,
           :created_by,
           :template_version,
+          submitter_membership: :user,
           application_contact_membership: :user,
           requirement_template: :taggings
         )

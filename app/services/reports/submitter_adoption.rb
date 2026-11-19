@@ -139,12 +139,26 @@ module Reports
 
     def submitters_in_range
       @submitters_in_range ||=
-        created_records.distinct.pluck(owner_column).compact
+        if subject == "projects"
+          created_records.distinct.pluck(:owner_id).compact
+        else
+          created_records
+            .joins(:submitter_membership)
+            .distinct
+            .pluck("project_memberships.user_id")
+        end
     end
 
     def lifetime_counts
       @lifetime_counts ||=
-        records.where.not(owner_column => nil).group(owner_column).count
+        if subject == "projects"
+          records.where.not(owner_id: nil).group(:owner_id).count
+        else
+          records
+            .joins(:submitter_membership)
+            .group("project_memberships.user_id")
+            .count
+        end
     end
 
     def records
@@ -153,10 +167,6 @@ module Reports
 
     def created_records
       range.apply(records, created_column)
-    end
-
-    def owner_column
-      subject == "projects" ? :owner_id : :submitter_id
     end
 
     def created_column

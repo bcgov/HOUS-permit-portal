@@ -4,7 +4,13 @@ import { cast, flow, Instance, toGenerator, types } from "mobx-state-tree"
 import { datefnsTableDateFormat } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
-import { EInboxDisplayMode, EPermitProjectRollupStatus, EProjectState } from "../types/enums"
+import {
+  EInboxDisplayMode,
+  EPermitProjectRollupStatus,
+  EProjectAccess,
+  EProjectMembershipStatus,
+  EProjectState,
+} from "../types/enums"
 import { IParcelGeometry, IProjectAccess, IProjectAuditSummary, IProjectDocument } from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { CollaboratorModel } from "./collaborator"
@@ -14,6 +20,7 @@ import { IPermitApplication, PermitApplicationModel } from "./permit-application
 import { PermitProjectCollaborationModel } from "./permit-project-collaboration"
 import { PermitProjectInboxApplicationSearchSlice } from "./permit-project-inbox-application-search"
 import { IProjectMeeting } from "./project-meeting"
+import { ProjectMembershipModel } from "./project-membership"
 
 const PermitProjectCoreModel = types.model("PermitProjectCore", {
   id: types.identifier,
@@ -72,6 +79,7 @@ const PermitProjectCoreModel = types.model("PermitProjectCore", {
   activeProjectMeeting: types.maybeNull(types.frozen<IProjectMeeting>()),
   displayMode: types.optional(types.enumeration(Object.values(EInboxDisplayMode)), EInboxDisplayMode.list),
   currentUserAccess: types.maybeNull(types.frozen<IProjectAccess>()),
+  membershipMap: types.map(ProjectMembershipModel),
 })
 
 export const PermitProjectModel = types
@@ -134,6 +142,14 @@ export const PermitProjectModel = types
     },
     get parcelRings(): [number, number][][] | null {
       return self.parcelGeometry?.rings ?? null
+    },
+    // Active members, plus pending Limited invites. The people and block panels share this list.
+    get panelMemberships() {
+      return Array.from(self.membershipMap.values()).filter(
+        (person) =>
+          person.status === EProjectMembershipStatus.active ||
+          (person.status === EProjectMembershipStatus.pending && person.access === EProjectAccess.limited)
+      )
     },
   }))
   .actions((self) => ({
@@ -250,6 +266,38 @@ export const PermitProjectModel = types
         self.setTablePermitApplications(response.data.data as any)
       }
       return response
+    }),
+    fetchMemberships: flow(function* () {
+      const people = []
+      let page = 1
+      let totalPages = 1
+      do {
+        const response = yield self.environment.api.fetchPermitProjectMemberships(self.id, { page, perPage: 100 })
+        if (!response.ok) return false
+        people.push(...(response.data?.data ?? []))
+        totalPages = response.data?.meta?.totalPages ?? 1
+        page += 1
+      } while (page <= totalPages)
+
+      self.membershipMap.clear()
+      people.forEach((person) => self.membershipMap.put(person))
+      return true
+    }),
+    // Merges matches into the map. An empty query is not a search.
+    searchMemberships: flow(function* (query: string) {
+      const trimmed = query.trim()
+      if (!trimmed) return []
+
+      const response = yield self.environment.api.fetchPermitProjectMemberships(self.id, {
+        query: trimmed,
+        page: 1,
+        perPage: 20,
+      })
+      if (!response.ok) return []
+
+      const matches = (response.data?.data ?? []).filter((person) => person.status === EProjectMembershipStatus.active)
+      matches.forEach((person) => self.membershipMap.put(person))
+      return matches.map((person) => self.membershipMap.get(person.id)).filter(Boolean)
     }),
   }))
 

@@ -1,11 +1,11 @@
 <%
   block_grant = @project_grant.block?
-  heading = block_grant ? "You've been given a requirement to edit" : "You've been given a permit application"
+  heading = block_grant ? "You've been given a requirement to edit" : "You've been given access to a permit application"
   intro =
     if block_grant
       "You've been given a requirement on a permit application to view and edit in Building Permit Hub."
     else
-      "You've been given a permit application to view and edit in Building Permit Hub."
+      "You've been given access to a permit application to view and edit in Building Permit Hub."
     end
   application_url = @permit_application.submitter_frontend_url
 %>

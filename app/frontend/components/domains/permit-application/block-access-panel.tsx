@@ -4,10 +4,11 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst, useServerAPI } from "../../../setup/root"
+import { IProjectMembership } from "../../../models/project-membership"
+import { useMst } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
-import { EProjectAccess, EProjectMembershipStatus } from "../../../types/enums"
-import { IOption, IProjectGrant, IProjectPerson } from "../../../types/types"
+import { EProjectAccess } from "../../../types/enums"
+import { IOption } from "../../../types/types"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { AsyncSelect } from "../../shared/select/async-select"
@@ -18,26 +19,6 @@ interface IBlockAccessPanelProps {
   requirementBlockId: string
   onClose: () => void
   stickyHeaderHeight?: number
-  onGrantsChange?: (grants: IProjectGrant[]) => void
-}
-
-const loadActivePeople = async (api: ReturnType<typeof useServerAPI>, projectId: string | null) => {
-  if (!projectId) return []
-  const people: IProjectPerson[] = []
-  let page = 1
-  let totalPages = 1
-  do {
-    const response = await api.fetchPermitProjectMemberships(projectId, { page, perPage: 100 })
-    if (!response.ok) return people
-    people.push(...(response.data?.data ?? []))
-    totalPages = response.data?.meta?.totalPages ?? 1
-    page += 1
-  } while (page <= totalPages)
-  return people.filter(
-    (person) =>
-      person.status === EProjectMembershipStatus.active ||
-      (person.status === EProjectMembershipStatus.pending && person.access === EProjectAccess.limited)
-  )
 }
 
 const blockTitleFor = (permitApplication: IPermitApplication, requirementBlockId: string) => {
@@ -53,19 +34,21 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
   requirementBlockId,
   onClose,
   stickyHeaderHeight,
-  onGrantsChange,
 }: IBlockAccessPanelProps) {
   const { t } = useTranslation()
-  const api = useServerAPI()
-  const { userStore } = useMst()
+  const { userStore, permitProjectStore } = useMst()
   const currentUserId = userStore.currentUser?.id
-  const [people, setPeople] = useState<IProjectPerson[]>([])
-  const [grants, setGrants] = useState<IProjectGrant[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [view, setView] = useState<"summary" | "edit">("summary")
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [inviteOpen, setInviteOpen] = useState(false)
+
+  const project = permitApplication.projectId
+    ? permitProjectStore.permitProjectMap.get(permitApplication.projectId)
+    : null
+  const people = project?.panelMemberships ?? []
+  const grants = permitApplication.projectGrants
 
   const blockTitle = blockTitleFor(permitApplication, requirementBlockId)
   const peoplePath = permitApplication.projectId ? `/projects/${permitApplication.projectId}/people` : "/projects"
@@ -75,15 +58,13 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
     const load = async () => {
       setLoading(true)
       setView("summary")
-      const [loadedPeople, grantsResponse] = await Promise.all([
-        loadActivePeople(api, permitApplication.projectId),
-        api.fetchProjectGrants(permitApplication.id),
-      ])
+      const projectId = permitApplication.projectId
+      let loadedProject = projectId ? permitProjectStore.permitProjectMap.get(projectId) : null
+      if (!loadedProject && projectId) {
+        loadedProject = await permitProjectStore.fetchPermitProject(projectId)
+      }
+      await Promise.all([loadedProject?.fetchMemberships(), permitApplication.fetchProjectGrants()])
       if (cancelled) return
-      const loadedGrants = grantsResponse.ok ? (grantsResponse.data?.data ?? []) : []
-      setPeople(loadedPeople)
-      setGrants(loadedGrants)
-      onGrantsChange?.(loadedGrants)
       setLoading(false)
     }
     void load()
@@ -92,7 +73,7 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
     }
   }, [permitApplication.id, requirementBlockId])
 
-  const hasApplicationGrant = (person: IProjectPerson) =>
+  const hasApplicationGrant = (person: IProjectMembership) =>
     grants.some((grant) => grant.projectMembershipId === person.id && grant.kind === "application")
 
   const blockGrants = grants.filter(
@@ -127,12 +108,12 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
     let ok = true
     for (const membershipId of selectedIds) {
       if (blockGrants.some((grant) => grant.projectMembershipId === membershipId)) continue
-      const created = await api.createProjectGrant(permitApplication.id, {
+      const created = await permitApplication.createProjectGrant({
         membershipId,
         kind: "block",
         requirementBlockId,
       })
-      if (!created.ok) {
+      if (!created) {
         ok = false
         break
       }
@@ -140,26 +121,18 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
     if (ok) {
       for (const grant of blockGrants) {
         if (wanted.has(grant.projectMembershipId)) continue
-        const removed = await api.destroyProjectGrant(permitApplication.id, grant.id)
-        if (!removed.ok) {
+        const removed = await permitApplication.destroyProjectGrant(grant.id)
+        if (!removed) {
           ok = false
           break
         }
       }
     }
-    if (ok) {
-      const refreshed = await api.fetchProjectGrants(permitApplication.id)
-      if (refreshed.ok) {
-        const loadedGrants = refreshed.data?.data ?? []
-        setGrants(loadedGrants)
-        onGrantsChange?.(loadedGrants)
-      }
-      setView("summary")
-    }
+    if (ok) setView("summary")
     setSaving(false)
   }
 
-  const projectLine = (person: IProjectPerson) => {
+  const projectLine = (person: IProjectMembership) => {
     const role = person.roleTags.join(", ")
     const access =
       person.access === EProjectAccess.limited
@@ -343,14 +316,16 @@ export const BlockAccessPanel = observer(function BlockAccessPanel({
         onClose={() => setInviteOpen(false)}
         projectId={permitApplication.projectId}
         onCreated={() => {
-          void loadActivePeople(api, permitApplication.projectId).then(setPeople)
+          const projectId = permitApplication.projectId
+          const loadedProject = projectId ? permitProjectStore.permitProjectMap.get(projectId) : null
+          void loadedProject?.fetchMemberships()
         }}
       />
     </>
   )
 })
 
-const PersonRow = ({ person, line, you }: { person: IProjectPerson; line: string; you: boolean }) => {
+const PersonRow = ({ person, line, you }: { person: IProjectMembership; line: string; you: boolean }) => {
   const { t } = useTranslation()
   return (
     <Flex align="center" gap={4}>
