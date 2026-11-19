@@ -95,23 +95,37 @@ class UserDataCleanupJob
       association_name = model_class.public_recordable_user_association
       next unless association_name
 
-      # Construct the foreign key from the association name
+      # Find records belonging to this user. Permit applications point at a
+      # membership, so the user id is on that row. Drafts are destroyed here
+      # because the user no longer has a dependent destroy for them.
       foreign_key = "#{association_name}_id"
-
-      # Find records belonging to this user
-      # We need to use the association name to query, or manually construct the where clause
-      # Since we don't know the inverse association name on User (e.g. created_step_codes vs step_codes),
-      # we query the model directly.
-      model_class
-        .where(foreign_key => user.id)
-        .find_each do |record|
-          if record.public_record?
-            record.take_user_snapshots!
-            record.update_column(foreign_key, nil)
-            # Reindex if the model is searchable to ensure consistency
-            record.reindex if record.respond_to?(:search_data)
-          end
+      scope =
+        if model_class == PermitApplication
+          PermitApplication.unscoped.where(
+            submitter_membership_id:
+              ProjectMembership.where(user_id: user.id).select(:id)
+          )
+        else
+          model_class.where(foreign_key => user.id)
         end
+      null_column =
+        (
+          if model_class == PermitApplication
+            :submitter_membership_id
+          else
+            foreign_key
+          end
+        )
+
+      scope.find_each do |record|
+        if record.public_record?
+          record.take_user_snapshots!
+          record.update_column(null_column, nil)
+          record.reindex if record.respond_to?(:search_data)
+        elsif model_class == PermitApplication
+          record.destroy!
+        end
+      end
     end
   end
 

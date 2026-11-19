@@ -23,11 +23,10 @@ import { requirementTypeToFormioType } from "../../../constants"
 import { COMPLETTION_SECTION_KEY } from "../../../constants/formio-constants"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { useInterval } from "../../../hooks/use-interval"
-import { useMst, useServerAPI } from "../../../setup/root"
+import { useMst } from "../../../setup/root"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ICustomEventMap } from "../../../types/dom"
 import { ECollaborationType, ECustomEvents, ERequirementType } from "../../../types/enums"
-import { IProjectGrant } from "../../../types/types"
 import { findPidComponentKey } from "../../../utils/formio-component-traversal"
 import { handleScrollToBottom, handleScrollToTop } from "../../../utils/utility-functions"
 import { CopyableValue } from "../../shared/base/copyable-value"
@@ -60,12 +59,8 @@ type TPermitApplicationMetadataForm = {
   nickname: string
 }
 
-const countGrantedPeople = (grants: IProjectGrant[]) =>
-  new Set(grants.filter((grant) => grant.kind !== "invite").map((grant) => grant.projectMembershipId)).size
-
 export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationScreenProps) => {
   const { userStore, uiStore } = useMst()
-  const api = useServerAPI()
   const { scrollToSelector, setScrollToSelector } = uiStore
   const currentUser = userStore.currentUser
   const { currentPermitApplication, error } = usePermitApplication()
@@ -123,28 +118,12 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const [isReviewingSubmit, setIsReviewingSubmit] = useState(false)
   const [peopleOpen, setPeopleOpen] = useState(false)
   const [blockAccessId, setBlockAccessId] = useState<string | null>(null)
-  const [grants, setGrants] = useState<IProjectGrant[]>([])
-  const [grantedPeopleCount, setGrantedPeopleCount] = useState(0)
-  const applyGrants = (next: IProjectGrant[]) => {
-    setGrants(next)
-    setGrantedPeopleCount(countGrantedPeople(next))
-  }
   const [imminentSubmission, setImminentSubmission] = useState(null)
   const reviewSubmitActionsRef = useRef<IReviewSubmitActions | null>(null)
 
   useEffect(() => {
-    const applicationId = currentPermitApplication?.id
-    if (!applicationId) return
-    let cancelled = false
-    const load = async () => {
-      const response = await api.fetchProjectGrants(applicationId)
-      if (cancelled || !response.ok) return
-      applyGrants(response.data?.data ?? [])
-    }
-    void load()
-    return () => {
-      cancelled = true
-    }
+    if (!currentPermitApplication) return
+    void currentPermitApplication.fetchProjectGrants()
   }, [currentPermitApplication?.id])
 
   useEffect(() => {
@@ -509,7 +488,9 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                     setPeopleOpen((open) => !open)
                   }}
                 >
-                  {t("permitApplication.people.buttonWithCount", { count: grantedPeopleCount })}
+                  {t("permitApplication.people.buttonWithCount", {
+                    count: currentPermitApplication.grantedPeopleCount,
+                  })}
                 </Button>
                 <Button
                   variant="primary"
@@ -631,7 +612,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             permitApplication={currentPermitApplication}
             stickyHeaderHeight={permitHeaderHeight}
             onClose={() => setPeopleOpen(false)}
-            onGrantsChange={applyGrants}
           />
         )}
         {blockAccessId && (
@@ -640,7 +620,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
             requirementBlockId={blockAccessId}
             stickyHeaderHeight={permitHeaderHeight}
             onClose={() => setBlockAccessId(null)}
-            onGrantsChange={applyGrants}
           />
         )}
       </Flex>
@@ -650,7 +629,6 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
           requirementBlockAssignmentNode={requirementBlockAssignmentNode}
           permitApplication={currentPermitApplication}
           collaborationType={ECollaborationType.submission}
-          grants={grants}
         />
       ))}
       {isContactsOpen && (

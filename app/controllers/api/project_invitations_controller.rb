@@ -66,6 +66,7 @@ class Api::ProjectInvitationsController < Api::ApplicationController
     end
 
     project_title = @membership.permit_project.title
+    @membership.audit_comment = ProjectMembership::INVITE_DECLINED_AUDIT
     @membership.destroy!
 
     render_success({ project_title: project_title })

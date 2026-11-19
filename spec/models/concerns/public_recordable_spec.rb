@@ -71,7 +71,7 @@ RSpec.describe PublicRecordable, type: :model do
     before do
       # Manually orphan the record to simulate the cleanup job
       permit_application.take_user_snapshots!
-      permit_application.update(submitter_id: nil)
+      permit_application.update!(submitter_membership: nil)
       permit_application.reload
     end
 

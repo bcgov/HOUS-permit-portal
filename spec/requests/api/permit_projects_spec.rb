@@ -514,6 +514,15 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       reviewer = create(:user, :reviewer, jurisdiction:)
       colleague = create(:user, :reviewer, jurisdiction:)
       outsider = create(:user, :reviewer)
+      primary_user = create(:user, :submitter)
+      primary =
+        create(
+          :project_membership,
+          permit_project: permit_project,
+          user: primary_user,
+          access: :full
+        )
+      primary.update!(contact_designation: :primary)
       sign_in reviewer
 
       post "/api/permit_projects/#{permit_project.id}/permit_applications",
@@ -531,7 +540,8 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(response).to have_http_status(:ok)
       application = PermitApplication.find(json_response["data"].first["id"])
       expect(application.created_by).to eq(jurisdiction)
-      expect(application.submitter).to eq(owner)
+      expect(application.submitter).to eq(primary_user)
+      expect(application.submitter_membership).to eq(primary)
       expect(application.nickname).to be_nil
       expect(json_response["data"].first["created_by"]).to eq(
         "id" => jurisdiction.id,

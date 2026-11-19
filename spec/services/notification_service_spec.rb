@@ -354,7 +354,7 @@ RSpec.describe NotificationService do
   end
 
   describe ".publish_review_started_event" do
-    it "emails and pushes based on the application contact's preference flags" do
+    it "emails and pushes based on the submitter's preference flags" do
       preference =
         instance_double(
           "Preference",
@@ -385,7 +385,7 @@ RSpec.describe NotificationService do
       )
     end
 
-    it "sends review started to the application contact, not the submitter" do
+    it "sends review started to the member chosen as the submitter" do
       submitter = create(:user, :submitter)
       contact_user = create(:user, :submitter)
       project = create(:permit_project, owner: submitter)
@@ -403,7 +403,8 @@ RSpec.describe NotificationService do
           permit_project: project,
           jurisdiction: project.jurisdiction
         )
-      permit_application.update!(application_contact_membership: membership)
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
       allow(NotificationPushJob).to receive(:perform_async)
       allow(PermitHubMailer).to receive(:notify_review_started).and_return(
         instance_double("MailerMessage", deliver_later: true)
@@ -660,7 +661,7 @@ RSpec.describe NotificationService do
       ).with(permit_application, submitter)
     end
 
-    it "includes a Limited application contact alongside Full members" do
+    it "includes a Limited submitter alongside Full members" do
       owner = create(:user, :submitter)
       contact_user = create(:user, :submitter)
       project = create(:permit_project, owner: owner)
@@ -678,7 +679,8 @@ RSpec.describe NotificationService do
           permit_project: project,
           jurisdiction: project.jurisdiction
         )
-      permit_application.update!(application_contact_membership: membership)
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
       allow(permit_application).to receive(
         :confirmed_submission_contacts
       ).and_return([])
@@ -914,7 +916,7 @@ RSpec.describe NotificationService do
   end
 
   describe "private helpers" do
-    it "determine_file_owner returns the application contact for a permit application attachment" do
+    it "determine_file_owner returns the submitter for a permit application attachment" do
       submitter = instance_double("User")
       # case/when uses is_a?, which an instance double does not pass.
       pa = PermitApplication.new
@@ -1061,7 +1063,7 @@ RSpec.describe NotificationService do
       ).with(new_template_version, submitter, any_args)
     end
 
-    it "warns the application contact instead of the submitter" do
+    it "warns the member chosen as the submitter" do
       allow(NotificationPushJob).to receive(:perform_async)
       allow(PermitHubMailer).to receive(
         :notify_new_template_version_published
@@ -1102,7 +1104,8 @@ RSpec.describe NotificationService do
           permit_project: project,
           template_version: old_template_version
         )
-      permit_application.update!(application_contact_membership: membership)
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
 
       described_class.publish_new_template_version_publish_event(
         new_template_version
@@ -1157,7 +1160,7 @@ RSpec.describe NotificationService do
       end
     end
 
-    it "notifies the application contact instead of the submitter" do
+    it "notifies the member chosen as the submitter" do
       allow(NotificationPushJob).to receive(:perform_async)
       requirement_template = create(:requirement_template)
       template_version =
@@ -1187,7 +1190,8 @@ RSpec.describe NotificationService do
           permit_project: project,
           template_version: template_version
         )
-      permit_application.update!(application_contact_membership: membership)
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
 
       described_class.publish_customization_update_event(customization)
 
