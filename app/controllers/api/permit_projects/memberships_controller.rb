@@ -28,20 +28,29 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
         invited_email: create_membership_params[:email],
         contact_designation:
           create_membership_params[:contact_designation].presence || :none,
-        access: create_membership_params[:access].presence || :standard,
+        access: create_membership_params[:access].presence || :limited,
         role_tags: create_membership_params[:role_tags] || []
       )
     raw_token = issue_invitation!(@membership)
     authorize @membership
 
-    unless @membership.save
+    grant_error = nil
+    ProjectMembership.transaction do
+      raise ActiveRecord::Rollback unless @membership.save
+
+      grant_error = create_requested_invite_grant
+      raise ActiveRecord::Rollback if grant_error
+    end
+
+    if grant_error || !ProjectMembership.exists?(@membership.id)
       return(
         render_error(
           "project_membership.create_error",
           {
             status: :unprocessable_content,
             message_opts: {
-              error_message: @membership.errors.full_messages.join(", ")
+              error_message:
+                grant_error || @membership.errors.full_messages.join(", ")
             },
             log_args: {
               errors: @membership.errors.full_messages
@@ -108,14 +117,25 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   def update
     authorize @membership, update_query
 
-    unless @membership.update(membership_params)
+    saved = false
+    grant_error = nil
+    ProjectMembership.transaction do
+      saved = @membership.update(membership_params)
+      raise ActiveRecord::Rollback unless saved
+
+      grant_error = sync_invite_grant
+      raise ActiveRecord::Rollback if grant_error
+    end
+
+    if grant_error || !saved
       return(
         render_error(
           "project_membership.update_error",
           {
             status: :unprocessable_content,
             message_opts: {
-              error_message: @membership.errors.full_messages.join(", ")
+              error_message:
+                grant_error || @membership.errors.full_messages.join(", ")
             },
             log_args: {
               errors: @membership.errors.full_messages,
@@ -175,8 +195,46 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   def update_query
     standing =
       membership_params.key?(:access) ||
-        membership_params.key?(:contact_designation)
+        membership_params.key?(:contact_designation) || allow_invite_requested?
     standing ? :update_standing? : :update_role_tags?
+  end
+
+  # The invitation already authorized this actor to invite. The grant rides
+  # along when they say yes. Changing it later is standing (Full).
+  def create_requested_invite_grant
+    return unless allow_invite_param
+    return unless @membership.expanded?
+
+    grant = @membership.project_grants.create(kind: :invite)
+    return if grant.persisted?
+
+    grant.errors.full_messages.join(", ")
+  end
+
+  def sync_invite_grant
+    return unless allow_invite_requested?
+    return unless @membership.expanded?
+
+    if allow_invite_param
+      return if @membership.project_grants.invite.exists?
+
+      grant = @membership.project_grants.create(kind: :invite)
+      return if grant.persisted?
+
+      grant.errors.full_messages.join(", ")
+    else
+      @membership.project_grants.invite.destroy_all
+      nil
+    end
+  end
+
+  def allow_invite_requested?
+    params[:membership].respond_to?(:key?) &&
+      params[:membership].key?(:allow_invite)
+  end
+
+  def allow_invite_param
+    ActiveModel::Type::Boolean.new.cast(params.dig(:membership, :allow_invite))
   end
 
   def create_membership_params

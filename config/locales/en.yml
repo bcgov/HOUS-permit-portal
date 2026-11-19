@@ -47,6 +47,22 @@ en:
       removed_project_reviewer: "%{user} removed %{reviewer} as project reviewer"
       assigned_application_reviewer: "%{user} assigned %{reviewer} as reviewer"
       removed_application_reviewer: "%{user} removed %{reviewer} as reviewer"
+      sent_project_invitation: "%{user} invited %{person}"
+      accepted_project_invitation: "%{person} accepted the invitation"
+      resent_project_invitation: "%{user} re-sent an invitation to %{person}"
+      declined_project_invitation: "%{person} declined the invitation"
+      cancelled_project_invitation: "%{user} cancelled the invitation to %{person}"
+      changed_member_access: "%{user} changed %{person}'s access from %{from} to %{to}"
+      changed_member_contact: "%{user} changed %{person}'s contact designation from %{from} to %{to}"
+      changed_member_roles: "%{user} changed %{person}'s project roles from %{from} to %{to}"
+      removed_project_member: "%{user} removed %{person} from the project"
+      member_left_project: "%{person} left the project"
+      gave_application_grant: "%{user} gave %{person} access to the whole application %{application}"
+      removed_application_grant: "%{user} removed %{person}'s access to the whole application %{application}"
+      gave_block_grant: "%{user} gave %{person} access to %{block} on %{application}"
+      removed_block_grant: "%{user} removed %{person}'s access to %{block} on %{application}"
+      gave_invite_grant: "%{user} allowed %{person} to invite people"
+      removed_invite_grant: "%{user} removed %{person}'s permission to invite people"
     values:
       unknown: "Unknown"
       permit_project/state:
@@ -59,6 +75,16 @@ en:
         active: "Active"
         complete: "Complete"
         closed: "Closed"
+      none: "none"
+      project_membership:
+        access:
+          limited: "Limited"
+          expanded: "Expanded"
+          full: "Full"
+        contact_designation:
+          none: "none"
+          primary: "primary"
+          alternate: "alternate"
       permit_application/status:
         new_draft: "New draft"
         newly_submitted: "Submitted"
@@ -120,10 +146,10 @@ en:
           attributes:
             submitter:
               incorrect_role: "must have the submitter role"
+              inactive_member: "must be an active member of this project"
             jurisdiction:
               no_contact: "is not ready to accept applications through this tool yet. Please check with your local jurisdiction."
               inbox_not_enabled: "inbox for this permit application is not enabled"
-              no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
         permit_project:
           staff_owned_live_must_be_discarded: "review staff cannot own an active permit project outside of a sandbox"
@@ -225,6 +251,8 @@ en:
       notify_permit_collaboration: "Welcome you have been invited to Collaborate in the Building Permit Hub"
       notify_project_review_collaboration: "You have been assigned as a review collaborator on a project"
       notify_project_membership_invitation: "You've been invited to join a project"
+      notify_project_application_grant: "You've been given a permit application"
+      notify_project_block_grant: "You've been given a requirement to edit"
       notify_new_or_unconfirmed_permit_collaboration: "You’re Invited to Collaborate on a Building Permit Application"
       notify_new_or_unconfirmed_preview: "You’re Invited to Preview a Building Permit Template"
       notify_preview: "You're Invited to Preview a Building Permit Template"
@@ -757,6 +785,9 @@ en:
       submit_state_error:
         title: Error
         message: "This application cannot be submitted or re-submitted"
+      update_submitter_error:
+        title: Error
+        message: "%{error_message}"
       digital_seal_checks_pending:
         title: "Digital seal checks are still running"
         message: "Your draft has been saved. Wait for the digital seal checks to finish before submitting."
@@ -844,6 +875,10 @@ en:
         title: Error
         message: "Person could not be updated. %{error_message}"
       destroy_error:
+        title: Error
+        message: "%{error_message}"
+    project_grant:
+      create_error:
         title: Error
         message: "%{error_message}"
     project_invitation:

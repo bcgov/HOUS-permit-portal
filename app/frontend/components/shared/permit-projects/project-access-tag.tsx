@@ -4,13 +4,13 @@ import { useTranslation } from "react-i18next"
 import { EProjectAccess } from "../../../types/enums"
 
 const accessBgMap: Record<EProjectAccess, string> = {
-  [EProjectAccess.standard]: "semantic.infoLight",
+  [EProjectAccess.limited]: "semantic.infoLight",
   [EProjectAccess.expanded]: "theme.green.100",
   [EProjectAccess.full]: "semantic.warningLight",
 }
 
 const accessBorderColorMap: Record<EProjectAccess, string> = {
-  [EProjectAccess.standard]: "focus",
+  [EProjectAccess.limited]: "focus",
   [EProjectAccess.expanded]: "semantic.success",
   [EProjectAccess.full]: "semantic.warning",
 }

@@ -233,9 +233,14 @@ module PermitApplicationStatus
       update(revisions_requested_at: Time.current)
       publish_revision_message(:jurisdiction_message)
       NotificationService.publish_application_revisions_request_event(self)
+      reset_submission_block_statuses_for_revision_requests
     end
 
     def handle_submission
+      if aasm.from_state == :revisions_requested
+        reset_review_block_statuses_for_changed_fields
+      end
+
       publish_revision_message(:submitter_message)
 
       self.class.transaction do
@@ -316,5 +321,87 @@ module PermitApplicationStatus
 
       self.queue_clock_started_at = Time.current if is_our_court
     end
+
+    private
+
+    def reset_submission_block_statuses_for_revision_requests
+      version = latest_submission_version
+      return if version.blank?
+
+      block_ids =
+        version.revision_requests.filter_map do |request|
+          next unless request.is_a?(FieldRevisionRequest)
+
+          key =
+            request.requirement_json&.[]("key") ||
+              request.requirement_json&.[](:key)
+          requirement_block_id_from_form_key(key)
+        end
+
+      reset_permit_block_statuses_to_draft(block_ids, :submission)
+    end
+
+    def reset_review_block_statuses_for_changed_fields
+      reset_permit_block_statuses_to_draft(
+        changed_requirement_block_ids(
+          latest_submission_version&.submission_data,
+          submission_data
+        ),
+        :review
+      )
+    end
+
+    def reset_permit_block_statuses_to_draft(
+      requirement_block_ids,
+      collaboration_type
+    )
+      ids = Array(requirement_block_ids).compact.uniq
+      return if ids.empty?
+
+      permit_block_statuses
+        .where(
+          requirement_block_id: ids,
+          collaboration_type: collaboration_type
+        )
+        .where.not(status: :draft)
+        .find_each { |block_status| block_status.update!(status: :draft) }
+    end
+
+    def changed_requirement_block_ids(before_data, after_data)
+      before_sections = submission_sections(before_data)
+      after_sections = submission_sections(after_data)
+      ids = []
+
+      (before_sections.keys | after_sections.keys).each do |section_key|
+        before_section = section_fields(before_sections[section_key])
+        after_section = section_fields(after_sections[section_key])
+
+        (before_section.keys | after_section.keys).each do |field_key|
+          next if before_section[field_key] == after_section[field_key]
+
+          block_id = requirement_block_id_from_form_key(field_key)
+          ids << block_id if block_id
+        end
+      end
+
+      ids
+    end
+
+    def submission_sections(submission_data)
+      data =
+        submission_data.is_a?(Hash) ? submission_data.deep_stringify_keys : {}
+      sections = data["data"]
+      sections.is_a?(Hash) ? sections : {}
+    end
+
+    def section_fields(section)
+      section.is_a?(Hash) ? section : {}
+    end
+
+    def requirement_block_id_from_form_key(key)
+      key.to_s[/\|RB([^|]+)/, 1]
+    end
+
+    public
   end
 end

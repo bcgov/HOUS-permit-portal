@@ -40,7 +40,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(owner, completed_meeting).submit?).to be false
   end
 
-  it "lets Expanded request, edit, withdraw, and download a calendar, and denies Standard" do
+  it "lets Expanded request, edit, withdraw, and download a calendar, and denies Limited" do
     expanded = create(:user, :submitter)
     standard = create(:user, :submitter)
     create(
@@ -53,7 +53,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       :project_membership,
       permit_project: permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
@@ -68,7 +68,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       :project_membership,
       permit_project: calendar_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
     scheduled_meeting =
       create(:project_meeting, :scheduled, permit_project: calendar_project)
@@ -89,7 +89,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
     expect(policy(standard, scheduled_meeting).download_calendar?).to be false
   end
 
-  it "lets Expanded view a meeting and denies Standard" do
+  it "lets Expanded view a meeting and denies Limited" do
     expanded = create(:user, :submitter)
     standard = create(:user, :submitter)
     create(
@@ -102,7 +102,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       :project_membership,
       permit_project: permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
     open_meeting =
       create(:project_meeting, :open, permit_project: permit_project)
@@ -386,7 +386,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
       ).resolve
     end
 
-    it "includes meetings for an Expanded member and excludes them for Standard" do
+    it "includes meetings for an Expanded member and excludes them for Limited" do
       meeting
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
@@ -400,7 +400,7 @@ RSpec.describe ProjectMeetingPolicy, type: :policy do
         :project_membership,
         permit_project: permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
 
       expect(resolved_scope_for(expanded)).to include(meeting)

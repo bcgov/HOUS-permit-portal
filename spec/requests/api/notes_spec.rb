@@ -337,7 +337,7 @@ RSpec.describe "Api::Notes", type: :request do
   end
 
   describe "GET /api/permit_projects/:permit_project_id/notes/download_csv" do
-    it "returns notes and a CSV to Expanded and denies Standard" do
+    it "returns notes and a CSV to Expanded and denies Limited" do
       create(
         :note,
         noteable: meeting,
@@ -356,7 +356,7 @@ RSpec.describe "Api::Notes", type: :request do
         :project_membership,
         user: standard,
         permit_project: permit_project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded

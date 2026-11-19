@@ -563,6 +563,23 @@ export const processFieldsForEphemeral = (formJson: IFormJson) => {
   return formJson
 }
 
+const REQUIREMENT_BLOCK_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+// Marks real requirement-block panels so the Form.io header can offer Edit access.
+export const stampEditAccessLinks = (formJson: IFormJson, label: string): IFormJson => {
+  const visit = (component: any) => {
+    if (!component) return
+    if (component.type === "panel" && REQUIREMENT_BLOCK_ID.test(component.id || "")) {
+      component.editAccess = true
+      component.editAccessLabel = label
+    }
+    component.components?.forEach(visit)
+  }
+
+  formJson.components?.forEach(visit)
+  return formJson
+}
+
 export const findPidComponentKey = (component: any) => {
   if (component.key && component.key.endsWith("|pid")) {
     return component.key

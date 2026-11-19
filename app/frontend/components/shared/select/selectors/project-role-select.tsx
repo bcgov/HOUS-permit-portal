@@ -30,7 +30,7 @@ const selectStyles: StylesConfig<IOption, true> = {
   }),
   menuPortal: (css) => ({
     ...css,
-    zIndex: 10,
+    zIndex: 2000,
   }),
   option: (css, state) => ({
     ...css,

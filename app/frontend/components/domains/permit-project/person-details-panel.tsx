@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Flex, IconButton, Radio, RadioGroup, Text, VStack } from "@chakra-ui/react"
+import { Avatar, Box, Button, Flex, HStack, IconButton, Radio, RadioGroup, Text, VStack } from "@chakra-ui/react"
 import { CaretLeft, X } from "@phosphor-icons/react"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -10,15 +10,17 @@ import {
 } from "../../../types/enums"
 import { IProjectPerson } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
+import { InfoTooltip } from "../../shared/info-tooltip"
 import { ConfirmationModal } from "../../shared/modals/confirmation-modal"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
 import { ProjectRoleSelect } from "../../shared/select/selectors/project-role-select"
+import { AllowInviteField } from "./allow-invite-field"
 
 interface IPersonDetailsPanelProps {
   person: IProjectPerson
   isSelf?: boolean
-  // Three levels: role tags (Expanded on self and Standard), access and
+  // Three levels: role tags (Expanded on self and Limited), access and
   // contact designation (Full), and re-send (same as invite).
   canEditRoleTags: boolean
   canManageStanding: boolean
@@ -32,6 +34,7 @@ interface IPersonDetailsPanelProps {
     roleTags?: string[]
     contactDesignation?: EProjectContactDesignation
     access?: EProjectAccess
+    allowInvite?: boolean
   }) => void
   onReinvite?: () => Promise<boolean>
   onRemove: () => void
@@ -212,9 +215,20 @@ const ContactEditor = ({
         onChange={(value) => onDraftContactChange(value as EProjectContactDesignation)}
       >
         <VStack align="stretch" spacing={2.5} pt={4}>
-          <Text fontWeight="bold" fontSize="lg">
-            {t("permitProject.people.contactQuestion")}
-          </Text>
+          <HStack spacing={2} align="center">
+            <Text fontWeight="bold" fontSize="lg">
+              {t("permitProject.people.contactQuestion")}
+            </Text>
+            <InfoTooltip
+              hasArrow
+              placement="top"
+              openDelay={200}
+              maxW="320px"
+              whiteSpace="normal"
+              label={t("permitProject.people.contactEmailHelp")}
+              ariaLabel={t("permitProject.people.contactEmailHelp")}
+            />
+          </HStack>
           <Radio value={EProjectContactDesignation.primary} size="lg">
             <Text fontSize="lg">{t("permitProject.people.contactYesPrimary")}</Text>
           </Radio>
@@ -579,9 +593,22 @@ export const PersonDetailsPanel = ({
               <Text fontWeight="bold" fontSize="md">
                 {t("permitProject.people.additionalAccess")}
               </Text>
-              <Text fontSize="sm" color="text.secondary" mt={2.5}>
-                {t("permitProject.people.additionalAccessPlaceholder")}
-              </Text>
+              {person.access === EProjectAccess.expanded && canManageStanding ? (
+                <Box mt={2.5}>
+                  <AllowInviteField
+                    value={person.allowInvite === true}
+                    isDisabled={isSaving}
+                    onChange={(allowInvite) => {
+                      if (allowInvite === (person.allowInvite === true)) return
+                      void onSave({ allowInvite })
+                    }}
+                  />
+                </Box>
+              ) : (
+                <Text fontSize="sm" color="text.secondary" mt={2.5}>
+                  {t("permitProject.people.additionalAccessPlaceholder")}
+                </Text>
+              )}
             </Box>
 
             {canRemove && (

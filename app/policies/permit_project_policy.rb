@@ -56,7 +56,7 @@ class PermitProjectPolicy < ApplicationPolicy
     pin?
   end
 
-  # Every member, including Standard. The row is the summary view; opening
+  # Every member, including Limited. The row is the summary view; opening
   # an application is PermitApplicationPolicy#show?.
   def search_permit_applications?
     show?

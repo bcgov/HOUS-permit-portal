@@ -119,7 +119,7 @@ RSpec.describe "Api::Storage", type: :request do
       expect(json_response["url"]).to be_present
     end
 
-    it "lets Expanded download a meeting document and denies Standard" do
+    it "lets Expanded download a meeting document and denies Limited" do
       project = create(:permit_project, owner: user)
       document =
         create(
@@ -138,7 +138,7 @@ RSpec.describe "Api::Storage", type: :request do
         :project_membership,
         user: standard,
         permit_project: project,
-        access: :standard
+        access: :limited
       )
 
       sign_in expanded

@@ -9,7 +9,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
     policy_for(described_class, user:, record:, sandbox:)
   end
 
-  it "lets Expanded download project notes and denies Standard" do
+  it "lets Expanded download project notes and denies Limited" do
     project = create(:permit_project)
     expanded = create(:user, :submitter)
     standard = create(:user, :submitter)
@@ -23,7 +23,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
       :project_membership,
       permit_project: project,
       user: standard,
-      access: :standard
+      access: :limited
     )
 
     expect(policy(expanded, project).download_notes_csv?).to be true
@@ -70,7 +70,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
   describe "membership access" do
     let(:record) { create(:permit_project, owner:, sandbox: nil) }
 
-    it "lets another Full member update and denies Expanded and Standard" do
+    it "lets another Full member update and denies Expanded and Limited" do
       full_member = create(:user)
       expanded_member = create(:user)
       standard_member = create(:user)
@@ -90,7 +90,7 @@ RSpec.describe PermitProjectPolicy, type: :policy do
         :project_membership,
         permit_project: record,
         user: standard_member,
-        access: :standard
+        access: :limited
       )
 
       expect(policy(full_member, record).update?).to be true

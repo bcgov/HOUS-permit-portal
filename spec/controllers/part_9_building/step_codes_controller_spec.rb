@@ -97,14 +97,14 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
         expect(JSON.parse(response.body).dig("data", "id")).to eq(existing.id)
       end
 
-      it "forbids a Standard member from creating a Step Code on the application" do
+      it "forbids a Limited member from creating a Step Code on the application" do
         member = create(:user, :submitter)
         create(
           :project_membership,
           permit_project:
             permit_application_with_fake_plan_document.permit_project,
           user: member,
-          access: :standard
+          access: :limited
         )
         sign_in member
 
@@ -286,14 +286,14 @@ RSpec.describe Api::Part9Building::StepCodesController, type: :controller do
       expect(JSON.parse(response.body).dig("data", "id")).to eq(step_code.id)
     end
 
-    it "returns forbidden for a Standard member" do
+    it "returns forbidden for a Limited member" do
       member = create(:user, :submitter)
       create(
         :project_membership,
         permit_project:
           permit_application_with_fake_plan_document.permit_project,
         user: member,
-        access: :standard
+        access: :limited
       )
       sign_in member
 

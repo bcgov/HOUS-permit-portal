@@ -70,13 +70,13 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.show?).to be true
     end
 
-    it "denies show for a Standard member" do
+    it "denies show for a Limited member" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       policy =
         described_class.new(
@@ -119,13 +119,13 @@ RSpec.describe PermitApplicationPolicy do
       expect(policy.create?).to be true
     end
 
-    it "denies create for a Standard member" do
+    it "denies create for a Limited member" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       policy =
         described_class.new(
@@ -281,7 +281,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -367,7 +367,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -444,7 +444,7 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
-    it "lets Full and Expanded respond during revisions and denies Standard" do
+    it "lets Full and Expanded respond during revisions and denies Limited" do
       revision =
         create(
           :permit_application,
@@ -465,7 +465,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: revision.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
 
       %i[
@@ -492,6 +492,53 @@ RSpec.describe PermitApplicationPolicy do
           ).public_send(check)
         ).to be false
       end
+    end
+
+    it "keeps the revision note, additional information, and submit behind an application grant" do
+      revision =
+        create(
+          :permit_application,
+          :revisions_requested,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox
+        )
+      standard = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: revision.permit_project,
+          user: standard,
+          access: :limited
+        )
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: revision,
+        requirement_block_id: SecureRandom.uuid
+      )
+      policy = described_class.new(UserContext.new(standard, sandbox), revision)
+
+      expect(policy.update_submitter_note?).to be false
+      expect(policy.upload_revision_fulfillment?).to be false
+      expect(policy.submit?).to be false
+
+      create(
+        :project_grant,
+        :application,
+        project_membership: membership,
+        permit_application: revision
+      )
+
+      expect(policy.update_submitter_note?).to be true
+      expect(policy.upload_revision_fulfillment?).to be true
+      expect(policy.submit?).to be true
+      expect(
+        described_class::Scope.new(
+          UserContext.new(standard, sandbox),
+          PermitApplication.all
+        ).resolve_viewable
+      ).to include(revision)
     end
 
     it "acknowledge_published_electives? permits a member who can edit the draft" do
@@ -529,7 +576,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -572,7 +619,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       expect(
         described_class.new(
@@ -662,7 +709,7 @@ RSpec.describe PermitApplicationPolicy do
       ).to be false
     end
 
-    it "submit? permits Full and Expanded on a draft or a revision request and denies Standard" do
+    it "submit? permits Full and Expanded on a draft or a revision request and denies Limited" do
       expanded = create(:user, :submitter)
       standard = create(:user, :submitter)
       create(
@@ -675,7 +722,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
 
       expect(
@@ -775,7 +822,7 @@ RSpec.describe PermitApplicationPolicy do
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       standard_policy =
         described_class.new(
@@ -933,8 +980,19 @@ RSpec.describe PermitApplicationPolicy do
           jurisdiction_id: jurisdiction.id
         )
       submitted_status =
-        double("PermitBlockStatus", permit_application: submitted)
-      draft_status = double("PermitBlockStatus", permit_application: draft)
+        double(
+          "PermitBlockStatus",
+          permit_application: submitted,
+          submission?: false,
+          review?: true
+        )
+      draft_status =
+        double(
+          "PermitBlockStatus",
+          permit_application: draft,
+          submission?: false,
+          review?: true
+        )
 
       expect(
         described_class.new(
@@ -954,6 +1012,23 @@ RSpec.describe PermitApplicationPolicy do
           submitted_status
         ).create_or_update_permit_block_status?
       ).to be false
+    end
+
+    it "lets a member set the submission status on a draft they can edit" do
+      status =
+        PermitBlockStatus.new(
+          permit_application: draft_permit_application,
+          requirement_block_id: SecureRandom.uuid,
+          collaboration_type: :submission,
+          status: :draft
+        )
+
+      expect(
+        described_class.new(
+          UserContext.new(submitter, sandbox),
+          status
+        ).create_or_update_permit_block_status?
+      ).to be true
     end
 
     it "download_application_metrics_csv? permits only super_admin" do
@@ -1022,14 +1097,14 @@ RSpec.describe PermitApplicationPolicy do
       ).to be true
     end
 
-    it "lets a Standard member archive only a draft they created" do
+    it "lets a Limited member archive only a draft they created" do
       standard = create(:user, :submitter)
       project = draft_permit_application.permit_project
       create(
         :project_membership,
         permit_project: project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       own =
         create(
@@ -1432,13 +1507,13 @@ RSpec.describe PermitApplicationPolicy do
       expect(resolve_for.call(sandbox)).not_to include(live)
     end
 
-    it "keeps a Standard member in the project list and out of applications they can open" do
+    it "keeps a Limited member in the project list and out of applications they can open" do
       standard = create(:user, :submitter)
       create(
         :project_membership,
         permit_project: draft_permit_application.permit_project,
         user: standard,
-        access: :standard
+        access: :limited
       )
       context = UserContext.new(standard, sandbox)
 
@@ -1451,6 +1526,54 @@ RSpec.describe PermitApplicationPolicy do
       expect(
         PermitApplicationPolicy.new(context, draft_permit_application).show?
       ).to be false
+    end
+
+    it "opens the granted application and leaves the next one closed" do
+      standard = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: draft_permit_application.permit_project,
+          user: standard,
+          access: :limited
+        )
+      other_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          jurisdiction: jurisdiction,
+          sandbox: sandbox,
+          permit_project: draft_permit_application.permit_project,
+          template_version: draft_permit_application.template_version
+        )
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: draft_permit_application,
+        requirement_block_id: SecureRandom.uuid
+      )
+      context = UserContext.new(standard, sandbox)
+      viewable =
+        PermitApplicationPolicy::Scope.new(
+          context,
+          PermitApplication.all
+        ).resolve_viewable
+
+      granted = PermitApplicationPolicy.new(context, draft_permit_application)
+      expect(granted.show?).to be true
+      expect(granted.update?).to be true
+      expect(granted.update_version?).to be true
+      expect(granted.acknowledge_published_electives?).to be true
+      expect(granted.upload_supporting_document?).to be true
+      expect(granted.submit?).to be false
+      expect(
+        PermitApplicationPolicy.new(context, other_application).show?
+      ).to be false
+      expect(
+        PermitApplicationPolicy.new(context, other_application).update_version?
+      ).to be false
+      expect(viewable).to include(draft_permit_application)
+      expect(viewable).not_to include(other_application)
     end
   end
 end

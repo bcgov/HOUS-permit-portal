@@ -281,9 +281,30 @@ module Reports
 
     # Timestamps are stored as UTC without a zone. Truncate in the app zone
     # and return a date so ActiveRecord does not read the bucket back as UTC.
+    # Offsets come from Time.zone. Postgres tzdata still falls back to PST on
+    # 2026-11-01, when Vancouver stays on UTC-7.
+    # ponytail: transitions stop at 2100. A later change keeps the last offset.
     def local_month_sql(timestamp_sql)
-      zone = ActiveRecord::Base.connection.quote(Time.zone.tzinfo.name)
-      "date_trunc('month', (#{timestamp_sql}) AT TIME ZONE 'UTC' AT TIME ZONE #{zone})::date"
+      <<~SQL.squish
+        date_trunc(
+          'month',
+          (
+            SELECT utc_ts + (#{local_offset_sql})
+            FROM (SELECT (#{timestamp_sql}) AS utc_ts) AS utc
+          )
+        )::date
+      SQL
+    end
+
+    def local_offset_sql
+      transitions = Time.zone.tzinfo.transitions_up_to(Time.utc(2100, 1, 1))
+      clauses =
+        transitions.reverse.map do |transition|
+          at = Time.at(transition.at.to_i).utc.strftime("%Y-%m-%d %H:%M:%S")
+          "WHEN utc_ts >= TIMESTAMP '#{at}' THEN INTERVAL '#{transition.offset.utc_total_offset} seconds'"
+        end
+      initial = transitions.first.previous_offset.utc_total_offset
+      "CASE #{clauses.join(" ")} ELSE INTERVAL '#{initial} seconds' END"
     end
 
     def numeric_presence?(value)

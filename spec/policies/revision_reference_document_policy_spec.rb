@@ -44,7 +44,7 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
       :project_membership,
       permit_project: permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
 
     expect(policy(owner).download?).to be false
@@ -86,5 +86,59 @@ RSpec.describe RevisionReferenceDocumentPolicy, type: :policy do
 
     expect(policy(owner).download?).to be true
     expect(policy(outsider).download?).to be false
+  end
+
+  it "lets a block grant download reference files only after the package is sent" do
+    standard = create(:user, :submitter)
+    membership =
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: standard,
+        access: :limited
+      )
+    create(
+      :project_grant,
+      project_membership: membership,
+      permit_application: application,
+      requirement_block_id: SecureRandom.uuid
+    )
+    record
+
+    expect(policy(standard).download?).to be false
+
+    allow(NotificationService).to receive(
+      :publish_application_revisions_request_event
+    )
+    application.finalize_revision_requests!
+
+    expect(policy(standard).download?).to be true
+  end
+
+  it "lets an application grant download reference files after the package is sent" do
+    standard = create(:user, :submitter)
+    membership =
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: standard,
+        access: :limited
+      )
+    create(
+      :project_grant,
+      :application,
+      project_membership: membership,
+      permit_application: application
+    )
+    record
+
+    expect(policy(standard).download?).to be false
+
+    allow(NotificationService).to receive(
+      :publish_application_revisions_request_event
+    )
+    application.finalize_revision_requests!
+
+    expect(policy(standard).download?).to be true
   end
 end

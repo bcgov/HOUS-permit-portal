@@ -83,7 +83,7 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
       )
     record = document_for(permit_application)
     expanded_member = member_with_access(permit_application, :expanded)
-    standard_member = member_with_access(permit_application, :standard)
+    standard_member = member_with_access(permit_application, :limited)
 
     expect(policy(submitter, record).upload?).to be true
     expect(policy(expanded_member, record).upload?).to be true
@@ -102,7 +102,7 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
       )
     record = document_for(permit_application)
     expanded_member = member_with_access(permit_application, :expanded)
-    standard_member = member_with_access(permit_application, :standard)
+    standard_member = member_with_access(permit_application, :limited)
 
     expect(policy(submitter, record).destroy?).to be true
     expect(policy(expanded_member, record).destroy?).to be true
@@ -125,6 +125,52 @@ RSpec.describe SupportingDocumentPolicy, type: :policy do
       owned.permit_project.project_memberships.find_by!(user: outsider)
     ).to be_full
     [outsider, owned, target]
+  end
+
+  it "downloads and removes only a supporting file on a granted block" do
+    submitter = create(:user, :submitter)
+    permit_application =
+      create(
+        :permit_application,
+        submitter: submitter,
+        jurisdiction: jurisdiction,
+        sandbox: sandbox
+      )
+    granted_id = SecureRandom.uuid
+    other_id = SecureRandom.uuid
+    member = member_with_access(permit_application, :limited)
+    create(
+      :project_grant,
+      project_membership: ProjectMembership.find_by!(user: member),
+      permit_application: permit_application,
+      requirement_block_id: granted_id
+    )
+    granted =
+      create(
+        :supporting_document,
+        permit_application: permit_application,
+        data_key: "file|RB#{granted_id}"
+      )
+    other =
+      create(
+        :supporting_document,
+        permit_application: permit_application,
+        data_key: "file|RB#{other_id}"
+      )
+
+    expect(policy(member, granted).download?).to be true
+    expect(policy(member, other).download?).to be false
+    expect(policy(member, granted).destroy?).to be true
+    expect(policy(member, other).destroy?).to be false
+
+    create(
+      :project_grant,
+      :application,
+      project_membership: ProjectMembership.find_by!(user: member),
+      permit_application: permit_application
+    )
+    expect(policy(member, other).download?).to be true
+    expect(policy(member, other).destroy?).to be true
   end
 
   it "download? denies a Full member of a different project" do

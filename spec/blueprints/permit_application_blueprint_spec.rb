@@ -48,4 +48,35 @@ RSpec.describe PermitApplicationBlueprint do
 
     expect(json["can_archive_draft"]).to be true
   end
+
+  it "marks a summary row openable when the member holds a block grant" do
+    project = create(:permit_project)
+    application = create(:permit_application, permit_project: project)
+    user = create(:user, :submitter)
+    membership =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: user,
+        access: :limited
+      )
+    create(
+      :project_grant,
+      project_membership: membership,
+      permit_application: application
+    )
+    access = ProjectAccess.new(user, project.sandbox, project)
+
+    json =
+      JSON.parse(
+        described_class.render(
+          application,
+          view: :summary,
+          current_user: user,
+          project_access: access
+        )
+      )
+
+    expect(json["can_open"]).to be true
+  end
 end

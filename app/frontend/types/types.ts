@@ -147,6 +147,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  accessibleOnly?: boolean
   publishedOnly?: boolean
   releaseType?: EReleaseNoteType
   year?: number
@@ -702,6 +703,16 @@ export interface IProjectPerson {
   contactDesignation: EProjectContactDesignation
   status: EProjectMembershipStatus
   canEditRoleTags: boolean
+  allowInvite?: boolean
+}
+
+export interface IProjectGrant {
+  id: string
+  kind: "block" | "application" | "invite"
+  projectMembershipId: string
+  permitApplicationId: string | null
+  requirementBlockId: string | null
+  memberName?: string | null
 }
 
 // The caller's project access (ProjectAccess#to_h). The API is the check.

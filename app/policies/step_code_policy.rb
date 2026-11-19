@@ -23,14 +23,14 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
-  # A Step Code on an application follows that application's project access.
-  # A standalone Step Code (no application) belongs to its creator.
-  # GRANTS TODO: Standard with a block grant. An attached Step Code follows edit_application?.
+  # A standalone Step Code belongs to its creator.
+  # On an application, any block grant opens it. An application grant edits it.
+  # A block grant edits it only when the energy block is granted.
   def create?
     return false unless user
     return true if record.permit_application.nil?
 
-    project_access_for(record.permit_application).edit_application?
+    step_code_editable?(record.permit_application)
   end
 
   # Not limited to the Step Code creator.
@@ -45,28 +45,30 @@ class StepCodePolicy < ApplicationPolicy
     destroy?
   end
 
-  # GRANTS TODO: Standard with a grant on the application. An attached Step Code follows view_application?.
+  # A block grant or an application grant opens it.
+  # Editing from a block grant still needs the energy block.
   def show?
     return false unless user && same_sandbox?
     application = record.permit_application
     return standalone_creator? if application.nil?
 
     project_access_for(application).view_application? ||
+      application.application_granted_to?(user) ||
+      application.block_granted_to?(user) ||
       (user.review_staff? && user.member_of?(application.jurisdiction))
   end
 
-  # GRANTS TODO: Standard with a block grant. An attached Step Code follows edit_application?.
   def update?
     return false unless user && same_sandbox?
     return standalone_creator? if record.permit_application.nil?
 
-    project_access_for(record.permit_application).edit_application?
+    step_code_editable?(record.permit_application)
   end
 
   def reassign_to?(target_permit_application)
     return false unless user && target_permit_application
 
-    project_access_for(target_permit_application).edit_application?
+    step_code_editable?(target_permit_application)
   end
 
   private
@@ -77,6 +79,13 @@ class StepCodePolicy < ApplicationPolicy
 
   def project_access_for(permit_application)
     access.on(permit_application.permit_project)
+  end
+
+  def step_code_editable?(permit_application)
+    return true if project_access_for(permit_application).edit_application?
+    return true if permit_application.application_granted_to?(user)
+
+    permit_application.user_can_edit_step_code_block?(user_id: user.id)
   end
 
   def same_sandbox?

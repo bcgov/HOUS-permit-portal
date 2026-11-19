@@ -18,7 +18,7 @@ RSpec.describe MeetingRequestDocumentPolicy, type: :policy do
     policy_for(described_class, user:, record:, sandbox:)
   end
 
-  it "lets Expanded download a meeting document and denies Standard" do
+  it "lets Expanded download a meeting document and denies Limited" do
     expanded = create(:user, :submitter)
     standard = create(:user, :submitter)
     create(
@@ -31,7 +31,7 @@ RSpec.describe MeetingRequestDocumentPolicy, type: :policy do
       :project_membership,
       permit_project: permit_project,
       user: standard,
-      access: :standard
+      access: :limited
     )
 
     expect(policy(expanded).download?).to be true

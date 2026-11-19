@@ -83,8 +83,11 @@ class ExternalApi::V2::PermitProjectsController < ExternalApi::ApplicationContro
               permit_project: @permit_project,
               template_version: versions_by_template_id[template_id],
               jurisdiction_id: @permit_project.jurisdiction_id,
-              submitter: @permit_project.owner,
-              created_by: @permit_project.jurisdiction
+              created_by: @permit_project.jurisdiction,
+              submitter_membership:
+                @permit_project.project_memberships.find_by(
+                  contact_designation: :primary
+                )
             )
           permit_application.save!
           Note.create_creation_message!(

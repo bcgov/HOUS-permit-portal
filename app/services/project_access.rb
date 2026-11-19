@@ -66,10 +66,14 @@ class ProjectAccess
     full?
   end
 
-  # Invite, choose access, re-send, and cancel a pending or expired invite.
-  # GRANTS TODO: Expanded with an invite grant. They must not offer Full.
-  # Standard stays denied. This is not a future grant.
+  # Full, or Expanded with an invite grant. Limited stays denied.
+  # Offering Full is invite_at_full?.
   def invite_people?
+    full? || (expanded? && membership.project_grants.invite.authorizing.exists?)
+  end
+
+  # Offer Full, and re-send or cancel a Full invite. Full only.
+  def invite_at_full?
     full?
   end
 
@@ -79,13 +83,13 @@ class ProjectAccess
     full?
   end
 
-  # Anyone on this project. Standard stays denied, including their own.
+  # Anyone on this project. Limited stays denied, including their own.
   # This is not a future grant.
   def edit_role_tags?(_target)
     full_or_expanded?
   end
 
-  # Pending and expired invitations. Standard stays denied. This is not a future grant.
+  # Pending and expired invitations. Limited stays denied. This is not a future grant.
   def view_invitations?
     full_or_expanded?
   end
@@ -94,34 +98,36 @@ class ProjectAccess
     full_or_expanded?
   end
 
-  # Also downloads, Step Code view, revision reference files, and requests
-  # on the application.
-  # GRANTS TODO: Standard with a grant on the application.
+  # Project-wide. A block grant opens one application through
+  # PermitApplicationPolicy, not every application on the project.
   def view_application?
     full_or_expanded?
   end
 
-  # Also template version, electives, supporting documents, Step Code create
-  # and edit, and responding to requests.
-  # GRANTS TODO: Standard with a block grant.
+  # Project-wide edit. A Limited block grant is checked on that application.
   def edit_application?
     full_or_expanded?
   end
 
-  # Standard stays denied. This is not a future grant.
-  # Assigning submit to someone else is assign_submit?.
+  # Limited stays denied unless this application has an application grant.
   def submit_application?
     full_or_expanded?
   end
 
-  # GRANTS TODO: Full and Expanded assign blocks once a grant record exists.
+  # Assign a block grant.
   def assign_block?
-    false
+    full_or_expanded?
   end
 
-  # GRANTS TODO: Full and Expanded assign submit once a grant record exists.
-  def assign_submit?
-    false
+  # Assign the grant that opens one whole application. Full and Expanded.
+  def assign_application?
+    full_or_expanded?
+  end
+
+  # Give an Expanded member an invite grant. Full only.
+  # Sending the invite is invite_people?.
+  def assign_invite?
+    full?
   end
 
   # Full archives any draft. Any member archives a draft they created.
@@ -133,26 +139,26 @@ class ProjectAccess
       application.created_by_id == @user.id
   end
 
-  # Standard stays denied. This is not a future grant.
+  # Limited stays denied. This is not a future grant.
   def delete_step_code?
     full_or_expanded?
   end
 
   # List, detail, documents, request, edit, calendar, withdraw, and notes
   # from the local government.
-  # Standard stays denied. This is not a future grant.
+  # Limited stays denied. This is not a future grant.
   def manage_meetings?
     full_or_expanded?
   end
 
   # The notes tab and the project notes CSV.
-  # Standard stays denied. This is not a future grant.
+  # Limited stays denied. This is not a future grant.
   def view_project_notes?
     full_or_expanded?
   end
 
   # The activity tab.
-  # Standard stays denied. This is not a future grant.
+  # Limited stays denied. This is not a future grant.
   def view_activity?
     full_or_expanded?
   end

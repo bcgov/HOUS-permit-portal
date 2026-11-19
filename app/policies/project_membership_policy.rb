@@ -1,15 +1,16 @@
 # frozen_string_literal: true
 
 class ProjectMembershipPolicy < ApplicationPolicy
-  # Invite and choose access.
+  # Invite and choose access. Expanded with an invite grant cannot offer Full,
+  # and cannot re-send or cancel a Full invite.
   def create?
-    project_access.invite_people?
+    may_send_invite?(record)
   end
 
   # Re-send keeps invited_email. MembershipsController#reinvite refuses an
   # active member.
   def reinvite?
-    project_access.invite_people?
+    may_send_invite?(record)
   end
 
   # Access and contact designation. Hard Full block, not a grant.
@@ -26,7 +27,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
   # Leaving is removing your own active membership, at any access level.
   # ProjectMembership still refuses the last Full member and the primary.
   def destroy?
-    return project_access.invite_people? unless record.active?
+    return may_send_invite?(record) unless record.active?
     return true if own_membership?
 
     project_access.manage_member_standing?
@@ -55,6 +56,13 @@ class ProjectMembershipPolicy < ApplicationPolicy
 
   def project_access
     @project_access ||= access.on(record.permit_project)
+  end
+
+  def may_send_invite?(membership)
+    return false unless project_access.invite_people?
+    return true if project_access.invite_at_full?
+
+    !membership.full?
   end
 
   def own_membership?

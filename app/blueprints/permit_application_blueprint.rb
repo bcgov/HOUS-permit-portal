@@ -1,5 +1,5 @@
 class PermitApplicationBlueprint < Blueprinter::Base
-  # A project member who cannot open the application (Standard) still sees it
+  # A project member who cannot open the application (Limited) still sees it
   # in the project list. No files, PDFs, or submission versions.
   view :summary do
     identifier :id
@@ -31,6 +31,15 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :can_archive_draft do |pa, options|
       options[:project_access]&.archive_draft?(pa) || false
+    end
+
+    # Project-wide view is Full or Expanded. A grant opens this one application.
+    field :can_open do |pa, options|
+      user = options[:current_user]
+      next false unless user
+      next true if options[:project_access]&.view_application?
+
+      pa.block_granted_to?(user) || pa.application_granted_to?(user)
     end
 
     field :created_by do |pa, _options|
@@ -180,7 +189,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
         []
       end
     end
-    association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
+    association :permit_block_statuses,
+                blueprint: PermitBlockStatusBlueprint do |pa|
+      pa.permit_block_statuses.submission
+    end
     association :submission_versions,
                 blueprint: SubmissionVersionBlueprint,
                 view: :extended
@@ -217,6 +229,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, _options|
       pa.permit_collaborations
+    end
+    association :permit_block_statuses,
+                blueprint: PermitBlockStatusBlueprint do |pa|
+      pa.permit_block_statuses.review
     end
     association :all_submission_version_completed_supporting_documents,
                 blueprint: SupportingDocumentBlueprint

@@ -20,7 +20,12 @@ module Api::Concerns::Search::ProjectPermitApplications
         permit_application_search_params[:per_page].presence ||
           Kaminari.config.default_per_page,
       includes: PermitApplication::SEARCH_INCLUDES,
-      scope_results: ->(relation) { policy_scope(relation) }
+      scope_results: ->(relation) do
+        scoped = policy_scope(relation)
+        return scoped unless accessible_only?
+
+        PermitApplicationPolicy::Scope.new(pundit_user, scoped).resolve_viewable
+      end
     }
 
     @permit_application_search =
@@ -36,6 +41,7 @@ module Api::Concerns::Search::ProjectPermitApplications
     params.permit(
       :query,
       :show_archived,
+      :accessible_only,
       :page,
       :per_page,
       filters: [
@@ -94,6 +100,12 @@ module Api::Concerns::Search::ProjectPermitApplications
   def discarded
     ActiveModel::Type::Boolean.new.cast(
       permit_application_search_params[:show_archived] || false
+    )
+  end
+
+  def accessible_only?
+    ActiveModel::Type::Boolean.new.cast(
+      permit_application_search_params[:accessible_only]
     )
   end
 end

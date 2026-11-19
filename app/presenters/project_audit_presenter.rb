@@ -8,7 +8,9 @@ class ProjectAuditPresenter
     "PermitProjectCollaboration" =>
       ProjectAuditFormatters::PermitProjectCollaborationFormatter,
     "SubmissionVersion" => ProjectAuditFormatters::SubmissionVersionFormatter,
-    "ProjectMeeting" => ProjectAuditFormatters::ProjectMeetingFormatter
+    "ProjectMeeting" => ProjectAuditFormatters::ProjectMeetingFormatter,
+    "ProjectMembership" => ProjectAuditFormatters::ProjectMembershipFormatter,
+    "ProjectGrant" => ProjectAuditFormatters::ProjectGrantFormatter
   }.freeze
 
   attr_reader :audit, :viewer
