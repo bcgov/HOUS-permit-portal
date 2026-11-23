@@ -231,7 +231,7 @@ RSpec.describe PromoteUser do
 
     existing_user = create(:user, :submitter)
     jurisdiction = create(:sub_district)
-    sandbox = create(:sandbox, jurisdiction: jurisdiction)
+    sandbox = jurisdiction.sandboxes.published.first
     project =
       create(
         :permit_project,
