@@ -1996,6 +1996,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
         create(
           :permit_application,
           submitter: member,
+          created_by: member,
           permit_project: permit_project,
           template_version: template_version,
           jurisdiction: jurisdiction
@@ -2067,6 +2068,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
         create(
           :permit_application,
           submitter: member,
+          created_by: member,
           permit_project: permit_project,
           template_version: template_version,
           jurisdiction: jurisdiction
