@@ -607,6 +607,9 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(permit_application.reload).to be_newly_submitted
+      expect(permit_application.latest_submission_version.submitted_by).to eq(
+        member
+      )
     end
 
     it "forbids a Limited member from submitting a draft" do

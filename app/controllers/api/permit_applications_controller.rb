@@ -352,7 +352,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
             pending_checks = checks
             false
           else
-            @permit_application.submit!
+            @permit_application.submit!(current_user)
           end
         end
       end
