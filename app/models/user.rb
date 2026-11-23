@@ -96,6 +96,11 @@ class User < ApplicationRecord
 
   # Shared resources that should not be deleted with the user
   has_many :revision_requests, dependent: :nullify
+  has_many :submitted_submission_versions,
+           class_name: "SubmissionVersion",
+           foreign_key: :submitted_by_id,
+           dependent: :nullify,
+           inverse_of: :submitted_by
   # Draft template versions assigned to this user
   has_many :assigned_template_versions,
            class_name: "TemplateVersion",

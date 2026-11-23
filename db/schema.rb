@@ -1245,7 +1245,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
     t.datetime "package_ready_at"
     t.jsonb "zipfile_data"
     t.jsonb "report_snapshot"
+    t.uuid "submitted_by_id"
     t.index ["permit_application_id"], name: "index_submission_versions_on_permit_application_id"
+    t.index ["submitted_by_id"], name: "index_submission_versions_on_submitted_by_id"
   end
 
   create_table "supporting_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1536,6 +1538,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
   add_foreign_key "step_codes", "users", column: "creator_id"
   add_foreign_key "submission_contacts", "jurisdictions"
   add_foreign_key "submission_versions", "permit_applications"
+  add_foreign_key "submission_versions", "users", column: "submitted_by_id", on_delete: :nullify
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "supporting_documents", "revision_requests"
   add_foreign_key "supporting_documents", "submission_versions"
