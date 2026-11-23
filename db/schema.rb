@@ -648,10 +648,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
     t.string "created_by_type"
     t.uuid "created_by_id"
     t.uuid "acknowledged_customization_change_id"
-    t.uuid "application_contact_membership_id"
     t.uuid "submitter_membership_id"
     t.index ["acknowledged_customization_change_id"], name: "index_permit_applications_on_acked_change_id"
-    t.index ["application_contact_membership_id"], name: "index_permit_applications_on_application_contact_membership_id"
     t.index ["created_by_type", "created_by_id"], name: "index_permit_applications_on_created_by"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
@@ -1490,7 +1488,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
   add_foreign_key "permit_applications", "customization_changes", column: "acknowledged_customization_change_id", on_delete: :nullify
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_projects"
-  add_foreign_key "permit_applications", "project_memberships", column: "application_contact_membership_id", on_delete: :nullify
   add_foreign_key "permit_applications", "project_memberships", column: "submitter_membership_id", on_delete: :nullify
   add_foreign_key "permit_applications", "template_versions"
   add_foreign_key "permit_block_statuses", "permit_applications"

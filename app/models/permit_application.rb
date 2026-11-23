@@ -24,11 +24,7 @@ class PermitApplication < ApplicationRecord
     :submission_versions,
     :step_code,
     :created_by,
-    {
-      permit_collaborations: :collaborator,
-      application_contact_membership: :user,
-      submitter_membership: :user
-    }
+    { permit_collaborations: :collaborator, submitter_membership: :user }
   ]
 
   belongs_to :created_by, polymorphic: true, optional: true
@@ -38,10 +34,7 @@ class PermitApplication < ApplicationRecord
              class_name: "CustomizationChange",
              optional: true
   belongs_to :permit_project, optional: true, touch: true
-  belongs_to :application_contact_membership,
-             class_name: "ProjectMembership",
-             optional: true,
-             inverse_of: false
+  # The application contact.
   belongs_to :submitter_membership,
              class_name: "ProjectMembership",
              optional: true,
@@ -954,12 +947,26 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  # Who is told about this application. The contact wins when one is set.
+  # Who is told about this application. The submitter membership is the contact.
   def application_message_recipient
-    application_contact_membership&.user || submitter
+    submitter
+  end
+
+  # The application contact and the user who submitted the latest version.
+  # One entry each.
+  def application_message_recipients
+    [application_message_recipient, latest_submission_submitter].compact.uniq
   end
 
   private
+
+  def latest_submission_submitter
+    submission_versions
+      .where.not(submitted_by_id: nil)
+      .order(created_at: :desc, id: :desc)
+      .first
+      &.submitted_by
+  end
 
   # The project's own sandbox, so a model check never depends on the request.
   def project_access_for(user)

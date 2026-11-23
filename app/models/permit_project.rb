@@ -262,7 +262,6 @@ class PermitProject < ApplicationRecord
           :created_by,
           :template_version,
           submitter_membership: :user,
-          application_contact_membership: :user,
           requirement_template: :taggings
         )
         .order(updated_at: :desc)
@@ -372,12 +371,12 @@ class PermitProject < ApplicationRecord
 
   # Account deletion of the last Full member. A submitted application is kept
   # with the project. A drafts-only project is destroyed now.
-  def abandon_if_unattended!
+  def abandon_if_unattended!(departing_user = nil)
     return if destroyed? || orphaned? || @abandoning
     return if active_full_members.exists?
 
     @abandoning = true
-    public_record? ? abandon_with_children! : destroy!
+    public_record? ? abandon_with_children!(departing_user) : destroy!
   end
 
   def ensure_creator_membership!
@@ -406,28 +405,33 @@ class PermitProject < ApplicationRecord
     project_memberships.where(access: :full).where.not(user_id: nil)
   end
 
-  def abandon_with_children!
+  def abandon_with_children!(departing_user)
     now = Time.current
-    remember_user!
+    remember_user!(departing_user)
     update_columns(orphaned_at: now, discarded_at: now, updated_at: now)
-    PermitApplication
-      .unscoped
-      .where(permit_project_id: id)
-      .find_each do |application|
-        application.remember_user!
-        next if application.discarded_at.present?
+    applications = PermitApplication.unscoped.where(permit_project_id: id)
+    applications.find_each do |application|
+      application.remember_user!(departing_user)
+      next if application.discarded_at.present?
 
-        application.update_columns(discarded_at: now, updated_at: now)
-        application.reindex if application.respond_to?(:search_data)
-      end
-    StepCode
-      .unscoped
-      .where(permit_project_id: id)
-      .find_each do |step_code|
-        next if step_code.discarded_at.present?
+      application.update_columns(discarded_at: now, updated_at: now)
+      application.reindex if application.respond_to?(:search_data)
+    end
+    step_codes =
+      StepCode
+        .unscoped
+        .where(permit_project_id: id)
+        .or(
+          StepCode.unscoped.where(
+            permit_application_id: applications.select(:id)
+          )
+        )
+    step_codes.find_each do |step_code|
+      step_code.remember_user!(departing_user)
+      next if step_code.discarded_at.present?
 
-        step_code.update_columns(discarded_at: now, updated_at: now)
-      end
+      step_code.update_columns(discarded_at: now, updated_at: now)
+    end
     reindex if respond_to?(:search_data)
   end
 

@@ -148,11 +148,16 @@ RSpec.describe PublicRecordable, type: :model do
           submitter: user,
           jurisdiction: project.jurisdiction
         )
+      attached = create(:step_code, creator: user)
+      # The factory refuses a permit application that has no design package.
+      attached.update_columns(permit_application_id: application.id)
+      loose = create(:step_code, creator: user)
 
       user.destroy!
 
       project.reload
       application.reload
+      attached.reload
       expect(project.orphaned_at).to be_present
       expect(project.discarded_at).to be_present
       expect(project.owner_id).to be_nil
@@ -162,6 +167,9 @@ RSpec.describe PublicRecordable, type: :model do
       expect(application.discarded_at).to be_present
       expect(application).to be_orphaned
       expect(application.submitter).to be_readonly
+      expect(attached.first_name_snapshot).to eq("Ada")
+      expect(attached.discarded_at).to be_present
+      expect(StepCode.unscoped.exists?(loose.id)).to be false
     end
 
     it "destroys a drafts-only project when its last Full member is deleted" do
@@ -203,10 +211,9 @@ RSpec.describe PublicRecordable, type: :model do
       expect(application.orphaned_at).to be_nil
       expect(application.discarded_at).to be_nil
       expect(application.submitter_membership_id).to be_nil
-      expect(application.first_name_snapshot).to eq("Ada")
+      expect(application.first_name_snapshot).to be_nil
       expect(application).not_to be_orphaned
-      expect(application.submitter).to be_readonly
-      expect(application.submitter.name).to eq("Ada Owner")
+      expect(application.submitter).to be_nil
     end
   end
 end

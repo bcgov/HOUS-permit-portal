@@ -81,11 +81,11 @@ module PublicRecordable
 
   # The person's name, kept for display after the account is gone.
   # update_columns skips the orphan immutability check.
-  def remember_user!
+  def remember_user!(user = nil)
     return unless persisted?
     return unless respond_to?(:omniauth_username_snapshot=)
 
-    user_to_snapshot = snapshot_source_user
+    user_to_snapshot = user || snapshot_source_user
     return unless user_to_snapshot&.persisted?
 
     update_columns(
