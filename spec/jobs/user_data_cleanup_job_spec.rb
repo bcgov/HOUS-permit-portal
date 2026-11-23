@@ -232,8 +232,8 @@ RSpec.describe UserDataCleanupJob, type: :job do
         expect(kept.orphaned_at).to be_nil
         expect(kept.discarded_at).to be_nil
         expect(kept.submitter_membership_id).to be_nil
-        expect(kept.first_name_snapshot).to eq(user_to_delete.first_name)
-        expect(kept.submitter).to be_readonly
+        expect(kept.first_name_snapshot).to be_nil
+        expect(kept.submitter).to be_nil
       end
 
       it "abandons a license agreement instead of deleting it" do

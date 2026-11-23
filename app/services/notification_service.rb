@@ -125,9 +125,11 @@ class NotificationService
 
     relevant_permit_applications =
       with_application_message_recipient(
-        PermitApplication.kept.select(
-          "DISTINCT ON (application_message_users.id) permit_applications.*"
-        )
+        PermitApplication.kept.select(<<~SQL.squish)
+          DISTINCT ON (application_message_users.id)
+            permit_applications.*,
+            application_message_users.id AS notification_recipient_id
+        SQL
       )
         .joins(:template_version)
         .where(
@@ -147,10 +149,11 @@ class NotificationService
       relevant_permit_applications.each_with_object(
         {}
       ) do |permit_application, hash|
-        recipient = permit_application.application_message_recipient
-        next if recipient.blank?
+        recipient_id =
+          permit_application.attributes["notification_recipient_id"]
+        next if recipient_id.blank?
 
-        hash[recipient.id] = template_version.publish_event_notification_data(
+        hash[recipient_id] = template_version.publish_event_notification_data(
           permit_application
         )
       end
@@ -389,16 +392,23 @@ class NotificationService
     scope.pluck("application_message_users.id").uniq
   end
 
-  # The application's contact, or the submitter when that contact has no user.
+  # The submitter membership is the application contact, plus the user who
+  # submitted the latest version. One row per user.
   def self.with_application_message_recipient(scope)
-    scope.left_joins(:application_contact_membership).joins(<<~SQL.squish)
+    scope.joins(<<~SQL.squish)
       LEFT JOIN project_memberships submitter_memberships
         ON submitter_memberships.id = permit_applications.submitter_membership_id
+      LEFT JOIN LATERAL (
+        SELECT submitted_by_id
+        FROM submission_versions
+        WHERE submission_versions.permit_application_id = permit_applications.id
+          AND submission_versions.submitted_by_id IS NOT NULL
+        ORDER BY submission_versions.created_at DESC, submission_versions.id DESC
+        LIMIT 1
+      ) latest_submission ON TRUE
       INNER JOIN users application_message_users
-        ON application_message_users.id = COALESCE(
-          project_memberships.user_id,
-          submitter_memberships.user_id
-        )
+        ON application_message_users.id = submitter_memberships.user_id
+        OR application_message_users.id = latest_submission.submitted_by_id
       INNER JOIN preferences
         ON preferences.user_id = application_message_users.id
     SQL
@@ -651,16 +661,18 @@ class NotificationService
     end
   end
 
-  # Full and Expanded members, plus this application's contact.
-  # Without a project, the contact, or the submitter when there is no contact.
+  # Full and Expanded members, plus this application's contact and the user
+  # who submitted the latest version. Each user is included once.
   def self.application_recipients(permit_application, check)
-    contact = permit_application.application_message_recipient
+    extras = permit_application.application_message_recipients
     project = permit_application.permit_project
-    return [contact].compact unless project
+    return extras unless project
 
     recipients = project.members_who(check).includes(:preference).to_a
-    if contact && recipients.none? { |user| user.id == contact.id }
-      recipients << contact
+    extras.each do |user|
+      next if recipients.any? { |existing| existing.id == user.id }
+
+      recipients << user
     end
     recipients
   end
@@ -771,19 +783,26 @@ class NotificationService
                        :application_added_label
 
   def self.publish_review_started_event(permit_application)
-    user = permit_application.application_message_recipient
-    return if user.blank?
+    notification_user_hash = {}
 
-    preference = user.preference
-    notification_user_hash = {
-      user.id => permit_application.review_started_event_notification_data
-    }
-    if preference&.enable_email_application_view_notification
-      PermitHubMailer.notify_review_started(permit_application).deliver_later
+    permit_application.application_message_recipients.each do |user|
+      preference = user.preference
+      if preference&.enable_in_app_application_view_notification
+        notification_user_hash[
+          user.id
+        ] = permit_application.review_started_event_notification_data
+      end
+      if preference&.enable_email_application_view_notification
+        PermitHubMailer.notify_review_started(
+          permit_application,
+          user
+        ).deliver_later
+      end
     end
-    if preference&.enable_in_app_application_view_notification
-      NotificationPushJob.perform_async(notification_user_hash)
-    end
+
+    return if notification_user_hash.empty?
+
+    NotificationPushJob.perform_async(notification_user_hash)
   end
 
   def self.publish_file_upload_failed_event(file_attachment, file_name: nil)

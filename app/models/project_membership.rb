@@ -59,9 +59,7 @@ class ProjectMembership < ApplicationRecord
   validate :keeps_a_full_member, on: :update
 
   # dependent: :nullify runs in definition order. Prepend so a blocked
-  # destroy aborts before the name is copied, and the copy runs before the
-  # foreign key is cleared.
-  before_destroy :remember_submitter_for_account_deletion, prepend: true
+  # destroy aborts before the foreign key is cleared.
   before_destroy :keep_last_full_member, prepend: true
   before_update :remember_role_names
   after_create :audit_invitation_sent
@@ -245,25 +243,13 @@ class ProjectMembership < ApplicationRecord
     throw :abort
   end
 
-  # Manual removal just clears the contact. Account deletion keeps the name
-  # so a project that still has a Full member can show who submitted.
-  def remember_submitter_for_account_deletion
-    return unless destroyed_by_association&.active_record == User
-    return if user.blank?
-
-    PermitApplication
-      .unscoped
-      .where(submitter_membership_id: id)
-      .find_each(&:remember_user!)
-  end
-
   def abandon_unattended_project
     return unless destroyed_by_association&.active_record == User
 
     project = PermitProject.unscoped.find_by(id: permit_project_id)
     return if project.blank? || project.destroyed?
 
-    project.abandon_if_unattended!
+    project.abandon_if_unattended!(user)
   end
 
   def other_active_full_members
