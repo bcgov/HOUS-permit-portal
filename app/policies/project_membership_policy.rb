@@ -33,21 +33,27 @@ class ProjectMembershipPolicy < ApplicationPolicy
     project_access.manage_member_standing?
   end
 
-  # MEMBERSHIP COMMENT - submitters only. If reviewers can accept later:
-  # PermitProjectsController#show selects the submitter :extended view before
-  # the review inbox view, so an accepted reviewer would lose the inbox view
-  # of that project. Accept also does not check sandbox, so a reviewer in
-  # another sandbox could accept and then be denied on the overview redirect.
+  # REVIEW STAFF PROJECT MEMBER TODO: invitations are submitter-only. Review
+  # staff are not project members. A review assignment is not a membership.
+  # Accept does not check sandbox, so a reviewer in another sandbox could
+  # accept and then fail same_sandbox? and the overview redirect.
+  # PermitProjectsController#show picks the membership :extended view before
+  # the inbox view, so a staff member would lose the inbox project screen.
+  # The inbox view has to win for review staff, or the URL has to name which
+  # view. ProjectAccess is membership only. Policies OR a jurisdiction check
+  # beside it, so a staff member would get both. Grants are Limited and
+  # Expanded submitter delegation; decide whether jurisdiction powers replace
+  # grants or stack with them.
   def show_invitation?
     user&.submitter?
   end
 
-  # MEMBERSHIP COMMENT - see show_invitation?
+  # REVIEW STAFF PROJECT MEMBER TODO: see show_invitation?.
   def accept_invitation?
     show_invitation?
   end
 
-  # MEMBERSHIP COMMENT - see show_invitation?
+  # REVIEW STAFF PROJECT MEMBER TODO: see show_invitation?.
   def decline_invitation?
     show_invitation?
   end

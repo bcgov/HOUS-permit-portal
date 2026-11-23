@@ -369,6 +369,29 @@ class PermitProject < ApplicationRecord
     )
   end
 
+  # REVIEW STAFF PROJECT MEMBER TODO: live memberships are removed because a
+  # promoted submitter must not remain a member. Sandbox creator memberships
+  # are left. If review staff can be members, do not drop a membership granted
+  # to them as staff. staff_owned_live? still forbids a kept live project they
+  # own. technical_support is jurisdiction staff, not review staff. Accept
+  # does not check sandbox. The membership view wins over the inbox view.
+  # ProjectAccess is membership only and policies OR a jurisdiction check, so
+  # a staff member would get both. Grants are Limited and Expanded submitter
+  # delegation; decide whether jurisdiction powers replace them or stack.
+  def release_member!(user)
+    project_memberships.find_by(user_id: user.id)&.depart!
+    return if destroyed?
+
+    if active_full_members.exists?
+      return unless owner_id == user.id
+
+      remember_user!(user)
+      update!(owner: nil)
+    else
+      abandon_if_unattended!(user)
+    end
+  end
+
   # Account deletion of the last Full member. A submitted application is kept
   # with the project. A drafts-only project is destroyed now.
   def abandon_if_unattended!(departing_user = nil)
