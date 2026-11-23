@@ -112,6 +112,13 @@ class ProjectMembership < ApplicationRecord
     with_primary_transfer { super }
   end
 
+  # Promotion removes a live membership, including the last Full member.
+  # Account deletion uses destroyed_by_association for the same bypass.
+  def depart!
+    @departing = true
+    destroy!
+  end
+
   private
 
   def normalize_invited_fields
@@ -230,10 +237,10 @@ class ProjectMembership < ApplicationRecord
     errors.add(:access, :last_full_member)
   end
 
-  # Removing the project removes every row. Account deletion is allowed to
-  # remove the last Full member; that is what abandons the project.
+  # Removing the project removes every row. Account deletion and depart!
+  # may remove the last Full member; that is what abandons the project.
   def keep_last_full_member
-    return if destroyed_by_association || !active?
+    return if @departing || destroyed_by_association || !active?
     # The saved row, not an unsaved access assignment. A failed demotion
     # leaves access as Limited in memory while the database row is still Full.
     return unless access_was == "full"

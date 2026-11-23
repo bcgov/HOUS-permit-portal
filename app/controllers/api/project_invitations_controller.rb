@@ -1,9 +1,10 @@
 class Api::ProjectInvitationsController < Api::ApplicationController
   before_action :set_membership
 
-  # MEMBERSHIP COMMENT - submitters only. Accept does not check sandbox.
-  # If reviewers can accept later, a reviewer in another sandbox could accept
-  # and then be denied on the overview redirect. See PermitProjectsController#show.
+  # REVIEW STAFF PROJECT MEMBER TODO: submitters only. Accept does not check
+  # sandbox. A reviewer in another sandbox could accept and then fail
+  # same_sandbox? and the overview redirect. See
+  # ProjectMembershipPolicy#show_invitation? and PermitProjectsController#show.
   def show
     authorize @membership, :show_invitation?
 

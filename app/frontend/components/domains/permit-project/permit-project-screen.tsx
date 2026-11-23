@@ -41,8 +41,10 @@ export const PermitProjectScreen = observer(() => {
     siteConfigurationStore.projectMeetingsEnabled && currentPermitProject?.jurisdiction?.projectMeetingsEnabled
   )
   // Review staff who are not members belong on the submission-inbox project view.
-  // MEMBERSHIP COMMENT: if reviewers can accept invitations later, a reviewer
-  // member stays here and loses the inbox view of this project.
+  // REVIEW STAFF PROJECT MEMBER TODO: a member stays on the submitter project
+  // screen and loses the inbox view. Review staff are not project members. If
+  // they can be, the inbox view has to win for them. See
+  // ProjectMembershipPolicy#show_invitation?.
   // Null the submitter base path so tab canonicalization does not race this redirect.
   const inboxSlug =
     userStore.currentUser?.isReviewStaff && currentPermitProject && !currentPermitProject.isMember

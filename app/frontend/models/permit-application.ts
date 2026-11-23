@@ -158,8 +158,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
         if (self.currentUserAccess?.viewApplication) return false
         if (self.hasActiveProjectMeeting) return false
 
-        // MEMBERSHIP COMMENT: a member who is also review staff opens drafts as
-        // a member. Reviewers accepting invitations is out of scope.
+        // REVIEW STAFF PROJECT MEMBER TODO: a member who is also review staff
+        // opens drafts as a member. Review staff are not project members. If
+        // they can be, drafts need an explicit rule against the inbox. See
+        // ProjectMembershipPolicy#show_invitation?.
         const project = self.rootStore.permitProjectStore.currentPermitProject
         if (
           project?.id === self.projectId &&
