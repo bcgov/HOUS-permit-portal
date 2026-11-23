@@ -33,7 +33,7 @@ class PermitApplication < ApplicationRecord
   belongs_to :acknowledged_customization_change,
              class_name: "CustomizationChange",
              optional: true
-  belongs_to :permit_project, optional: true, touch: true
+  belongs_to :permit_project, touch: true
   # The application contact.
   belongs_to :submitter_membership,
              class_name: "ProjectMembership",

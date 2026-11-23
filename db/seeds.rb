@@ -366,8 +366,8 @@ if PermitApplication.first.blank?
         )
       PermitApplication.create!(
         nickname: nickname,
-        submitter: submitter_user,
         permit_project: permit_project,
+        submitter: submitter_user,
         template_version: template_version
       )
     end
@@ -376,8 +376,8 @@ if PermitApplication.first.blank?
     rand(1..2).times do
       draft_tv = published_template_versions.sample
       PermitApplication.create!(
-        submitter: submitter_user,
         permit_project: permit_project,
+        submitter: submitter_user,
         template_version: draft_tv,
         status: :new_draft
       )
@@ -545,8 +545,8 @@ if north_van.present?
       pa =
         PermitApplication.create!(
           nickname: "Inbox test — permit #{idx + 1}",
-          submitter: submitter_for_inbox_test,
           permit_project: inbox_test_project,
+          submitter: submitter_for_inbox_test,
           template_version: tv
         )
       seed_pa_status.call(
@@ -853,8 +853,8 @@ else
   if template_version && owned_project.permit_applications.none?
     PermitApplication.create!(
       nickname: "Submitter 1 house",
-      submitter: submitter_1,
       permit_project: owned_project,
+      submitter: submitter_1,
       template_version: template_version
     )
   end
@@ -885,8 +885,8 @@ else
       application =
         PermitApplication.create!(
           nickname: "Reporting sample",
-          submitter: owner,
           permit_project: project,
+          submitter: owner,
           template_version: reporting_templates.sample
         )
       seed_pa_status.call(application, :newly_submitted)

@@ -168,7 +168,7 @@ RSpec.describe PermitApplication, type: :model do
                "ProjectMembership"
              ).optional
     end
-    it { should belong_to(:permit_project).optional }
+    it { should belong_to(:permit_project) }
   end
 
   describe "enums" do
