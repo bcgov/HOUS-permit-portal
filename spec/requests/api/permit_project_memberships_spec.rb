@@ -60,7 +60,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
     [outsider, other_application]
   end
 
-  describe "GET /api/permit_projects/:id/memberships" do
+  describe "GET /api/permit_projects/:id/memberships", search: true do
     it "returns the creator membership and the other members" do
       sign_in owner
 
@@ -201,7 +201,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
     end
   end
 
-  describe "POST /api/permit_projects/:id/memberships/search" do
+  describe "POST /api/permit_projects/:id/memberships/search", search: true do
     it "matches a member name" do
       sign_in owner
 
@@ -615,7 +615,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(creator_membership.reload.contact_designation).to eq("alternate")
     end
 
-    it "forbids a reviewer who can see the project" do
+    it "forbids a reviewer who can see the project", search: true do
       sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
 
       get "/api/permit_projects/#{project.id}/memberships", headers: headers
@@ -654,7 +654,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
   end
 
   describe "DELETE /api/permit_projects/:id/memberships/:id" do
-    it "removes another member from the project" do
+    it "removes another member from the project", search: true do
       sign_in owner
 
       delete "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
@@ -703,7 +703,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(ProjectMembership.exists?(creator_membership.id)).to be(false)
     end
 
-    it "forbids a reviewer who can see the project" do
+    it "forbids a reviewer who can see the project", search: true do
       sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
 
       get "/api/permit_projects/#{project.id}/memberships", headers: headers

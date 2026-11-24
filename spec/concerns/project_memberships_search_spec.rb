@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
+RSpec.describe Api::Concerns::Search::ProjectMemberships,
+               type: :controller,
+               search: true do
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::ProjectMemberships
   end
