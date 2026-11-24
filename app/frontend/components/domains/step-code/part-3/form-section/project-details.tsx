@@ -30,7 +30,7 @@ import { SectionHeading } from "./shared/section-heading"
 interface IProjectDetailsForm {
   fullAddress?: string
   referenceNumber?: string
-  permitDate?: string
+  permitDate?: Date | string
   site?: IOption
   jurisdictionId?: string
 }

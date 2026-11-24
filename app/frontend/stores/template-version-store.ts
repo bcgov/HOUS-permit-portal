@@ -3,7 +3,7 @@ import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
-import { TemplateVersionModel } from "../models/template-version"
+import { ITemplateVersion, TemplateVersionModel } from "../models/template-version"
 import { ESocketEventTypes, ETemplateVersionStatus } from "../types/enums"
 import { ITemplateVersionUpdate, IUserPushPayload } from "../types/types"
 
@@ -47,7 +47,7 @@ export const TemplateVersionStoreModel = types
   }))
   .views((self) => ({
     // View to get a RequirementTemplate by id
-    getTemplateVersionById(id: string) {
+    getTemplateVersionById(id: string): ITemplateVersion | undefined {
       return self.templateVersionMap.get(id)
     },
   }))

@@ -284,9 +284,11 @@ export const NotificationStoreModel = types
       self.fetchNotifications()
     }),
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
-      const existing = self.notifications.find((n) => n.id === payload.data.id)
+      if (!("actionType" in payload.data)) return
+      const notification = payload.data
+      const existing = self.notifications.find((n) => n.id === notification.id)
       if (!existing) {
-        self.notifications.unshift(self.convertNotificationToUseDate(payload.data))
+        self.notifications.unshift(self.convertNotificationToUseDate(notification))
       }
       self.unreadNotificationsCount = self.popoverOpen ? 0 : payload.meta.unreadCount
       self.totalPages = payload.meta.totalPages

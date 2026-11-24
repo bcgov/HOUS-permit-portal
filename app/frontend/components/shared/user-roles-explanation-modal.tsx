@@ -22,7 +22,7 @@ export function UserRolesExplanationModal() {
     EUserRoles.reviewManager,
     EUserRoles.reviewer,
     EUserRoles.technicalSupport,
-  ]
+  ] as const
   return (
     <>
       <Button onClick={onOpen} variant={"link"} textDecoration={"underline"}>

@@ -4,6 +4,12 @@ appName: "hous-permit-portal"
 
 vaultNamespace: "bb18ab-nonprod"
 
+# Keep Puma serving while ingress drains traffic from a terminating web pod.
+# The total grace period includes this delay and Puma's subsequent shutdown.
+web:
+  preStopDelaySeconds: 20
+  terminationGracePeriodSeconds: 60
+
 route:
   spec:
     host: "dev.buildingpermit.gov.bc.ca"

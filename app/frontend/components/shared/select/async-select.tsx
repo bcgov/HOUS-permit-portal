@@ -1,13 +1,9 @@
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React, { CSSProperties, RefAttributes } from "react"
-import { GroupBase } from "react-select"
+import { GroupBase, SelectInstance as Select, SelectComponentsConfig, StylesConfig } from "react-select"
 import AsyncReactSelect, { AsyncProps } from "react-select/async"
-import AsyncCreatableSelect from "react-select/async-creatable"
-import { AsyncCreatableProps } from "react-select/dist/declarations/src/AsyncCreatable"
-import Select from "react-select/dist/declarations/src/Select"
-import { SelectComponentsConfig } from "react-select/dist/declarations/src/components"
-import { StylesConfig } from "react-select/dist/declarations/src/styles"
+import AsyncCreatableSelect, { AsyncCreatableProps } from "react-select/async-creatable"
 import { IOption } from "../../../types/types"
 
 export type TAsyncSelectProps<

@@ -56,8 +56,8 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
     )
     controller.instance_variable_set(:@permit_project, project)
 
-    User.reindex
-    PermitApplication.reindex
+    reindex_search(User)
+    reindex_search(PermitApplication)
   end
 
   it "as project owner returns all project applications" do
@@ -72,6 +72,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
   end
 
   it "as unrelated submitter sees nothing under someone else's project" do
+    silence_policy_filtered_search_warning(p1_draft, p2_sub, p3_resub)
     unrelated = create(:user, :submitter)
     allow(controller).to receive(:current_user).and_return(unrelated)
     controller.perform_permit_application_search
@@ -140,6 +141,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
   end
 
   it "as unrelated non-review user sees only their own submissions (none here)" do
+    silence_policy_filtered_search_warning(p1_draft, p2_sub, p3_resub)
     allow(controller).to receive(:current_user).and_return(
       unrelated_nonreview_user
     )

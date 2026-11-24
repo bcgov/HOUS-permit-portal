@@ -47,9 +47,11 @@ if SHRINE_USE_S3
     store: Shrine::Storage::S3.new(public: false, **s3_options)
   }
 else
+  root =
+    Rails.env.test? ? Rails.root.join("tmp/test", Process.pid.to_s) : "public"
   Shrine.storages = {
-    cache: Shrine::Storage::FileSystem.new("public", prefix: "uploads/cache"), # temporary
-    store: Shrine::Storage::FileSystem.new("public", prefix: "uploads/store") # permanent
+    cache: Shrine::Storage::FileSystem.new(root, prefix: "uploads/cache"), # temporary
+    store: Shrine::Storage::FileSystem.new(root, prefix: "uploads/store") # permanent
   }
 end
 

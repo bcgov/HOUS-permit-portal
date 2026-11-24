@@ -7,6 +7,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { Outlet, useLocation, useNavigate } from "react-router-dom"
 import { datefnsTableDateFormat } from "../../../constants"
 import { useJurisdiction } from "../../../hooks/resources/use-jurisdiction"
+import { IExternalApiKey } from "../../../models/external-api-key"
 import { useMst } from "../../../setup/root"
 import { EJurisdictionExternalApiState } from "../../../types/enums"
 import { CalloutBanner } from "../../shared/base/callout-banner"
@@ -55,7 +56,7 @@ export const ExternalApiKeysIndexScreen = observer(function ExternalApiKeysIndex
     }
   }
 
-  const externalApiKeys = currentJurisdiction.externalApiKeys
+  const externalApiKeys: IExternalApiKey[] = currentJurisdiction.externalApiKeys
   const externalApiEnabled = currentJurisdiction.externalApiEnabled
   const disableLinkClick = (e) => !externalApiEnabled && e.preventDefault()
 

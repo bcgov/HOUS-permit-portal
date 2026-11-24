@@ -6,8 +6,8 @@ import {
   TGenericContactDisplayProps,
 } from "../requirement-field-display/generic-contact-display"
 import { EditableLabel, TEditableLabelProps } from "./editable-label"
-import { IsOptionalCheckbox, TIsOptionalCheckboxProps } from "./is-optional-checkbox"
-import { IControlProps } from "./types"
+import { IsOptionalCheckbox } from "./is-optional-checkbox"
+import { IControlProps, TIsOptionalCheckboxProps } from "./types"
 
 export type TGenericContactEditProps<TFieldValues> = {
   editableLabelProps: TEditableLabelProps<TFieldValues>

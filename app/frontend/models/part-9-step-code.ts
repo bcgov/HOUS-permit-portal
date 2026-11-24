@@ -44,6 +44,8 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
         return self.checklists.find((checklist) => checklist.stage === stage)
       },
+    }))
+    .views((self) => ({
       get preConstructionChecklist() {
         return self.currentChecklist
       },
@@ -55,9 +57,13 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
         return stageStatusFor(stage, self.checklists, self.stageCompletions)
       },
+    }))
+    .views((self) => ({
       isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
         return self.stageStatus(stage) === EStepCodeStageStatus.complete
       },
+    }))
+    .views((self) => ({
       get isComplete() {
         return self.isStageComplete()
       },

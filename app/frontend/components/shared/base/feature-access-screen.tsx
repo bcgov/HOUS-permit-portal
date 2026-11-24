@@ -14,7 +14,7 @@ interface FeatureAccessScreenProps {
   title: string
   description: string
   features: FeatureItem[]
-  i18nPrefix: string
+  i18nPrefix: "home.configurationManagement.featureAccess" | "siteConfiguration.globalFeatureAccess"
   containerProps?: Record<string, any>
 }
 
@@ -62,7 +62,7 @@ const FeatureRow = ({
   label: string
   enabled?: boolean
   route: string
-  i18nPrefix: string
+  i18nPrefix: "home.configurationManagement.featureAccess" | "siteConfiguration.globalFeatureAccess"
 }) => {
   const { t } = useTranslation()
   return (
@@ -80,10 +80,9 @@ const FeatureRow = ({
           w={28}
         >
           {(() => {
-            const toggleKey = `${i18nPrefix}.toggle${enabled ? "On" : "Off"}`
+            const toggleKey = `${i18nPrefix}.toggle${enabled ? "On" : "Off"}` as const
             return (
               <Text as="span" fontWeight="bold">
-                {/* // @ts-ignore */}
                 {t(toggleKey)}
               </Text>
             )

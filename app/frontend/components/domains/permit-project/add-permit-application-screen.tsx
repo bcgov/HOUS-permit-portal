@@ -61,10 +61,15 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
     navigate(`/projects/${currentPermitProject.id}`, { replace: true })
   }, [memberCannotAdd, currentPermitProject, navigate])
 
-  const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
+  const availableTemplates = templateVersions.filter((tv) => !tv.disabledByJurisdiction)
+  const filteredTemplates = availableTemplates.filter((tv) => tv.matchesSearchQuery(query))
   const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
   const selectedTemplateVersions = useMemo(
-    () => templateVersions.filter((templateVersion) => selectedTemplateVersionIds.includes(templateVersion.id)),
+    () =>
+      templateVersions.filter(
+        (templateVersion) =>
+          !templateVersion.disabledByJurisdiction && selectedTemplateVersionIds.includes(templateVersion.id)
+      ),
     [selectedTemplateVersionIds, templateVersions]
   )
   const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
@@ -89,8 +94,8 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
     try {
       setIsSubmitting(true)
-      const params = selectedTemplateVersionIds.map((templateVersionId) => ({
-        templateVersionId,
+      const params = selectedTemplateVersions.map((templateVersion) => ({
+        templateVersionId: templateVersion.id,
         jurisdictionId: currentPermitProject.jurisdiction?.id,
       }))
       const response = await (currentPermitProject as any).bulkCreatePermitApplications(
@@ -102,7 +107,7 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
         if (shouldOfferProjectMeetingAfterAdd) {
           const params = new URLSearchParams({
             source: "add-permits",
-            count: selectedTemplateVersionIds.length.toString(),
+            count: selectedTemplateVersions.length.toString(),
             requiresMeeting: "true",
           })
           navigate(`/projects/${currentPermitProject.id}/meetings/new?${params.toString()}`)
@@ -225,13 +230,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           {/* Action controls above the template list */}
           <Flex w="full" gap={4} mb={4}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersions.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
               onClick={onSubmit}
-              count={selectedTemplateVersionIds.length}
-              disabled={isSubmitting || selectedTemplateVersionIds.length === 0 || isLoading}
+              count={selectedTemplateVersions.length}
+              disabled={isSubmitting || selectedTemplateVersions.length === 0 || isLoading}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>
@@ -301,13 +306,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           {/* Action controls below the template list */}
           <Flex w="full" gap={4} mt={8}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersions.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
               onClick={onSubmit}
-              count={selectedTemplateVersionIds.length}
-              disabled={isSubmitting || selectedTemplateVersionIds.length === 0 || isLoading}
+              count={selectedTemplateVersions.length}
+              disabled={isSubmitting || selectedTemplateVersions.length === 0 || isLoading}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>

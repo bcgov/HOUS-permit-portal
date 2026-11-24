@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Api::PermitProjects", type: :request, search: true do
+RSpec.describe "Api::PermitProjects", type: :request do
   include Devise::Test::IntegrationHelpers
 
   let(:headers) { { "ACCEPT" => "application/json" } }
@@ -11,10 +11,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     create(:permit_project, owner: owner, jurisdiction: jurisdiction)
   end
 
-  before do
-    sign_in owner
-    PermitProject.reindex
-  end
+  before { sign_in owner }
 
   def full_member_of_another_project
     outsider = create(:user, :submitter)
@@ -32,11 +29,10 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     [outsider, other_application]
   end
 
-  describe "POST /api/permit_projects/search" do
+  describe "POST /api/permit_projects/search", search: true do
     it "returns paginated results for the owner" do
       create_list(:permit_project, 3, owner: owner)
-      PermitProject.reindex
-
+      reindex_search(PermitProject)
       post "/api/permit_projects/search",
            params: {
              page: 1,
@@ -53,8 +49,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
 
     it "filters out projects for unrelated users" do
       other_projects = create_list(:permit_project, 2, owner: other_user)
-      PermitProject.reindex
-
+      reindex_search(PermitProject)
       post "/api/permit_projects/search", headers: headers, as: :json
 
       expect(response).to have_http_status(:ok)
@@ -86,8 +81,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       inactive_project = create(:permit_project, owner: owner)
       create(:project_meeting, :open, permit_project: permit_project)
       create(:project_meeting, :completed, permit_project: inactive_project)
-      PermitProject.reindex
-
+      reindex_search(PermitProject)
       post "/api/permit_projects/search",
            params: {
              page: 1,
@@ -109,8 +103,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       inactive_project = create(:permit_project, owner: owner)
       create(:project_meeting, :scheduled, permit_project: permit_project)
       create(:project_meeting, :withdrawn, permit_project: inactive_project)
-      PermitProject.reindex
-
+      reindex_search(PermitProject)
       post "/api/permit_projects/search",
            params: {
              page: 1,
@@ -436,15 +429,15 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
     end
   end
 
-  describe "POST /api/permit_projects/:id/permit_applications/search" do
+  describe "POST /api/permit_projects/:id/permit_applications/search",
+           search: true do
     it "returns permit applications for a project" do
       create(
         :permit_application,
         permit_project: permit_project,
         submitter: owner
       )
-      PermitApplication.reindex
-
+      reindex_search(PermitApplication)
       post "/api/permit_projects/#{permit_project.id}/permit_applications/search",
            params: {
              page: 1,
@@ -510,7 +503,8 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
       expect(json_response["data"].first["created_by"]).not_to have_key("email")
     end
 
-    it "attributes a reviewer's draft to the jurisdiction and lets that jurisdiction's staff see it" do
+    it "attributes a reviewer's draft to the jurisdiction and lets that jurisdiction's staff see it",
+       search: true do
       reviewer = create(:user, :reviewer, jurisdiction:)
       colleague = create(:user, :reviewer, jurisdiction:)
       outsider = create(:user, :reviewer)
@@ -556,7 +550,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
         permit_project.recent_permit_applications(outsider)
       ).not_to include(application)
 
-      PermitApplication.reindex
+      reindex_search(PermitApplication)
       sign_in colleague
       post "/api/permit_projects/#{permit_project.id}/permit_applications/search",
            headers: headers,

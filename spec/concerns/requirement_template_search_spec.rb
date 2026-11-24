@@ -2,7 +2,8 @@ require "rails_helper"
 
 RSpec.describe Api::RequirementTemplatesController,
                type: :controller,
-               search: true do
+               search: true,
+               search_callbacks: false do
   def json_response
     JSON.parse(response.body)
   end
@@ -55,10 +56,7 @@ RSpec.describe Api::RequirementTemplatesController,
   let!(:super_admin) { create(:user, :super_admin) }
   let!(:submitter) { create(:user) }
 
-  before do
-    RequirementTemplate.reindex
-    RequirementTemplate.search_index.refresh
-  end
+  before { reindex_search(RequirementTemplate) }
 
   describe "GET #index" do
     context "when user is a super admin" do
@@ -142,10 +140,7 @@ RSpec.describe Api::RequirementTemplatesController,
       end
 
       context "pagination" do
-        before do
-          RequirementTemplate.reindex
-          RequirementTemplate.search_index.refresh
-        end
+        before { reindex_search(RequirementTemplate) }
 
         it "returns the correct number of results per page" do
           get :index, params: { query: "", page: 1, per_page: 2 }

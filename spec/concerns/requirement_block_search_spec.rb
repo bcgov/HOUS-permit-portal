@@ -2,7 +2,8 @@ require "rails_helper"
 
 RSpec.describe Api::RequirementBlocksController,
                type: :controller,
-               search: true do
+               search: true,
+               search_callbacks: false do
   include Devise::Test::ControllerHelpers
 
   def json_response
@@ -79,10 +80,7 @@ RSpec.describe Api::RequirementBlocksController,
   let!(:super_admin) { create(:user, :super_admin) }
   let!(:regular_user) { create(:user) }
 
-  before do
-    RequirementBlock.reindex
-    RequirementBlock.search_index.refresh
-  end
+  before { reindex_search(RequirementBlock) }
 
   describe "GET #index" do
     context "when user is unauthenticated" do
@@ -207,7 +205,7 @@ RSpec.describe Api::RequirementBlocksController,
       context "sorting by updated_at descending" do
         it "returns requirement blocks sorted by updated_at in descending order" do
           requirement_block_any_visible.update(name: "Updated Block Any 1")
-          RequirementBlock.reindex
+          reindex_search(RequirementBlock)
           get :index,
               params: {
                 query: "",
@@ -261,8 +259,7 @@ RSpec.describe Api::RequirementBlocksController,
             display_name: "Paginated Display",
             discarded_at: nil
           )
-          RequirementBlock.reindex
-          RequirementBlock.search_index.refresh
+          reindex_search(RequirementBlock)
         end
 
         context "when requesting the first page with per_page=3" do

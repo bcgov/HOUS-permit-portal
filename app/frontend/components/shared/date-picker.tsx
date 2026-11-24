@@ -9,12 +9,7 @@ import { useTranslation } from "react-i18next"
 import { datefnsAppDateFormat } from "../../constants"
 import { interopDefault } from "../../utils/interop-default"
 
-const ReactDatePicker =
-  typeof ReactDatePickerImport === "function"
-    ? ReactDatePickerImport
-    : ((ReactDatePickerImport as { default?: typeof ReactDatePickerImport }).default?.default ??
-      (ReactDatePickerImport as { default?: typeof ReactDatePickerImport }).default ??
-      ReactDatePickerImport)
+const ReactDatePicker = interopDefault(interopDefault(ReactDatePickerImport))
 
 type IDatePickerPropsBase = {
   containerProps?: Partial<BoxProps>

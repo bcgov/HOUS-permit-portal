@@ -31,7 +31,7 @@ export const BlockStatusSelect = observer(function BlockStatusSelect({
   const btnRef = useRef<HTMLButtonElement>()
   const getLabel = (status: EPermitBlockStatus | undefined) =>
     t(`permitCollaboration.blockStatus.${status || EPermitBlockStatus.draft}`)
-  const uniqueId = useMemo(uuidv4, [])
+  const uniqueId = useMemo(() => uuidv4(), [])
   const selectId = `block-status-select-${uniqueId}`
   const labelId = `block-status-select-label-${uniqueId}`
 

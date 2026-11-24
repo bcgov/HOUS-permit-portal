@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::Concerns::Search::JurisdictionUsers, type: :controller do
+RSpec.describe Api::Concerns::Search::JurisdictionUsers,
+               type: :controller,
+               search: true do
   # This assumes you have a dummy controller for testing the concern
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::JurisdictionUsers
@@ -31,7 +33,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionUsers, type: :controller do
     allow(controller).to receive(:params).and_return(user_search_params)
 
     controller.instance_variable_set(:@jurisdiction, jurisdiction)
-    User.reindex
+    reindex_search(User)
   end
 
   describe "perform_user_search" do
@@ -86,7 +88,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionUsers, type: :controller do
       end
 
       it "returns all jurisdiction users for review_manager" do
-        User.reindex
+        reindex_search(User)
         controller.perform_user_search
         expect(
           controller.instance_variable_get(:@user_search)&.results

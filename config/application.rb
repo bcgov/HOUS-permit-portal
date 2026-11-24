@@ -24,17 +24,27 @@ Bundler.require(*Rails.groups)
 # initializer runs. See lib/devise/jwt/cookie.rb for full documentation.
 require_relative "../lib/devise/jwt/cookie"
 require_relative "../lib/auth_cookies"
+require_relative "../lib/redis_sentinel_configuration"
 
 module HousPermitPortal
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
+    # Preserve application behavior during the Rails 8.1 upgrade. Adopt newer
+    # framework defaults separately after reviewing their compatibility.
     config.load_defaults 7.2
 
     # Please, add to the `ignore` list any other `lib` subdirectories that do
     # not contain `.rb` files, or that should not be reloaded or eager loaded.
     # Common ones are `templates`, `generators`, or `middleware`, for example.
 
-    config.autoload_lib(ignore: %w[assets tasks devise auth_cookies.rb])
+    config.autoload_lib(
+      ignore: %w[
+        assets
+        tasks
+        devise
+        auth_cookies.rb
+        redis_sentinel_configuration.rb
+      ]
+    )
 
     # Configuration for the application, engines, and railties goes here.
     #
@@ -48,6 +58,11 @@ module HousPermitPortal
 
     # Use Sidekiq for Active Job
     config.active_job.queue_adapter = :sidekiq
+
+    # Mail workers need to see the committed records referenced by deliver_later.
+    ActiveSupport.on_load(:action_mailer) do
+      ActionMailer::MailDeliveryJob.enqueue_after_transaction_commit = true
+    end
 
     # Force UUID primary keys for new tables and models
     config.generators { |g| g.orm :active_record, primary_key_type: :uuid }

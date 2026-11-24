@@ -69,8 +69,8 @@ export const Part9EnergyStepEditableBlock = observer(function Part9EnergyStepEdi
 
   const watchRequiredSteps = watch(fieldArrayName)
 
-  const defaultFields = R.filter((f) => f.default, fields as TJurisdictionStepRequirementField[])
-  const customFields = R.filter((f) => !f.default && !f._destroy, fields as TJurisdictionStepRequirementField[])
+  const defaultFields = R.filter((f) => f.default, fields)
+  const customFields = R.filter((f) => !f.default && !f._destroy, fields)
   const getIndex = (field) => R.findIndex((f) => f.key == field?.key, fields)
 
   const defaultIndex = Math.max(0, getIndex(R.find((f) => f.default, defaultFields)))

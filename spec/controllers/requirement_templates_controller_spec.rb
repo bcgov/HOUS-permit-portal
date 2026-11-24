@@ -1,9 +1,7 @@
 # spec/controllers/api/requirement_templates_controller_spec.rb
 require "rails_helper"
 
-RSpec.describe Api::RequirementTemplatesController,
-               type: :controller,
-               search: true do
+RSpec.describe Api::RequirementTemplatesController, type: :controller do
   let!(:super_admin) { create(:user, :super_admin) }
 
   describe "POST #create" do

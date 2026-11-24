@@ -21,11 +21,10 @@ export function useCollaborationAssignmentNodes({ formRef }: IProps) {
         if (mutation.type !== "childList") {
           continue
         }
-        // @ts-ignore
         const changedNodes = [...mutation.addedNodes, ...mutation.removedNodes]
 
         const anyPaneNodeChanged = changedNodes.some((node) => {
-          return node.classList?.contains("formio-component-panel")
+          return node instanceof Element && node.classList.contains("formio-component-panel")
         })
 
         if (!anyPaneNodeChanged) {

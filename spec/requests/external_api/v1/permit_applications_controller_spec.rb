@@ -129,6 +129,7 @@ RSpec.describe "External API v1 permit applications", type: :request do
     end
 
     it "returns 429 when rate limited (external_api/ip)" do
+      stub_permit_application_search
       # Avoid requiring Redis in test by using in-memory cache
       original_store = Rack::Attack.cache.store
       Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
