@@ -24,7 +24,7 @@ import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Navigate, useMatch, useNavigate } from "react-router-dom"
+import { Navigate, useMatch, useNavigate, useSearchParams } from "react-router-dom"
 import { useSearch } from "../../../hooks/use-search"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
@@ -83,19 +83,35 @@ const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
     handleCountPerPageChange,
     handlePageChange,
     updateProjectPerson,
+    shareProjectContactDetails,
     reinviteProjectPerson,
     destroyProjectPerson,
     primaryContactName,
     alternateContactNames,
   } = projectPeopleStore
   const [selectedPerson, setSelectedPerson] = useState<IProjectPerson | null>(null)
+  const [startSharing, setStartSharing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const wantsShareContact = !readOnly && searchParams.get("shareContact") === "1"
 
   useSearch(projectPeopleStore, [permitProject.id])
 
   useEffect(() => {
     setSelectedPerson(null)
+    setStartSharing(false)
   }, [permitProject.id])
+
+  useEffect(() => {
+    if (!wantsShareContact || isSearching) return
+    const self = tablePeople.find((person) => person.userId && person.userId === currentUser?.id)
+    if (!self) return
+    setSelectedPerson(self)
+    setStartSharing(true)
+    const next = new URLSearchParams(searchParams)
+    next.delete("shareContact")
+    setSearchParams(next, { replace: true })
+  }, [wantsShareContact, isSearching, tablePeople, currentUser?.id, searchParams, setSearchParams])
 
   useEffect(() => {
     if (!selectedPerson || isSearching || isSaving) return
@@ -125,6 +141,16 @@ const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
     }
     setIsSaving(false)
     setSelectedPerson(updated)
+  }
+
+  const handleShareContact = async (details: { projectContactEmail?: string; projectContactPhone?: string }) => {
+    if (!selectedPerson) return false
+    setIsSaving(true)
+    const updated = await shareProjectContactDetails(selectedPerson.id, details)
+    setIsSaving(false)
+    if (!updated) return false
+    setSelectedPerson(updated)
+    return true
   }
 
   const handleReinvite = async () => {
@@ -284,8 +310,8 @@ const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
               tablePeople.map((person) => (
                 <SearchGridRow
                   key={person.id}
-                  onClick={readOnly ? undefined : () => selectPerson(person)}
-                  bg={!readOnly && selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
+                  onClick={() => selectPerson(person)}
+                  bg={selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
                 >
                   <SearchGridItem>
                     <Flex align="center" gap={2.5}>
@@ -367,19 +393,21 @@ const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
           </Flex>
         </VStack>
       </Flex>
-      {selectedPerson && !readOnly && (
+      {selectedPerson && (
         <PersonDetailsPanel
           person={selectedPerson}
-          isSelf={Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
-          canEditRoleTags={selectedPerson.canEditRoleTags}
-          canManageStanding={!!projectAccess?.manageMemberStanding}
-          canResend={!!projectAccess?.invitePeople}
-          canRemove={canRemoveSelected}
+          isSelf={!readOnly && Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
+          canEditRoleTags={!readOnly && selectedPerson.canEditRoleTags}
+          canManageStanding={!readOnly && !!projectAccess?.manageMemberStanding}
+          canResend={!readOnly && !!projectAccess?.invitePeople}
+          canRemove={!readOnly && canRemoveSelected}
           primaryContactName={primaryContactName}
           alternateContactNames={alternateContactNames.slice()}
           isSaving={isSaving}
+          startSharing={startSharing && selectedPerson.userId === currentUser?.id}
           onClose={() => setSelectedPerson(null)}
           onSave={handleSave}
+          onShareContact={readOnly ? undefined : handleShareContact}
           onReinvite={handleReinvite}
           onRemove={handleRemove}
         />

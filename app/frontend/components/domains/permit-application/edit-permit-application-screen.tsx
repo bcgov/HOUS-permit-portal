@@ -355,6 +355,20 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const showSubmitControl =
     isReviewingSubmit || formJson?.components?.some((section) => section.key === COMPLETTION_SECTION_KEY)
   const sidePanelOpen = peopleOpen || Boolean(blockAccessId)
+  const peopleButton = (
+    <Button
+      variant="primary"
+      leftIcon={<Users />}
+      onClick={() => {
+        setBlockAccessId(null)
+        setPeopleOpen((open) => !open)
+      }}
+    >
+      {t("permitApplication.people.buttonWithCount", {
+        count: currentPermitApplication.grantedPeopleCount,
+      })}
+    </Button>
+  )
   let sidebar = <ChecklistSideBar permitApplication={currentPermitApplication} completedBlocks={completedBlocks} />
   if (isReviewingSubmit && imminentSubmission) {
     sidebar = (
@@ -460,7 +474,8 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 <BrowserSearchPrompt />
                 <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
                   {t("permitApplication.show.contactsSummary")}
-                </Button>{" "}
+                </Button>
+                {peopleButton}
                 {currentPermitApplication.currentUserAccess?.viewApplication && (
                   <SubmissionDownloadModal permitApplication={currentPermitApplication} />
                 )}
@@ -480,18 +495,10 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
                 gap={4}
               >
                 <BrowserSearchPrompt />
-                <Button
-                  variant="primary"
-                  leftIcon={<Users />}
-                  onClick={() => {
-                    setBlockAccessId(null)
-                    setPeopleOpen((open) => !open)
-                  }}
-                >
-                  {t("permitApplication.people.buttonWithCount", {
-                    count: currentPermitApplication.grantedPeopleCount,
-                  })}
+                <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+                  {t("permitApplication.show.contactsSummary")}
                 </Button>
+                {peopleButton}
                 <Button
                   variant="primary"
                   onClick={

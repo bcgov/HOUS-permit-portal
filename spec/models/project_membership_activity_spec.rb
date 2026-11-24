@@ -93,7 +93,12 @@ RSpec.describe "Project membership and grant activity", type: :model do
 
     Audited
       .audit_class
-      .as_user(owner) { member.update!(contact_designation: :primary) }
+      .as_user(owner) do
+        member.update!(
+          contact_designation: :primary,
+          project_contact_email: "blake@example.com"
+        )
+      end
 
     demotion =
       creator

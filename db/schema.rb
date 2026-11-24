@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_23_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -889,6 +889,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_18_120000) do
     t.string "invitation_token"
     t.datetime "invitation_sent_at"
     t.datetime "invitation_accepted_at"
+    t.string "project_contact_email"
+    t.string "project_contact_phone"
     t.index "permit_project_id, lower((invited_email)::text)", name: "index_project_memberships_unique_pending_email_per_project", unique: true, where: "(user_id IS NULL)"
     t.index ["invitation_token"], name: "index_project_memberships_on_invitation_token", unique: true, where: "(invitation_token IS NOT NULL)"
     t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"

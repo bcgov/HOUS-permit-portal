@@ -180,7 +180,10 @@ class Api::PermitProjectsController < Api::ApplicationController
     @permit_project = PermitProject.new(permit_project_params)
     @permit_project.owner = current_user
     @permit_project.sandbox = current_sandbox
+    assign_creator_contact!
     authorize @permit_project
+
+    return if creator_contact_invalid?
 
     if @permit_project.save
       render_success @permit_project,
@@ -464,6 +467,51 @@ class Api::PermitProjectsController < Api::ApplicationController
           }
         )
       end
+  end
+
+  def assign_creator_contact!
+    contact =
+      params.fetch(:permit_project, {}).permit(
+        :project_contact_email,
+        :project_contact_phone
+      )
+    @permit_project.project_contact_email = contact[:project_contact_email]
+    @permit_project.project_contact_phone = contact[:project_contact_phone]
+  end
+
+  # The server stores what was submitted. A blank field is not filled from the account.
+  def creator_contact_invalid?
+    email = @permit_project.project_contact_email
+    phone = @permit_project.project_contact_phone
+    if email.blank? && phone.blank?
+      render_error(
+        "permit_project.creator_contact_required",
+        { status: :unprocessable_entity }
+      )
+      return true
+    end
+
+    probe =
+      ProjectMembership.new(
+        project_contact_email: email,
+        project_contact_phone: phone
+      )
+    probe.validate
+    messages =
+      probe.errors.full_messages_for(:project_contact_email) +
+        probe.errors.full_messages_for(:project_contact_phone)
+    return false if messages.empty?
+
+    render_error(
+      "permit_project.creator_contact_invalid",
+      {
+        status: :unprocessable_entity,
+        message_opts: {
+          error_message: messages.join(", ")
+        }
+      }
+    )
+    true
   end
 
   def permit_project_params

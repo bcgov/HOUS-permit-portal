@@ -21,9 +21,13 @@ type TCreatePermitProjectFormData = {
   pid?: string
   site?: ISiteOption
   jurisdictionId?: string
+  projectContactEmail: string
+  projectContactPhone: string
 }
 
 export const NewPermitProjectScreen = observer(() => {
+  const { permitProjectStore, jurisdictionStore, sandboxStore, userStore } = useMst()
+  const currentUser = userStore.currentUser
   const formMethods = useForm<TCreatePermitProjectFormData>({
     mode: "onChange",
     reValidateMode: "onChange",
@@ -32,13 +36,14 @@ export const NewPermitProjectScreen = observer(() => {
       pid: "",
       site: null as ISiteOption,
       jurisdictionId: "",
+      projectContactEmail: currentUser?.email ?? "",
+      projectContactPhone: currentUser?.phoneNumber ?? "",
     },
   })
 
   const { handleSubmit, formState, control, watch } = formMethods
   const { isSubmitting } = formState
   const navigate = useNavigate()
-  const { permitProjectStore, jurisdictionStore, sandboxStore, userStore } = useMst()
   const { isSandboxActive } = sandboxStore
 
   const jurisdictionId = watch("jurisdictionId")
@@ -55,12 +60,21 @@ export const NewPermitProjectScreen = observer(() => {
   }, [jurisdictionId])
 
   const onSubmit = async (values: TCreatePermitProjectFormData) => {
+    const projectContactEmail = values.projectContactEmail?.trim() ?? ""
+    const projectContactPhone = values.projectContactPhone?.trim() ?? ""
+    if (!projectContactEmail && !projectContactPhone) {
+      formMethods.setError("projectContactEmail", { message: t("permitProject.new.contactRequired") })
+      return
+    }
+
     const siteCoordinates = values.site?.coordinates
     const params = {
       title: values.title?.trim(),
       fullAddress: values.site?.label,
       pid: values.pid,
       jurisdictionId: values.jurisdictionId,
+      projectContactEmail,
+      projectContactPhone,
       ...(!values.pid && siteCoordinates?.length >= 2
         ? { longitude: siteCoordinates[0], latitude: siteCoordinates[1] }
         : {}),
@@ -99,6 +113,22 @@ export const NewPermitProjectScreen = observer(() => {
                 fieldName="title"
                 label={t("permitProject.new.nameLabel")}
                 hint={t("permitProject.new.nameHint")}
+              />
+            </Flex>
+
+            <Flex direction="column" gap={2} w={{ base: "full", md: "50%" }}>
+              <Heading as="h2" variant="yellowline">
+                {t("permitProject.new.contactHeading")}
+              </Heading>
+              <Text>{t("permitProject.new.contactDescription")}</Text>
+              <TextFormControl
+                fieldName="projectContactEmail"
+                label={t("permitProject.people.personalDetailsFields.email")}
+                inputProps={{ type: "email" }}
+              />
+              <TextFormControl
+                fieldName="projectContactPhone"
+                label={t("permitProject.people.personalDetailsFields.phone")}
               />
             </Flex>
 

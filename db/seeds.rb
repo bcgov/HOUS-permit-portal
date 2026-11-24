@@ -831,6 +831,10 @@ else
       membership.access = access
       membership.contact_designation = designation
       membership.role_list = roles
+      if designation != :none && membership.project_contact_email.blank? &&
+           membership.project_contact_phone.blank?
+        membership.project_contact_email = user.email
+      end
       membership.save!
     end
   end

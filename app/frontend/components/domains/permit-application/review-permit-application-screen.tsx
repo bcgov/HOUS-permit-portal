@@ -243,13 +243,13 @@ export const ReviewPermitApplicationScreen = observer(() => {
           <Flex direction="column" align="flex-end" justify="space-between">
             <Stack direction={{ base: "column", lg: "row" }} align={{ base: "flex-end", lg: "center" }}>
               <BrowserSearchPrompt />
+              <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
+                {t("permitApplication.show.contactsSummary")}
+              </Button>
               <Button variant="primary" leftIcon={<Users />} onClick={() => setPeopleOpen((open) => !open)}>
                 {t("permitApplication.people.buttonWithCount", {
                   count: currentPermitApplication.grantedPeopleCount,
                 })}
-              </Button>
-              <Button variant="ghost" leftIcon={<Info size={20} />} color="white" onClick={onContactsOpen}>
-                {t("permitApplication.show.contactsSummary")}
               </Button>
               <SubmissionDownloadModal permitApplication={currentPermitApplication} review />
               <RouterLinkButton to={parentProjectPath} variant="default" rightIcon={<CaretRight />}>

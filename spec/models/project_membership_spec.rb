@@ -59,7 +59,10 @@ RSpec.describe ProjectMembership, type: :model do
       project.project_memberships.find_by!(user: project.creator)
     membership = create(:project_membership, permit_project: project)
 
-    membership.update!(contact_designation: :primary)
+    membership.update!(
+      contact_designation: :primary,
+      project_contact_email: "shared@example.com"
+    )
 
     expect(membership.reload.contact_designation).to eq("primary")
     expect(creator_membership.reload.contact_designation).to eq("none")
@@ -72,7 +75,11 @@ RSpec.describe ProjectMembership, type: :model do
     membership = create(:project_membership, permit_project: project)
 
     expect(
-      membership.update(contact_designation: :primary, access: "nope")
+      membership.update(
+        contact_designation: :primary,
+        access: "nope",
+        project_contact_email: "shared@example.com"
+      )
     ).to be_falsey
     expect(creator_membership.reload.contact_designation).to eq("primary")
     expect(membership.reload.contact_designation).to eq("none")
@@ -143,6 +150,30 @@ RSpec.describe ProjectMembership, type: :model do
 
     expect(membership.destroy).to be_truthy
     expect(ProjectMembership.exists?(membership.id)).to be false
+  end
+
+  it "refuses a new primary or alternate who has not shared a contact method" do
+    project = create(:permit_project)
+    membership = create(:project_membership, permit_project: project)
+
+    expect(membership.update(contact_designation: :primary)).to be false
+    expect(membership.errors[:contact_designation]).to be_present
+    expect(membership.reload.contact_designation).to eq("none")
+
+    expect(
+      membership.update(
+        contact_designation: :alternate,
+        project_contact_phone: "2505551212"
+      )
+    ).to be true
+    expect(membership.reload.project_contact_phone).to eq("+12505551212")
+  end
+
+  it "rejects a project contact email that is not an email address" do
+    membership = create(:project_membership)
+
+    expect(membership.update(project_contact_email: "not-an-email")).to be false
+    expect(membership.errors[:project_contact_email]).to be_present
   end
 
   it "removes a pending invite" do

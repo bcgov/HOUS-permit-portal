@@ -3,7 +3,7 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EProjectAccess, EProjectContactDesignation } from "../types/enums"
-import { IProjectInvitation, IProjectPerson, TSearchParams } from "../types/types"
+import { IAcceptedProjectInvitation, IProjectInvitation, IProjectPerson, TSearchParams } from "../types/types"
 import { setQueryParam } from "../utils/utility-functions"
 
 const isProjectAccess = (value: string): value is EProjectAccess =>
@@ -79,7 +79,6 @@ export const ProjectPeopleStoreModel = types
       lastName: string
       email: string
       roleTags?: string[]
-      contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
       allowInvite?: boolean
     }) {
@@ -154,7 +153,24 @@ export const ProjectPeopleStoreModel = types
       const response = yield self.environment.api.acceptProjectInvitation(token)
       if (!response.ok || !response.data?.data) return null
 
-      return response.data.data as { permitProjectId: string; projectTitle: string }
+      return response.data.data as IAcceptedProjectInvitation
+    }),
+    shareProjectContactDetails: flow(function* (
+      membershipId: string,
+      params: { projectContactEmail?: string; projectContactPhone?: string },
+      permitProjectId?: string
+    ) {
+      const projectId = permitProjectId ?? self.rootStore.permitProjectStore.currentPermitProject?.id
+      if (!projectId) return null
+
+      const response = yield self.environment.api.shareProjectContactDetails(projectId, membershipId, params)
+      if (!response.ok || !response.data?.data) return null
+
+      const updated: IProjectPerson = response.data.data
+      if (self.tablePeople.some((person) => person.id === updated.id)) {
+        self.tablePeople = cast(self.tablePeople.map((person) => (person.id === updated.id ? updated : person)))
+      }
+      return updated
     }),
     declineProjectInvitation: flow(function* (token: string) {
       const response = yield self.environment.api.declineProjectInvitation(token)

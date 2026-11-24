@@ -44,6 +44,9 @@ class PermitProject < ApplicationRecord
 
   delegate :name, to: :owner, prefix: true
 
+  # Submitted on create and copied onto the owner membership. Not columns.
+  attr_accessor :project_contact_email, :project_contact_phone
+
   after_create :ensure_creator_membership!
   after_commit :reindex
   after_commit :send_state_changed_webhook, if: :state_changed_for_external_api?
@@ -418,6 +421,10 @@ class PermitProject < ApplicationRecord
       membership = project_memberships.find_or_initialize_by(user_id: owner_id)
       membership.access = :full
       membership.contact_designation = :primary
+      membership.project_contact_email =
+        project_contact_email if project_contact_email.present?
+      membership.project_contact_phone =
+        project_contact_phone if project_contact_phone.present?
       membership.save!
     end
   end

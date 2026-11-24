@@ -1,25 +1,46 @@
-import { Avatar, Box, Button, Divider, Flex, Heading, HStack, Text, VStack } from "@chakra-ui/react"
+import {
+  Avatar,
+  Box,
+  Button,
+  Divider,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  Heading,
+  HStack,
+  Input,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useNavigate, useParams } from "react-router-dom"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus, EProjectMembershipStatus } from "../../../types/enums"
-import { IProjectInvitation } from "../../../types/types"
+import { IAcceptedProjectInvitation, IProjectInvitation } from "../../../types/types"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { SharedSpinner } from "../../shared/base/shared-spinner"
 import { CenterContainer } from "../../shared/containers/center-container"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export const AcceptProjectInvitationScreen = observer(() => {
   const { t } = useTranslation()
   const { invitationToken } = useParams<{ invitationToken: string }>()
   const navigate = useNavigate()
   const { projectPeopleStore, userStore, uiStore } = useMst()
-  const { fetchProjectInvitation, acceptProjectInvitation, declineProjectInvitation } = projectPeopleStore
+  const { fetchProjectInvitation, acceptProjectInvitation, declineProjectInvitation, shareProjectContactDetails } =
+    projectPeopleStore
   const currentUser = userStore.currentUser
 
   const [invitation, setInvitation] = useState<IProjectInvitation | null>(null)
+  const [accepted, setAccepted] = useState<IAcceptedProjectInvitation | null>(null)
+  const [contactEmail, setContactEmail] = useState("")
+  const [contactPhone, setContactPhone] = useState("")
+  const [contactError, setContactError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -60,22 +81,23 @@ export const AcceptProjectInvitationScreen = observer(() => {
   const isExpired = invitation.status === EProjectMembershipStatus.expired
   const alreadyMember = !!invitation.alreadyMember
 
+  const finish = (project: IAcceptedProjectInvitation) => {
+    uiStore.flashMessage.show(
+      EFlashMessageStatus.success,
+      t("permitProject.people.invitationScreen.acceptedTitle", { title: project.projectTitle }),
+      t("permitProject.people.invitationScreen.acceptedMessage"),
+      5000
+    )
+    navigate(`/projects/${project.permitProjectId}/overview`)
+  }
+
   const handleAccept = async () => {
     if (!invitationToken) return
     setIsSubmitting(true)
-    const accepted = await acceptProjectInvitation(invitationToken)
+    const result = await acceptProjectInvitation(invitationToken)
     setIsSubmitting(false)
 
-    if (accepted) {
-      const { permitProjectId, projectTitle } = accepted
-      uiStore.flashMessage.show(
-        EFlashMessageStatus.success,
-        t("permitProject.people.invitationScreen.acceptedTitle", { title: projectTitle }),
-        t("permitProject.people.invitationScreen.acceptedMessage"),
-        5000
-      )
-      navigate(`/projects/${permitProjectId}/overview`)
-    }
+    if (result) setAccepted(result)
   }
 
   const handleDecline = async () => {
@@ -94,6 +116,74 @@ export const AcceptProjectInvitationScreen = observer(() => {
       )
       navigate("/projects")
     }
+  }
+
+  const handleSkipContact = () => {
+    if (accepted) finish(accepted)
+  }
+
+  const handleContinueContact = async () => {
+    if (!accepted) return
+    const email = contactEmail.trim()
+    const phone = contactPhone.trim()
+    if (email && !EMAIL_PATTERN.test(email)) {
+      setContactError(t("permitProject.people.shareContactEmailInvalid"))
+      return
+    }
+    setContactError(null)
+    if (!email && !phone) {
+      finish(accepted)
+      return
+    }
+
+    setIsSubmitting(true)
+    const saved = await shareProjectContactDetails(
+      accepted.membershipId,
+      { projectContactEmail: email, projectContactPhone: phone },
+      accepted.permitProjectId
+    )
+    setIsSubmitting(false)
+    if (saved) finish(accepted)
+  }
+
+  if (accepted) {
+    return (
+      <CenterContainer py={20}>
+        <Flex direction="column" w="full" maxW="680px" px={6}>
+          <Heading as="h1" fontSize="32px" mb={4}>
+            {t("permitProject.people.shareContactTitle")}
+          </Heading>
+          <Text fontSize="lg" color="text.secondary" lineHeight="1.68" mb={3}>
+            {t("permitProject.people.shareContactIntro")}
+          </Text>
+          <Text fontSize="lg" color="text.secondary" lineHeight="1.68" mb={5}>
+            {t("permitProject.people.shareContactOptional")}
+          </Text>
+          <FormControl isInvalid={!!contactError} maxW="440px" mb={4}>
+            <FormLabel fontWeight="bold">{t("permitProject.people.personalDetailsFields.email")}</FormLabel>
+            <Input
+              type="email"
+              value={contactEmail}
+              bg="greys.white"
+              onChange={(event) => setContactEmail(event.target.value)}
+            />
+            <FormErrorMessage>{contactError}</FormErrorMessage>
+          </FormControl>
+          <FormControl maxW="440px" mb={5}>
+            <FormLabel fontWeight="bold">{t("permitProject.people.personalDetailsFields.phone")}</FormLabel>
+            <Input value={contactPhone} bg="greys.white" onChange={(event) => setContactPhone(event.target.value)} />
+          </FormControl>
+          <HStack spacing={4}>
+            <Button variant="secondary" onClick={handleSkipContact} isDisabled={isSubmitting}>
+              {t("permitProject.people.shareContactSkip")}
+            </Button>
+            <Button variant="primary" onClick={handleContinueContact} isLoading={isSubmitting}>
+              {t("permitProject.people.shareContactContinue")}
+            </Button>
+          </HStack>
+        </Flex>
+      </CenterContainer>
+    )
   }
 
   return (
