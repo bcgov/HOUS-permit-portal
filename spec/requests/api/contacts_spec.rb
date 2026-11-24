@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "Api::Contacts", type: :request, search: true do
+RSpec.describe "Api::Contacts", type: :request do
   include Devise::Test::IntegrationHelpers
 
   let(:headers) { { "ACCEPT" => "application/json" } }
@@ -8,12 +8,10 @@ RSpec.describe "Api::Contacts", type: :request, search: true do
   let(:other_user) { create(:user, :submitter) }
   let!(:contact) { create(:contact, contactable: user, first_name: "Alex") }
 
-  before do
-    sign_in user
-    Contact.reindex
-  end
+  before { sign_in user }
 
-  describe "GET /api/contacts/contact_options" do
+  describe "GET /api/contacts/contact_options", search: true do
+    before { reindex_search(Contact) }
     it "returns contact options for the current user" do
       get "/api/contacts/contact_options",
           params: {

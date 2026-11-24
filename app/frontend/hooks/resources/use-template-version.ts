@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useParams } from "react-router-dom"
+import { ITemplateVersion } from "../../models/template-version"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
-export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?: string } = {}) => {
+export const useTemplateVersion = ({ customErrorMessage }: { customErrorMessage?: string } = {}): {
+  templateVersion: ITemplateVersion | undefined
+  error: Error | undefined
+} => {
   const { templateVersionId } = useParams()
   const { pathname } = useLocation()
   const { templateVersionStore, sandboxStore } = useMst()

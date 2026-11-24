@@ -36,7 +36,7 @@ export const RequirementTemplateInboxFilter = observer(function RequirementTempl
 
   return (
     <InboxFilter
-      title={t("submissionInbox.filters.permitType")}
+      title={permitProjectId ? t("submissionInbox.filters.permitTypeShort") : t("submissionInbox.filters.permitType")}
       isMulti={true}
       value={value}
       onChange={(val) => onChange(val as string[])}

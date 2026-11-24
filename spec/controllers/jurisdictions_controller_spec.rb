@@ -15,10 +15,10 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     create_list(:user, 5, :reviewer, jurisdiction: jurisdiction)
   end
 
-  describe "POST #search_users" do
+  describe "POST #search_users", search: true do
     before do
       sign_in super_admin
-      User.reindex
+      reindex_search(User)
     end
 
     context "It only returns review_managers and not reviewers" do
@@ -66,8 +66,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
         user.jurisdiction_memberships.find_by!(jurisdiction: jurisdiction)
       user.update_column(:created_at, 2.years.ago)
       membership.update_column(:created_at, 1.week.ago)
-      User.reindex
-
+      reindex_search(User)
       post :search_users, params: { id: jurisdiction.id, query: user.email }
 
       user_json =
@@ -78,7 +77,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     end
   end
 
-  describe "logged in as super_admin" do
+  describe "logged in as super_admin", search: true do
     let!(:review_manager) do
       create(
         :user,
@@ -98,7 +97,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
 
     before do
       sign_in super_admin
-      Jurisdiction.reindex
+      reindex_search(Jurisdiction)
     end
 
     context "searching with review manager email" do
@@ -132,7 +131,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     end
   end
 
-  describe "Didn't logged in and" do
+  describe "Didn't logged in and", search: true do
     before {}
 
     context "searching with review manager email" do

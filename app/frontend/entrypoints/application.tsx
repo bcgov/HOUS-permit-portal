@@ -8,6 +8,7 @@ import { Navigation } from "../components/domains/navigation"
 import { AppErrorBoundary } from "../components/shared/sentry/error-boundary"
 import "../i18n/i18n"
 import { useLanguageChange } from "../i18n/use-language-change"
+import { listenForFrontendUpdates } from "../services/frontend-update"
 import { initializeSentry, observeSentryUser } from "../services/observability"
 import { isReactotronEnabled, setupReactotron } from "../setup/reactotron"
 import { Provider, setupRootStore } from "../setup/root"
@@ -17,6 +18,7 @@ import { theme } from "../styles/theme"
 import { useTranslation } from "react-i18next"
 import { getCurrentSandboxId, syncMatomoSandboxFlag } from "../utils/utility-functions"
 
+listenForFrontendUpdates()
 initializeSentry()
 
 const renderApp = (rootStore) => {
@@ -78,7 +80,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderApp(rootStore)
   } else {
     setupReactotron(rootStore.environment.api).then((reactotron) => {
-      // @ts-expect-error: trackMstNode is not part of the official Reactotron type definitions
       reactotron.trackMstNode(rootStore)
       window.console.tron = reactotron
       renderApp(rootStore)

@@ -17,9 +17,10 @@ inputs:
   image_name:
     description: OpenShift image name
     required: true
-  build_args:
-    description: Docker build args
-    required: true
+  frontend_vars_json:
+    description: GitHub configuration variables; only VITE_ entries are forwarded to the frontend build
+    required: false
+    default: "{}"
   release_version_prefix:
     description: Optional frontend release prefix; the checked-out commit SHA is appended after checkout
     required: false
@@ -118,6 +119,23 @@ runs:
       run: |
         echo "Deploying branch: ${DEPLOY_BRANCH} @ ${DEPLOY_SHA} to ${ENVIRONMENT_LABEL}"
 
+    - name: Prepare frontend build variables
+      id: frontend-build
+      uses: actions/github-script@v8
+      env:
+        DEPLOY_SCRIPTS_PATH: ${{ steps.prepare-deployment-scripts.outputs.path }}
+        FRONTEND_VARS_JSON: ${{ inputs.frontend_vars_json }}
+        RELEASE_VERSION_PREFIX: ${{ inputs.release_version_prefix }}
+        DEPLOY_SHA: ${{ steps.capture-git-sha.outputs.sha }}
+      with:
+        script: |
+          const prepareBuildArgs = require(`${process.env.DEPLOY_SCRIPTS_PATH}/build-args.cjs`);
+          core.setOutput('build_args', prepareBuildArgs({
+            variablesJson: process.env.FRONTEND_VARS_JSON,
+            releaseVersionPrefix: process.env.RELEASE_VERSION_PREFIX,
+            sha: process.env.DEPLOY_SHA,
+          }));
+
     - name: Prepare Sentry build secret
       if: inputs.sentry_upload_sourcemaps == 'true'
       shell: bash
@@ -140,10 +158,9 @@ runs:
           git-sha=${{ steps.capture-git-sha.outputs.sha }}
         containerfiles: ./devops/docker/app/Dockerfile
         build-args: |
-          ${{ inputs.build_args }}
+          ${{ steps.frontend-build.outputs.build_args }}
           SENTRY_RELEASE=hous-permit-portal@${{ steps.capture-git-sha.outputs.sha }}
           SENTRY_UPLOAD_SOURCEMAPS=${{ inputs.sentry_upload_sourcemaps }}
-          ${{ inputs.release_version_prefix && format('VITE_RELEASE_VERSION={0}-{1}', inputs.release_version_prefix, steps.capture-git-sha.outputs.sha) || '' }}
         extra-args: |
           ${{ inputs.sentry_upload_sourcemaps == 'true' && format('--secret=id=sentry_auth_token,src={0}/bph-sentry-build-token', runner.temp) || '' }}
 

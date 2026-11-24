@@ -57,7 +57,7 @@ export const StepCodesGridRow = observer(({ stepCode }: { stepCode: IStepCode })
       and stage-aware target paths. Report download/share live on the project
       information stage rows. */}
       <SearchGridItem>{t(`stepCode.types.${type as EStepCodeType}`)}</SearchGridItem>
-      <SearchGridItem>{permitProjectTitle}</SearchGridItem>
+      <SearchGridItem>{permitProjectTitle?.trim() || t("stepCode.columns.noProject")}</SearchGridItem>
       <SearchGridItem>{fullAddress}</SearchGridItem>
       <SearchGridItem>{updatedAt ? format(updatedAt, datefnsTableDateTimeFormat) : ""}</SearchGridItem>
       <SearchGridItem>

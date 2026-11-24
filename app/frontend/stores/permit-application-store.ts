@@ -195,13 +195,12 @@ export const PermitApplicationStoreModel = types
       )
 
       self.rootStore.collaboratorStore.mergeUpdateAll(
-        R.pipe(
-          R.map(R.prop("permitCollaborations")),
-          R.reject(R.isNil),
-          R.flatten,
-          R.map(R.prop("collaborator")),
-          R.uniqBy((c: ICollaborator) => c.id)
-        )(permitApplicationsData),
+        R.uniqBy(
+          (collaborator: ICollaborator) => collaborator.id,
+          permitApplicationsData.flatMap((application: { permitCollaborations?: { collaborator: ICollaborator }[] }) =>
+            (application.permitCollaborations ?? []).map((collaboration) => collaboration.collaborator)
+          )
+        ),
         "collaboratorMap"
       )
 

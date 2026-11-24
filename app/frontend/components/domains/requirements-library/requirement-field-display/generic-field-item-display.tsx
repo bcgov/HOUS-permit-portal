@@ -9,7 +9,7 @@ interface IGenericFieldItemDisplayProps {
 }
 
 export function GenericFieldItemDisplay({ label, type, required }: IGenericFieldItemDisplayProps) {
-  const defaultProps: Partial<TRequirementFieldDisplayProps> = {
+  const defaultProps: TRequirementFieldDisplayProps = {
     label: label,
     requirementType: type,
     required: required,

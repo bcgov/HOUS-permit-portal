@@ -1,3 +1,4 @@
+import { ApiResponse } from "apisauce"
 import { t } from "i18next"
 import { flow } from "mobx"
 import { Instance, toGenerator, types } from "mobx-state-tree"
@@ -5,10 +6,19 @@ import { IJurisdictionTemplateVersionCustomizationForm } from "../components/dom
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
 import { EDeprecationReason, EExportFormat, ETemplateVersionStatus } from "../types/enums"
-import { IDenormalizedRequirementBlock, IDenormalizedTemplate, IFormJson, ITemplateVersionUpdate } from "../types/types"
+import {
+  IDenormalizedRequirementBlock,
+  IDenormalizedTemplate,
+  IFormJson,
+  ITemplateVersionDiff,
+  ITemplateVersionUpdate,
+} from "../types/types"
 import { startBlobDownload } from "../utils/utility-functions"
 import { IIntegrationMapping, IntegrationMappingModel } from "./integration-mapping"
-import { JurisdictionTemplateVersionCustomizationModel } from "./jurisdiction-template-version-customization"
+import {
+  IJurisdictionTemplateVersionCustomization,
+  JurisdictionTemplateVersionCustomizationModel,
+} from "./jurisdiction-template-version-customization"
 
 interface ITemplateCategorySummary {
   id: string
@@ -85,10 +95,10 @@ export const TemplateVersionModel = types
     getJurisdictionTemplateVersionCustomization(jurisdictionId: string) {
       return self.templateVersionCustomizationsByJurisdiction.get(jurisdictionId)
     },
-    getIntegrationMapping(jurisdictionId: string) {
+    getIntegrationMapping(jurisdictionId: string): IIntegrationMapping | undefined {
       return self.integrationMappingByJurisdiction.get(jurisdictionId)
     },
-    get deprecationReasonLabel() {
+    get deprecationReasonLabel(): string {
       if (!self.deprecationReason) {
         return ""
       }
@@ -140,7 +150,9 @@ export const TemplateVersionModel = types
     },
   }))
   .actions((self) => ({
-    fetchJurisdictionTemplateVersionCustomization: flow(function* (jurisdictionId: string) {
+    fetchJurisdictionTemplateVersionCustomization: flow(function* (
+      jurisdictionId: string
+    ): Generator<Promise<unknown>, ApiResponse<ApiResponse<IJurisdictionTemplateVersionCustomization>>> {
       const response = yield* toGenerator(
         self.environment.api.fetchJurisdictionTemplateVersionCustomization(self.id, jurisdictionId)
       )
@@ -157,7 +169,9 @@ export const TemplateVersionModel = types
 
       return response
     }),
-    copyJurisdictionTemplateVersionElectives: flow(function* (jurisdictionId: string) {
+    copyJurisdictionTemplateVersionElectives: flow(function* (
+      jurisdictionId: string
+    ): Generator<Promise<unknown>, boolean> {
       const response = yield* toGenerator(
         self.environment.api.copyJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, true, false, true)
       )
@@ -174,7 +188,7 @@ export const TemplateVersionModel = types
 
       return response.ok
     }),
-    copyJurisdictionTemplateVersionTips: flow(function* (jurisdictionId: string) {
+    copyJurisdictionTemplateVersionTips: flow(function* (jurisdictionId: string): Generator<Promise<unknown>, boolean> {
       const response = yield* toGenerator(
         self.environment.api.copyJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, false, true, true)
       )
@@ -191,7 +205,9 @@ export const TemplateVersionModel = types
 
       return response.ok
     }),
-    fetchIntegrationMapping: flow(function* (jurisdictionId: string) {
+    fetchIntegrationMapping: flow(function* (
+      jurisdictionId: string
+    ): Generator<Promise<unknown>, IIntegrationMapping | undefined> {
       const response = yield* toGenerator(self.environment.api.fetchIntegrationMapping(self.id, jurisdictionId))
       if (!response.ok || !response.data?.data) {
         return
@@ -204,7 +220,9 @@ export const TemplateVersionModel = types
 
       return self.getIntegrationMapping(jurisdictionId)
     }),
-    fetchTemplateVersionCompare: flow(function* (previousVersionId?: string) {
+    fetchTemplateVersionCompare: flow(function* (
+      previousVersionId?: string
+    ): Generator<Promise<unknown>, ApiResponse<ITemplateVersionDiff> | undefined> {
       const response = yield* toGenerator(self.environment.api.fetchTemplateVersionCompare(self.id, previousVersionId))
       if (response.ok) {
         return response.data
@@ -213,7 +231,7 @@ export const TemplateVersionModel = types
     createOrUpdateJurisdictionTemplateVersionCustomization: flow(function* (
       jurisdictionId: string,
       params: IJurisdictionTemplateVersionCustomizationForm
-    ) {
+    ): Generator<Promise<unknown>, IJurisdictionTemplateVersionCustomization | boolean> {
       const response = yield* toGenerator(
         self.environment.api.createOrUpdateJurisdictionTemplateVersionCustomization(self.id, jurisdictionId, params)
       )
@@ -229,7 +247,9 @@ export const TemplateVersionModel = types
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
     }),
-    promoteJurisdictionTemplateVersionCustomization: flow(function* (jurisdictionId: string) {
+    promoteJurisdictionTemplateVersionCustomization: flow(function* (
+      jurisdictionId: string
+    ): Generator<Promise<unknown>, IJurisdictionTemplateVersionCustomization | boolean> {
       const response = yield* toGenerator(
         self.environment.api.promoteJurisdictionTemplateVersionCustomization(self.id, jurisdictionId)
       )
@@ -245,7 +265,10 @@ export const TemplateVersionModel = types
 
       return self.getJurisdictionTemplateVersionCustomization(jurisdictionId)
     }),
-    downloadExport: flow(function* (jurisdictionId: string, format: EExportFormat) {
+    downloadExport: flow(function* (
+      jurisdictionId: string,
+      format: EExportFormat
+    ): Generator<Promise<unknown>, ApiResponse<BlobPart> | boolean> {
       const jurisdiction = self.rootStore.jurisdictionStore.getJurisdictionById(jurisdictionId)
       const mimeTypes = {
         [EExportFormat.csv]: "text/csv",
@@ -275,7 +298,7 @@ export const TemplateVersionModel = types
         throw error
       }
     }),
-    downloadRequirementSummary: flow(function* () {
+    downloadRequirementSummary: flow(function* (): Generator<Promise<unknown>, ApiResponse<BlobPart> | boolean> {
       try {
         const response = yield* toGenerator(self.environment.api.downloadRequirementSummaryCsv(self.id))
         if (!response.ok) {
@@ -295,7 +318,7 @@ export const TemplateVersionModel = types
         throw error
       }
     }),
-    unschedule: flow(function* () {
+    unschedule: flow(function* (): Generator<Promise<unknown>, boolean> {
       if (!self.isScheduled) {
         return false
       }
@@ -308,7 +331,7 @@ export const TemplateVersionModel = types
 
       return response.ok
     }),
-    shareDraft: flow(function* () {
+    shareDraft: flow(function* (): Generator<Promise<unknown>, boolean> {
       if (!self.isDraft) {
         return false
       }
@@ -321,7 +344,9 @@ export const TemplateVersionModel = types
       }
       return response.ok
     }),
-    inviteDraftPreviewersByEmail: flow(function* (emails: string[]) {
+    inviteDraftPreviewersByEmail: flow(function* (
+      emails: string[]
+    ): Generator<Promise<unknown>, { failedEmails: string[] } | null> {
       if (!self.isDraft) {
         return null
       }

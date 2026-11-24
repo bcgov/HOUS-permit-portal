@@ -6,6 +6,19 @@ require_relative "../config/environment"
 if Rails.env.production?
   abort("The Rails environment is running in production mode!")
 end
+
+if ENV.key?("TEST_ENV_NUMBER") &&
+     !ActiveRecord::Base.connection_db_config.database.end_with?(
+       "_test#{ENV["TEST_ENV_NUMBER"]}"
+     )
+  abort(
+    'Parallel specs need database: hous_permit_portal_test<%= ENV["TEST_ENV_NUMBER"] %> in config/database.yml. Unset DATABASE_URL if it overrides this.'
+  )
+end
+
+# Throttle counters belong to this process; resetting them must not affect others.
+Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+
 require "rspec/rails"
 require "pundit/rspec"
 require "database_cleaner/active_record"
@@ -26,6 +39,8 @@ require "database_cleaner/active_record"
 # require only the support files necessary.
 #
 Rails.root.glob("spec/support/**/*.rb").sort.each { |f| require f }
+Searchkick::Index.prepend(SearchSpecSupport::IndexIsolation)
+Searchkick.singleton_class.prepend(SearchSpecSupport::SearchIsolation)
 
 # Checks for pending migrations and applies them before tests are run.
 # If you are not using ActiveRecord, you can remove these lines.
@@ -73,17 +88,19 @@ RSpec.configure do |config|
   # arbitrary gems may also be filtered via:
   # config.filter_gems_from_backtrace("gem name")
   #
-  config.before(:suite) { DatabaseCleaner.clean_with(:truncation) }
-
-  config.before(:each) { DatabaseCleaner.strategy = :transaction }
-
-  config.before(:each, js: true) { DatabaseCleaner.strategy = :truncation }
-
-  config.before(:each, search: true) { DatabaseCleaner.strategy = :truncation }
-
-  config.before(:each) { DatabaseCleaner.start }
-
-  config.after(:each) { DatabaseCleaner.clean }
+  # Rails loads YAML fixtures in prepended before hooks. Start cleanup outside
+  # those hooks so fixture rows cannot leak into the next example or spec file.
+  config.around(:each) do |example|
+    DatabaseCleaner.strategy =
+      (
+        if example.metadata[:search] || example.metadata[:js]
+          :truncation
+        else
+          :transaction
+        end
+      )
+    DatabaseCleaner.cleaning { example.run }
+  end
 
   config.before do
     allow_any_instance_of(Api::ApplicationController).to receive(

@@ -20,7 +20,6 @@ export const NavSandboxSelect = observer(function NavSandboxSelect() {
         onChange={setCurrentSandboxId}
         value={currentSandboxId}
         options={currentUser.jurisdiction.sandboxOptions}
-        children={""}
       />
     </FormControl>
   )

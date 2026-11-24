@@ -130,7 +130,8 @@ export const NumberFormControl = (props: IInputFormControlProps) => {
 export const PhoneFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
-      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 14 } }, props)}
+      {...props}
+      inputProps={{ type: "text", maxLength: 14, ...props.inputProps }}
       leftElement={<Phone />}
     />
   )

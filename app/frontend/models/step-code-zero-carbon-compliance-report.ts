@@ -4,10 +4,10 @@ import { EStepCodePrescriptiveValue, EZeroCarbonStep } from "../types/enums"
 
 export const StepCodeZeroCarbonComplianceReportModel = types
   .model("StepCodeZeroCarbonComplianceReportModel", {
-    proposedStep: types.maybeNull(types.enumeration<EZeroCarbonStep[]>(Object.values(EZeroCarbonStep))),
-    requiredStep: types.maybeNull(types.enumeration<EZeroCarbonStep[]>(Object.values(EZeroCarbonStep))),
-    minStep: types.maybeNull(types.enumeration<EZeroCarbonStep[]>(Object.values(EZeroCarbonStep))),
-    maxStep: types.maybeNull(types.enumeration<EZeroCarbonStep[]>(Object.values(EZeroCarbonStep))),
+    proposedStep: types.maybeNull(types.enumeration(Object.values(EZeroCarbonStep))),
+    requiredStep: types.maybeNull(types.enumeration(Object.values(EZeroCarbonStep))),
+    minStep: types.maybeNull(types.enumeration(Object.values(EZeroCarbonStep))),
+    maxStep: types.maybeNull(types.enumeration(Object.values(EZeroCarbonStep))),
     co2Passed: types.maybeNull(types.boolean),
     co2: types.maybeNull(types.string),
     co2Requirement: types.maybeNull(types.string),
@@ -16,24 +16,12 @@ export const StepCodeZeroCarbonComplianceReportModel = types
     totalGhg: types.maybeNull(types.string),
     totalGhgRequirement: types.maybeNull(types.string),
     prescriptivePassed: types.maybeNull(types.boolean),
-    prescriptiveHeating: types.maybeNull(
-      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
-    ),
-    prescriptiveHeatingRequirement: types.maybeNull(
-      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
-    ),
-    prescriptiveHotWater: types.maybeNull(
-      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
-    ),
-    prescriptiveHotWaterRequirement: types.maybeNull(
-      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
-    ),
-    prescriptiveOther: types.maybeNull(
-      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
-    ),
-    prescriptiveOtherRequirement: types.maybeNull(
-      types.enumeration<EStepCodePrescriptiveValue[]>(Object.values(EStepCodePrescriptiveValue))
-    ),
+    prescriptiveHeating: types.maybeNull(types.enumeration(Object.values(EStepCodePrescriptiveValue))),
+    prescriptiveHeatingRequirement: types.maybeNull(types.enumeration(Object.values(EStepCodePrescriptiveValue))),
+    prescriptiveHotWater: types.maybeNull(types.enumeration(Object.values(EStepCodePrescriptiveValue))),
+    prescriptiveHotWaterRequirement: types.maybeNull(types.enumeration(Object.values(EStepCodePrescriptiveValue))),
+    prescriptiveOther: types.maybeNull(types.enumeration(Object.values(EStepCodePrescriptiveValue))),
+    prescriptiveOtherRequirement: types.maybeNull(types.enumeration(Object.values(EStepCodePrescriptiveValue))),
   })
   .extend(withEnvironment())
   .views((self) => ({

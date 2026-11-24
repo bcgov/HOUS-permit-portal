@@ -31,7 +31,7 @@ function mapsSearchUrl(address: string): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address.trim())}`
 }
 
-function getValidationRules(key: TContactInfoFieldKey, t: (k: string, opts?: Record<string, unknown>) => string) {
+function getValidationRules(key: TContactInfoFieldKey, t: import("i18next").TFunction) {
   const rules: Record<TContactInfoFieldKey, Record<string, unknown>> = {
     officeAddress: {
       maxLength: {

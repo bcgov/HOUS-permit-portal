@@ -349,8 +349,16 @@ export const EditPermitApplicationScreen = observer(({}: IEditPermitApplicationS
   const parentProjectPath = currentPermitApplication.projectId
     ? `/projects/${currentPermitApplication.projectId}/applications`
     : "/projects"
+  const handleSubmitClick = () => {
+    const formio = formRef.current
+    if (formio?.submit) {
+      formio.submit().catch(() => {})
+      return
+    }
+    handleScrollToBottom()
+  }
   const submitClickHandler = currentPermitApplication.canUserSubmit(currentUser)
-    ? handleScrollToBottom
+    ? handleSubmitClick
     : onSubmitBlockedModalOpen
   const showSubmitControl =
     isReviewingSubmit || formJson?.components?.some((section) => section.key === COMPLETTION_SECTION_KEY)

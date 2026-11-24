@@ -1,8 +1,6 @@
 require "rails_helper"
 
-RSpec.describe TemplateVersionPreview::ManagementService,
-               type: :service,
-               search: true do
+RSpec.describe TemplateVersionPreview::ManagementService, type: :service do
   let(:template_version) { create(:template_version, status: :draft) }
   let(:service) { described_class.new(template_version) }
 

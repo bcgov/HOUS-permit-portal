@@ -44,7 +44,13 @@ begin
     end
 
     # Use Rails' resolved configuration, including any DATABASE_URL override.
-    run!({ "RAILS_ENV" => "development" }, *bundle, "exec", "rails", "runner", <<~RUBY)
+    run!(
+      { "RAILS_ENV" => "development" },
+      *bundle,
+      "exec",
+      "rails",
+      "runner",
+      <<~RUBY
       configs = ActiveRecord::Base.configurations
       development = configs.configs_for(env_name: "development", name: "primary")
       test = configs.configs_for(env_name: "test", name: "primary")
@@ -52,6 +58,7 @@ begin
         abort "Configure separate development and test databases; see config/database.yml.local."
       end
     RUBY
+    )
 
     puts "== Preparing development database and initial seeds =="
     # Rails seeds a fresh development database; prepare test separately below.
@@ -62,16 +69,31 @@ begin
       "rails",
       "db:prepare"
     )
-    puts "== Preparing isolated test database =="
-    # Do not load development demo seeds into the test database.
-    run!(
-      { "RAILS_ENV" => "test" },
-      *bundle,
-      "exec",
-      "rails",
-      "db:create",
-      "db:migrate"
-    )
+    puts "== Preparing four isolated test databases =="
+    ["", "2", "3", "4"].each do |worker|
+      run!(
+        { "RAILS_ENV" => "test", "TEST_ENV_NUMBER" => worker },
+        *bundle,
+        "exec",
+        "rails",
+        "runner",
+        <<~'RUBY'
+          configs = ActiveRecord::Base.configurations
+          test = ActiveRecord::Base.connection_db_config
+          development = configs.configs_for(env_name: "development", name: "primary")
+          unless test.database&.end_with?("_test#{ENV.fetch("TEST_ENV_NUMBER")}") && test.database != development&.database
+            abort 'Use database: hous_permit_portal_test<%= ENV["TEST_ENV_NUMBER"] %> in config/database.yml and unset DATABASE_URL.'
+          end
+
+          # Load the schema for fresh databases and migrate existing ones without demo seeds.
+          puts "Preparing #{test.database}"
+          ActiveRecord::Tasks::DatabaseTasks.seed_loader = Object.new.tap do |loader|
+            def loader.load_seed; end
+          end
+          ActiveRecord::Tasks::DatabaseTasks.prepare_all
+        RUBY
+      )
+    end
 
     puts "== Building PDF renderer =="
     run!({ "RAILS_ENV" => "development" }, "npm", "run", "build:print")

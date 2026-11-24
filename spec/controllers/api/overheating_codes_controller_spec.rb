@@ -1,8 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Api::OverheatingCodesController,
-               type: :controller,
-               search: true do
+RSpec.describe Api::OverheatingCodesController, type: :controller do
   render_views
 
   let(:user) { create(:user) }
@@ -13,13 +11,12 @@ RSpec.describe Api::OverheatingCodesController,
     SiteConfiguration.instance.update!(overheating_tool_enabled: true)
   end
 
-  describe "POST #index" do
+  describe "POST #index", search: true do
     it "returns the current user's overheating codes" do
       mine = create(:overheating_code, creator: user, issued_to: "My Record")
       create(:overheating_code, creator: create(:user), issued_to: "Theirs")
 
-      OverheatingCode.reindex
-      OverheatingCode.search_index.refresh
+      reindex_search(OverheatingCode)
 
       post :index, params: {}, format: :json
 
@@ -31,8 +28,7 @@ RSpec.describe Api::OverheatingCodesController,
     it "does not return other users' overheating codes" do
       create(:overheating_code, creator: create(:user), issued_to: "Theirs")
 
-      OverheatingCode.reindex
-      OverheatingCode.search_index.refresh
+      reindex_search(OverheatingCode)
 
       post :index, params: {}, format: :json
 

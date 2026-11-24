@@ -1,8 +1,13 @@
 require "rails_helper"
 
-RSpec.describe TemplateVersioningService, type: :service, search: true do
+RSpec.describe TemplateVersioningService, type: :service do
   let!(:requirement_template) do
-    create(:live_full_requirement_template, sections_count: 3)
+    create(
+      :live_full_requirement_template,
+      sections_count: 3,
+      template_section_blocks_count: 2,
+      requirements_count: 2
+    )
   end
 
   describe "schedule!" do
@@ -260,7 +265,12 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         )
 
         requirement_template_2 =
-          create(:live_full_requirement_template, sections_count: 1)
+          create(
+            :live_full_requirement_template,
+            sections_count: 1,
+            template_section_blocks_count: 2,
+            requirements_count: 2
+          )
 
         TemplateVersioningService.schedule!(
           requirement_template_2,
@@ -768,7 +778,12 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
         )
 
         requirement_template_2 =
-          create(:live_full_requirement_template, sections_count: 1)
+          create(
+            :live_full_requirement_template,
+            sections_count: 1,
+            template_section_blocks_count: 2,
+            requirements_count: 2
+          )
 
         expected_deprecated_versions << TemplateVersioningService.schedule!(
           requirement_template_2,
@@ -815,7 +830,12 @@ RSpec.describe TemplateVersioningService, type: :service, search: true do
     it "publishes valid versions and reports invalid versions" do
       invalid_template = requirement_template
       valid_template =
-        create(:live_full_requirement_template, sections_count: 1)
+        create(
+          :live_full_requirement_template,
+          sections_count: 1,
+          template_section_blocks_count: 2,
+          requirements_count: 2
+        )
       invalid_version = nil
       valid_version = nil
 

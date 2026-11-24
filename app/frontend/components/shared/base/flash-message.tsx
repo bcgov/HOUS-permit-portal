@@ -2,6 +2,7 @@ import { ToastPosition, useToast } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React, { useEffect } from "react"
 import { useMst } from "../../../setup/root"
+import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "./custom-message-box"
 
 export const FlashMessage = observer(() => {
@@ -14,11 +15,19 @@ export const FlashMessage = observer(() => {
       toast({
         title,
         description,
-        status,
+        status: status === EFlashMessageStatus.special ? "info" : status,
         isClosable,
         duration,
         position: position as ToastPosition,
-        render: ({ description, ...rest }) => <CustomMessageBox description={description as string} {...rest} />,
+        render: ({ onClose }) => (
+          <CustomMessageBox
+            title={title}
+            description={description}
+            status={status}
+            isClosable={isClosable}
+            onClose={onClose}
+          />
+        ),
       })
     }
   }, [isVisible, status, title, description])

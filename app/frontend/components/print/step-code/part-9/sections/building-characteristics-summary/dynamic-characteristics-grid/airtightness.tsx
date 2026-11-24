@@ -29,15 +29,15 @@ export function Airtightness({ checklist }: IProps) {
           <ReportStack>
             <ReportRow>
               <ReportMetric value={t(`${i18nPrefix}.ach`)} />
-              <ReportMetric value={checklist.ach} />
+              <ReportMetric value={checklist.selectedReport?.energy.ach} />
             </ReportRow>
             <ReportRow>
               <ReportMetric value={t(`${i18nPrefix}.nla`)} />
-              <ReportMetric value={checklist.nla} />
+              <ReportMetric value={checklist.selectedReport?.energy.nla} />
             </ReportRow>
             <ReportRow>
               <ReportMetric value={t(`${i18nPrefix}.nlr`)} />
-              <ReportMetric value={checklist.nlr} />
+              <ReportMetric value={checklist.selectedReport?.energy.nlr} />
             </ReportRow>
           </ReportStack>
         </ReportCell>

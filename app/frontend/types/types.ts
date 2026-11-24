@@ -8,6 +8,7 @@ import {
   EBaselineOccupancyKey,
   EBaselinePerformanceRequirement,
   ECollaboratorType,
+  EConditionalOperator,
   EDocumentReferenceDocumentType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
@@ -173,7 +174,7 @@ export interface IRequirementOptions {
   conditional?: TConditional
   computedCompliance?: TComputedCompliance
   energyStepCode?: string
-  dataValidation?: Object
+  dataValidation?: import("./api-request").IDataValidation
 }
 
 export interface IFormJson {
@@ -600,7 +601,7 @@ export type TConditional = {
   show: boolean
   when: string
   eq: string
-  operator: string
+  operator: EConditionalOperator
 }
 
 export interface ILinkItem {

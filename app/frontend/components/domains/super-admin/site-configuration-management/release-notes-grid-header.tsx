@@ -60,7 +60,7 @@ const RELEASE_NOTE_GRID_HEADER_COLUMNS = [
     i18nKey: "releaseNote.columns.actions",
     showDivider: false,
   },
-] satisfies ReadonlyArray<ReleaseNoteGridHeaderColumn>
+] as const satisfies ReadonlyArray<ReleaseNoteGridHeaderColumn>
 
 export const ReleaseNotesGridHeaders = observer(function ReleaseNotesGridHeaders() {
   const { t } = useTranslation()

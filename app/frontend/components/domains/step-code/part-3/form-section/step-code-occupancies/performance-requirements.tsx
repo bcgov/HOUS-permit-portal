@@ -136,7 +136,7 @@ export const StepCodeOccupanciesPerformanceRequirements = observer(
   }
 )
 interface IOccupancyProps {
-  field: IStepCodeOccupancy
+  field: Omit<IStepCodeOccupancy, "modelledFloorArea"> & { modelledFloorArea: number }
   idx: number
 }
 
