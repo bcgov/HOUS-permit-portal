@@ -203,7 +203,7 @@ RSpec.describe "Api::PermitProjects", type: :request, search: true do
              as: :json
       end.not_to change(PermitProject, :count)
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "returns validation errors for invalid payloads" do
