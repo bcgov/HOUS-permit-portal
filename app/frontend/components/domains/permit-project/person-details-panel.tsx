@@ -540,39 +540,39 @@ export const PersonDetailsPanel = ({
               {isActive ? (
                 <VStack align="stretch" spacing={3}>
                   <Box as="dl">
-                    {[
-                      {
-                        label: t("permitProject.people.personalDetailsFields.name"),
-                        value: person.name || t("ui.notProvided"),
-                      },
-                      {
-                        label: t("permitProject.people.personalDetailsFields.organization"),
-                        value: person.organization || t("ui.notProvided"),
-                      },
-                      person.projectContactEmail
-                        ? {
-                            label: t("permitProject.people.personalDetailsFields.email"),
-                            value: person.projectContactEmail,
-                          }
-                        : null,
-                      person.projectContactPhone
-                        ? {
-                            label: t("permitProject.people.personalDetailsFields.phone"),
-                            value: person.projectContactPhone,
-                          }
-                        : null,
-                    ]
-                      .filter((item): item is { label: string; value: string } => item !== null)
-                      .map((item) => (
-                        <Box key={item.label} mb={2}>
-                          <Text as="dt" fontSize="xs" fontWeight="bold" color="text.secondary">
-                            {item.label}
-                          </Text>
-                          <Text as="dd" fontSize="md">
-                            {item.value}
-                          </Text>
-                        </Box>
-                      ))}
+                    {(
+                      [
+                        {
+                          label: t("permitProject.people.personalDetailsFields.name"),
+                          value: person.name || t("ui.notProvided"),
+                        },
+                        {
+                          label: t("permitProject.people.personalDetailsFields.organization"),
+                          value: person.organization || t("ui.notProvided"),
+                        },
+                        person.projectContactEmail
+                          ? {
+                              label: t("permitProject.people.personalDetailsFields.email"),
+                              value: person.projectContactEmail,
+                            }
+                          : null,
+                        person.projectContactPhone
+                          ? {
+                              label: t("permitProject.people.personalDetailsFields.phone"),
+                              value: person.projectContactPhone,
+                            }
+                          : null,
+                      ].filter((item) => item !== null) as { label: string; value: string }[]
+                    ).map((item) => (
+                      <Box key={item.label} mb={2}>
+                        <Text as="dt" fontSize="xs" fontWeight="bold" color="text.secondary">
+                          {item.label}
+                        </Text>
+                        <Text as="dd" fontSize="md">
+                          {item.value}
+                        </Text>
+                      </Box>
+                    ))}
                   </Box>
                   {isSelf && onShareContact && (hasSharedContact || !needsSharedContact) ? (
                     <Button
