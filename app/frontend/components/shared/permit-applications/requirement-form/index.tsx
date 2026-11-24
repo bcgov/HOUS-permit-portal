@@ -25,6 +25,7 @@ import { SharedSpinner } from "../../base/shared-spinner"
 import { defaultOptions, Form } from "../../chefs"
 import { ContactModal } from "../../contact/contact-modal"
 import { SafeTipTapDisplay } from "../../editor/safe-tiptap-display"
+import { RouterLink } from "../../navigation/router-link"
 import { PreviousSubmissionModal } from "../../revisions/previous-submission-modal"
 import { ResubmissionSummaryBox, resubmissionSummaryIsVisible } from "../../revisions/resubmission-summary-box"
 import { PermitApplicationSubmitModal } from "../permit-application-submit-modal"
@@ -467,6 +468,22 @@ export const RequirementForm = observer(
               description={t("permitApplication.show.templateDisabledByJurisdiction")}
               status={EFlashMessageStatus.error}
             />
+          )}
+          {permitApplication.submitterNeedsSharedContact && (
+            <CustomMessageBox status={EFlashMessageStatus.warning}>
+              <Text as="div" fontSize="md">
+                {t("permitApplication.edit.submitterContactDetailsMissing")}{" "}
+                {permitApplication.projectId && (
+                  <RouterLink
+                    to={`/projects/${permitApplication.projectId}/people?shareContact=1`}
+                    color="text.link"
+                    textDecoration="underline"
+                  >
+                    {t("permitProject.people.manageSharedContactLink")}
+                  </RouterLink>
+                )}
+              </Text>
+            </CustomMessageBox>
           )}
           {showResubmissionSummary &&
           resubmissionSummaryIsVisible(permitApplication) ? null : permitApplication?.isSubmitted ? (

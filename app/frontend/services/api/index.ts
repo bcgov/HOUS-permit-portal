@@ -434,6 +434,8 @@ export class Api {
     pin?: string
     latitude?: number
     longitude?: number
+    projectContactEmail?: string
+    projectContactPhone?: string
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
@@ -510,7 +512,6 @@ export class Api {
       lastName: string
       email: string
       roleTags?: string[]
-      contactDesignation?: EProjectContactDesignation
       access?: EProjectAccess
       allowInvite?: boolean
     }
@@ -554,8 +555,19 @@ export class Api {
   }
 
   async acceptProjectInvitation(token: string) {
-    return this.client.post<IApiResponse<{ permitProjectId: string; projectTitle: string }, Record<string, never>>>(
-      `/project_invitations/${token}/accept`
+    return this.client.post<
+      IApiResponse<{ permitProjectId: string; projectTitle: string; membershipId: string }, Record<string, never>>
+    >(`/project_invitations/${token}/accept`)
+  }
+
+  async shareProjectContactDetails(
+    permitProjectId: string,
+    membershipId: string,
+    membership: { projectContactEmail?: string; projectContactPhone?: string }
+  ) {
+    return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/share_contact_details`,
+      { membership }
     )
   }
 

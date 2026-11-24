@@ -36,7 +36,7 @@ class PermitApplication::FormJsonService
   end
 
   def remove_empty_sections
-    form_json["components"].delete_if do |component|
+    form_json["components"]&.delete_if do |component|
       component["components"].blank? || component["components"].empty?
     end
 

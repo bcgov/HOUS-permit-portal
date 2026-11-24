@@ -260,6 +260,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
   describe "PATCH /api/permit_projects/:id/memberships/:id" do
     it "updates role tags and contact designation without changing access" do
+      membership.update!(project_contact_email: "mina@example.com")
       sign_in owner
 
       patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
@@ -579,6 +580,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
     it "transfers primary contact to another member" do
       creator_membership = project.project_memberships.find_by!(user: owner)
+      membership.update!(project_contact_email: "mina@example.com")
       sign_in owner
 
       patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
@@ -597,6 +599,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
     it "clears primary on the current primary contact" do
       creator_membership = project.project_memberships.find_by!(user: owner)
+      creator_membership.update!(project_contact_email: "olivia@example.com")
       sign_in owner
 
       patch "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
@@ -753,7 +756,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
         "user_id" => nil,
         "name" => "Wanda Walls",
         "access" => "expanded",
-        "contact_designation" => "primary",
+        "contact_designation" => "none",
         "status" => "pending",
         "role_tags" => ["Architect"]
       )
@@ -828,14 +831,17 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response["data"]).to include(
         "permit_project_id" => project.id,
-        "project_title" => project.title
+        "project_title" => project.title,
+        "membership_id" => pending.id
       )
 
       pending.reload
       expect(pending.user_id).to eq(invitee.id)
       expect(pending.invitation_token).to be_nil
-      expect(pending.contact_designation).to eq("primary")
-      expect(creator_membership.reload.contact_designation).to eq("none")
+      expect(pending.contact_designation).to eq("none")
+      expect(pending.project_contact_email).to be_nil
+      expect(pending.project_contact_phone).to be_nil
+      expect(creator_membership.reload.contact_designation).to eq("primary")
     end
 
     it "rejects accepting an invitation when the person is already a member" do
@@ -1063,6 +1069,106 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
 
       expect(response).to have_http_status(:forbidden)
       expect(pending.reload).to be_pending
+    end
+  end
+
+  describe "project contact details" do
+    it "lets the member share an email or phone and keeps the account contact private" do
+      sign_in member
+      member.update!(phone_number: "2505551212")
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}/share_contact_details",
+            params: {
+              membership: {
+                project_contact_email: "project@example.com"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to include(
+        "project_contact_email" => "project@example.com",
+        "project_contact_phone" => nil
+      )
+      expect(json_response["data"]).not_to have_key("email")
+      expect(json_response["data"]["project_contact_email"]).not_to eq(
+        member.email
+      )
+      expect(membership.reload.project_contact_phone).to be_nil
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}/share_contact_details",
+            params: {
+              membership: {
+                project_contact_email: "",
+                project_contact_phone: "2505551212"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.project_contact_email).to be_nil
+      expect(membership.project_contact_phone).to eq("+12505551212")
+    end
+
+    it "refuses another member and ignores contact fields on the standing update" do
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}/share_contact_details",
+            params: {
+              membership: {
+                project_contact_email: "stolen@example.com"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(membership.reload.project_contact_email).to be_nil
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                project_contact_email: "stolen@example.com",
+                role_tags: ["Architect"]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.project_contact_email).to be_nil
+    end
+
+    it "refuses to designate a member who has not shared a contact method" do
+      sign_in owner
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                contact_designation: "alternate"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(membership.reload.contact_designation).to eq("none")
+
+      membership.update!(project_contact_email: "mina@example.com")
+
+      patch "/api/permit_projects/#{project.id}/memberships/#{membership.id}",
+            params: {
+              membership: {
+                contact_designation: "alternate"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(membership.reload.contact_designation).to eq("alternate")
     end
   end
 

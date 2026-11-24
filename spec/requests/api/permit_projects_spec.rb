@@ -129,7 +129,8 @@ RSpec.describe "Api::PermitProjects", type: :request do
              permit_project: {
                title: "Project Alpha",
                jurisdiction_id: permit_project.jurisdiction_id,
-               owner_id: other_user.id
+               owner_id: other_user.id,
+               project_contact_email: "alpha@example.com"
              }
            },
            headers: headers,
@@ -146,7 +147,8 @@ RSpec.describe "Api::PermitProjects", type: :request do
                title: "No PID Project",
                jurisdiction_id: permit_project.jurisdiction_id,
                latitude: 49.691403,
-               longitude: -123.147794
+               longitude: -123.147794,
+               project_contact_phone: "2505551212"
              }
            },
            headers: headers,
@@ -156,6 +158,45 @@ RSpec.describe "Api::PermitProjects", type: :request do
       created = PermitProject.find(json_response.dig("data", "id"))
       expect(created.latitude).to eq(BigDecimal("49.691403"))
       expect(created.longitude).to eq(BigDecimal("-123.147794"))
+    end
+
+    it "stores submitted project contact details on the owner membership" do
+      owner.update!(phone_number: "2505551212")
+
+      post "/api/permit_projects",
+           params: {
+             permit_project: {
+               title: "Contact Project",
+               jurisdiction_id: permit_project.jurisdiction_id,
+               project_contact_email: "project-only@example.com"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:created)
+      created = PermitProject.find(json_response.dig("data", "id"))
+      membership = created.project_memberships.find_by!(user: owner)
+      expect(membership.contact_designation).to eq("primary")
+      expect(membership.project_contact_email).to eq("project-only@example.com")
+      expect(membership.project_contact_email).not_to eq(owner.email)
+      expect(membership.project_contact_phone).to be_nil
+    end
+
+    it "rejects a project when no project contact method is submitted" do
+      expect do
+        post "/api/permit_projects",
+             params: {
+               permit_project: {
+                 title: "No Contact",
+                 jurisdiction_id: permit_project.jurisdiction_id
+               }
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(PermitProject, :count)
+
+      expect(response).to have_http_status(:unprocessable_entity)
     end
 
     it "returns validation errors for invalid payloads" do
@@ -516,7 +557,10 @@ RSpec.describe "Api::PermitProjects", type: :request do
           user: primary_user,
           access: :full
         )
-      primary.update!(contact_designation: :primary)
+      primary.update!(
+        contact_designation: :primary,
+        project_contact_email: "primary@example.com"
+      )
       sign_in reviewer
 
       post "/api/permit_projects/#{permit_project.id}/permit_applications",

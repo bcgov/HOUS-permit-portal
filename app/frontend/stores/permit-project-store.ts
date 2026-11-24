@@ -275,6 +275,8 @@ export const PermitProjectStoreModel = types
       pin?: string
       latitude?: number
       longitude?: number
+      projectContactEmail?: string
+      projectContactPhone?: string
     }) {
       const response = yield self.environment.api.createPermitProject(projectData)
       if (response.ok && response.data?.data) {

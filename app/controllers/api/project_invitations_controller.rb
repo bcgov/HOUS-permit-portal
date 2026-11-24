@@ -50,7 +50,11 @@ class Api::ProjectInvitationsController < Api::ApplicationController
     )
 
     render_success(
-      { permit_project_id: project_id, project_title: project_title }
+      {
+        permit_project_id: project_id,
+        project_title: project_title,
+        membership_id: @membership.id
+      }
     )
   end
 

@@ -290,6 +290,7 @@ Rails.application.routes.draw do
                 controller: "permit_projects/memberships" do
         post "search", on: :collection, to: "permit_projects/memberships#index"
         post :reinvite, on: :member
+        patch :share_contact_details, on: :member
         resources :project_grants,
                   only: %i[create destroy],
                   controller: "project_grants"
