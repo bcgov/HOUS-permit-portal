@@ -200,5 +200,6 @@ sites, goals, Tag Manager containers, archives and raw logs. The root password l
 
 **Sizing note:** a restored database is compact; a long-running one is not. InnoDB never returns
 freed space inside `matomo_session`, which is how a 1Gi volume reached ~455M in tools. Budget
-about 160M of fixed overhead (redo log, undo, system tablespace) plus data, and watch `df`; if
-usage creeps up, run `OPTIMIZE TABLE matomo_session` to reclaim the freed space.
+about 160M of fixed overhead (redo log, undo, system tablespace) plus data. The scheduled-tasks CronJob now runs
+`OPTIMIZE TABLE matomo_session` weekly (`matomo.cronJobs.scheduledTasks.sessionOptimize`) to hand that space back; watch
+`df`, and run it by hand if usage still creeps up.

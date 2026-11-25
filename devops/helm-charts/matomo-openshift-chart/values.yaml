@@ -218,6 +218,15 @@ matomo:
       schedule: "0 * * * *"
       activeDeadlineSeconds: 43200
       command: ./console scheduled-tasks:run
+      # -- Weekly OPTIMIZE TABLE on the session table, run right after the hourly purge. InnoDB never
+      # returns freed space inside a table file to the volume, and the session table is pure insert/delete
+      # churn, so on a small data volume it slowly fills the disk (tools reached ~455M of 1Gi this way).
+      # OPTIMIZE rebuilds the table online (brief metadata lock) and gives the space back.
+      # The job only acts when UTC day/hour match, so hour must be one the schedule above actually fires in.
+      sessionOptimize:
+        enabled: true
+        dayOfWeek: 7   # ISO weekday, UTC: 1=Mon ... 7=Sun
+        hour: 3        # 0-23, UTC
       resources: {}
       # PHP overrides for the scheduled-tasks job (purge can be memory-heavy).
       php:

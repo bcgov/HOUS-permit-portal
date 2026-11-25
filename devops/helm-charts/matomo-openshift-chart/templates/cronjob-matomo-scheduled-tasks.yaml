@@ -45,6 +45,16 @@ spec:
                 if (!$mysqli->connect_errno) {
                     $mysqli->query("DELETE FROM {{ .Values.db.prefix }}session WHERE modified + lifetime < UNIX_TIMESTAMP()");
                     fwrite(STDOUT, "Purged " . $mysqli->affected_rows . " expired sessions." . PHP_EOL);
+                {{- if .Values.matomo.cronJobs.scheduledTasks.sessionOptimize.enabled }}
+                    // Weekly compaction: InnoDB never hands freed space inside a table file back to the volume,
+                    // and the session table is insert/delete churn, so it only ever grows on disk.
+                    if (gmdate("N") == "{{ .Values.matomo.cronJobs.scheduledTasks.sessionOptimize.dayOfWeek | int }}" && gmdate("G") == "{{ .Values.matomo.cronJobs.scheduledTasks.sessionOptimize.hour | int }}") {
+                        $res = $mysqli->query("OPTIMIZE TABLE {{ .Values.db.prefix }}session");
+                        while ($res && ($row = $res->fetch_assoc())) {
+                            fwrite(STDOUT, "OPTIMIZE " . $row["Table"] . ": " . $row["Msg_type"] . " - " . $row["Msg_text"] . PHP_EOL);
+                        }
+                    }
+                {{- end }}
                 }
                 '
             env:
