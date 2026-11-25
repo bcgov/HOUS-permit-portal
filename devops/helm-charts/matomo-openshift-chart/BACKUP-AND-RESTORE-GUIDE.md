@@ -10,7 +10,7 @@ count-based retention), but built for MariaDB, which has no single tool with
 S3 support built in the way PostgreSQL's pgBackRest does.
 
 Run one destination, or both — they don't depend on each other. If you enable
-both, every scheduled run writes a copy to S3 *and* a copy to the PVC, each
+both, every scheduled run writes a copy to S3 _and_ a copy to the PVC, each
 with its own independent retention count, so a problem with one destination
 (bucket unreachable, PVC full) never blocks the other from succeeding.
 
@@ -30,11 +30,11 @@ credential field in `values.yaml` defaults to an empty string, and the
 recommended production path never puts a real value into a values file at
 all. Places this matters:
 
-| Field | Risk if misused | What to do instead |
-|---|---|---|
-| `backup.s3.accessKey` / `backup.s3.secretKey` | If you fill these into a values file and that file gets committed, the credential is now in git history permanently — deleting it later does not remove it from history. | Leave these blank. Set `backup.s3.createSecret: false` and create the Secret directly on the cluster (§2.2) — it never touches a file, and never a repo. |
-| `restore.confirm` / `restore.enabled` | These gate a **destructive** action (overwrites the live database). If they're ever set to their trigger values in a *persisted* values file, a routine `helm upgrade` could re-run a restore without anyone intending it. | Never set these in `values.yaml` or any `values-*.yaml` you keep. Only ever pass them as one-off `--set` flags on the specific command you're running right now (§5). |
-| Backup contents themselves | The `.sql.gz` files contain real visitor data (IPs, if not anonymized) and your Matomo superuser's password hash. Anyone with bucket read access can read this. | Restrict bucket/prefix access at the object-store level to only the service account this chart uses. Standard data-handling rules for your organization apply to backup files exactly as they do to the live database. |
+| Field                                         | Risk if misused                                                                                                                                                                                                            | What to do instead                                                                                                                                                                                                     |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `backup.s3.accessKey` / `backup.s3.secretKey` | If you fill these into a values file and that file gets committed, the credential is now in git history permanently — deleting it later does not remove it from history.                                                   | Leave these blank. Set `backup.s3.createSecret: false` and create the Secret directly on the cluster (§2.2) — it never touches a file, and never a repo.                                                               |
+| `restore.confirm` / `restore.enabled`         | These gate a **destructive** action (overwrites the live database). If they're ever set to their trigger values in a _persisted_ values file, a routine `helm upgrade` could re-run a restore without anyone intending it. | Never set these in `values.yaml` or any `values-*.yaml` you keep. Only ever pass them as one-off `--set` flags on the specific command you're running right now (§5).                                                  |
+| Backup contents themselves                    | The `.sql.gz` files contain real visitor data (IPs, if not anonymized) and your Matomo superuser's password hash. Anyone with bucket read access can read this.                                                            | Restrict bucket/prefix access at the object-store level to only the service account this chart uses. Standard data-handling rules for your organization apply to backup files exactly as they do to the live database. |
 
 If you already have real credentials in a values file from earlier
 experimentation, rotate them at the source (create a new access key,
@@ -62,15 +62,15 @@ invalidate the old one) — don't just delete the line from a future commit.
     restoring from.
 - **What the job will and won't touch (important for testing against
   storage you don't fully control):** every list/count/delete operation, on
-  *either* destination, is restricted to files matching exactly
+  _either_ destination, is restricted to files matching exactly
   `matomo-YYYYMMDD-HHMMSS.sql.gz`. Anything else already there — other
   prefixes, other apps' data, unrelated files on the PVC — is never listed,
   counted, or deleted; the job literally cannot see it as a deletion
-  candidate. Backups only ever *add* one new file per destination per run;
+  candidate. Backups only ever _add_ one new file per destination per run;
   nothing is ever written anywhere else.
 - **Bucket object-count limits (S3 only):** if your object store caps the
   total number of objects in the bucket (e.g. 500), set `backup.s3.maxObjects`
-  to that number. Before every upload the job counts *all* objects in the
+  to that number. Before every upload the job counts _all_ objects in the
   whole bucket (not just its own), and if adding one more would exceed the
   limit it first prunes its own oldest backups to make room — and if that
   still isn't enough (because something else in the bucket is consuming the
@@ -81,7 +81,7 @@ invalidate the old one) — don't just delete the line from a future commit.
   volume, sized by `backup.pvc.size`.
 - **Restore** (`templates/restore-job.yaml`): a one-off `Job`, never a
   CronJob. `restore.source` (`"s3"` or `"pvc"`) picks which destination to
-  restore *from* — use whichever one is actually intact/reachable right now.
+  restore _from_ — use whichever one is actually intact/reachable right now.
   An init container finds and stages either a named backup or the most
   recent one (`restore.backupFile: latest`) from that source, then the main
   container pipes it into `mariadb` against the live database —
@@ -137,7 +137,7 @@ so the chart never tries to manage this Secret itself:
 backup:
   s3:
     createSecret: false
-    secretName: "matomo-s3-backup"   # must match the Secret name above
+    secretName: "matomo-s3-backup" # must match the Secret name above
 ```
 
 (The chart-managed `createSecret: true` path exists only for quick local
@@ -151,18 +151,18 @@ Add to your environment's values overlay (e.g. `values-openshift-<env>.yaml`)
 ```yaml
 backup:
   enabled: true
-  schedule: "0 2 * * *"        # daily at 02:00 UTC
-  retentionCount: 14           # keep the last 14 backups on S3
-  pruneEnabled: true           # false = upload-only, never delete anything
+  schedule: "0 2 * * *" # daily at 02:00 UTC
+  retentionCount: 14 # keep the last 14 backups on S3
+  pruneEnabled: true # false = upload-only, never delete anything
   s3:
     enabled: true
     createSecret: false
     secretName: "matomo-s3-backup"
-    endpoint: "https://objectstore.example.gov.bc.ca"   # your on-prem endpoint
+    endpoint: "https://objectstore.example.gov.bc.ca" # your on-prem endpoint
     bucket: "your-bucket-name"
     path: "/matomo-backups"
-    maxObjects: 0                # e.g. 500 if your bucket enforces a hard cap
-    insecure: false             # true only for a self-signed/internal-CA endpoint
+    maxObjects: 0 # e.g. 500 if your bucket enforces a hard cap
+    insecure: false # true only for a self-signed/internal-CA endpoint
 ```
 
 Leave `backup.pvc.enabled` at its default `false` if you only want S3.
@@ -174,14 +174,14 @@ overlay:
 
 ```yaml
 backup:
-  enabled: true       # if not already set above
+  enabled: true # if not already set above
   pvc:
     enabled: true
-    createClaim: true          # chart creates the PVC; false + existingClaim to reuse one
-    size: "2Gi"                 # size for retentionCount backups + headroom (see §2.6)
-    storageClass: ""            # empty = cluster default; e.g. "netapp-file-standard"
+    createClaim: true # chart creates the PVC; false + existingClaim to reuse one
+    size: "2Gi" # size for retentionCount backups + headroom (see §2.6)
+    storageClass: "" # empty = cluster default; e.g. "netapp-file-standard"
     accessMode: ReadWriteOnce
-    retentionCount: 7           # independent of backup.retentionCount (S3's count)
+    retentionCount: 7 # independent of backup.retentionCount (S3's count)
     pruneEnabled: true
 ```
 
@@ -228,6 +228,7 @@ oc run rclone-check --rm -it --restart=Never --image=<internal-registry>/<namesp
     {"name":"RCLONE_CONFIG_S3REMOTE_SECRET_ACCESS_KEY","valueFrom":{"secretKeyRef":{"name":"matomo-s3-backup","key":"secret-key"}}}
   ]}]}}' -- rclone lsf s3remote:your-bucket-name/matomo-backups/
 ```
+
 (Or more simply: `oc exec` into any pod that already has the rclone image with these env vars set — e.g. the `matomo-db-backup` CronJob's own pod, right after a run, before it terminates — and run `rclone lsf ...` there.)
 
 **PVC:** you should see `Copy complete:` and a retention summary. Confirm the
@@ -260,7 +261,7 @@ That said, for a first dev test, still be deliberate:
 - Point `backup.s3.path` at a **brand-new folder that doesn't exist yet**,
   e.g. `/matomo-backups-dev`, not a folder that already holds other data.
   Nothing stops you reusing an existing folder — the pattern match protects
-  its *contents* — but a fresh folder means you can visually confirm the
+  its _contents_ — but a fresh folder means you can visually confirm the
   bucket listing before/after with zero ambiguity.
 - Set a low `retentionCount` (e.g. `3`) so a test loop doesn't accumulate
   objects.
@@ -273,12 +274,13 @@ That said, for a first dev test, still be deliberate:
 
 **"The bucket has a 500-object limit — is that handled?"** Only if you tell
 the chart about it — set `backup.s3.maxObjects: 500`. With that set, the job
-counts the *entire bucket's* object total (everything, not just its own
+counts the _entire bucket's_ object total (everything, not just its own
 folder) before every upload and refuses to push the count over the limit,
 pruning its own oldest backups first if that's enough to make room, and
 aborting cleanly (no upload, no delete) if it isn't. Left at the default `0`,
 no such check happens — with `retentionCount: 14` that's at most 14 objects
 from this job specifically, comfortably under 500 on its own, but:
+
 - the limit may be shared with other data already in the bucket, which this
   job has no visibility into unless `maxObjects` is set;
 - if you don't know whether the limit is per-bucket or per-prefix/folder,
@@ -341,15 +343,15 @@ Pick:
   for disaster recovery after data loss/corruption where you just want the
   freshest possible state back.
 - **A specific filename** — use this when you need to roll back to a point
-  *before* a specific bad event (e.g. a botched migration, an accidental
+  _before_ a specific bad event (e.g. a botched migration, an accidental
   bulk delete, or before a Matomo version upgrade that went wrong — see
   `UPGRADE-AND-RESTORE-GUIDE.md` for the upgrade-specific version of this
-  same concern). Pick the newest backup whose timestamp is *before* the
+  same concern). Pick the newest backup whose timestamp is _before_ the
   event you're recovering from.
 
 **A restore is a full-database replace, not a merge.** Anything written to
 the database after the backup you choose (new visits, config changes, Tag
-Manager edits) will be gone once the restore completes. If there's *any*
+Manager edits) will be gone once the restore completes. If there's _any_
 chance you'll want that data back, take a fresh backup first (§4, step 1)
 before restoring over it.
 
@@ -407,6 +409,7 @@ helm template matomo . -f values.yaml -f values-openshift.yaml -f values-openshi
 ```
 
 Notes:
+
 - `restore.source` picks the destination — use whichever one is actually
   available right now (e.g. S3 endpoint unreachable but the PVC is fine, or
   vice versa). Defaults to `"s3"` if omitted.
@@ -498,14 +501,14 @@ oc delete job matomo-db-restore-<the-jobSuffix-you-used> -n <namespace>
 
 ## 6. Troubleshooting
 
-| Symptom | Likely cause | Fix |
-|---|---|---|
-| `upload` container errors immediately, no `Uploading to ...` line | Bad endpoint/bucket/credentials | Double-check `backup.s3.endpoint`/`bucket` and that the Secret's `access-key`/`secret-key` are correct. |
-| `x509: certificate signed by unknown authority` | On-prem endpoint uses a self-signed/internal CA | Set `backup.s3.insecure: true` (and `restore.s3.insecure` if restoring from the same endpoint). |
-| Restore job never renders (`oc apply` says nothing to apply) | `restore.confirm` doesn't exactly match `yes-overwrite-database`, or `restore.enabled` wasn't set | Both are required together — this is deliberate (§0). Re-check the exact `--set` flags. |
-| `ERROR: bucket would still exceed maxObjects=... even after deleting all ... of our own backups` | Other data in the bucket (outside `backup.s3.path`) is already near/over the cap you set | Raise `maxObjects` if it's actually higher, free space at the object-store level, or point `backup.s3.path`/bucket at somewhere with headroom. Nothing was uploaded or deleted — safe to just fix and retry. |
-| `ERROR: backup.s3.path must be a dedicated folder, not the bucket root` | `backup.s3.path` was left empty or set to `/` | Set it to an actual folder name, e.g. `/matomo-backups`. |
-| `no backup found under ...` (S3) / `no backup found on PVC at ...` | Wrong `backup.s3.path`/`bucket`/`restore.source`, or genuinely no backups exist yet on that destination | List the source directly (§2.5 / §3) to confirm what's actually there — and double-check `restore.source` matches the destination you actually have backups on. |
-| `pvc-backup` container errors, `No space left on device` | `backup.pvc.size` too small for `backup.pvc.retentionCount` backups | Either raise `backup.pvc.size` (requires the PVC's StorageClass to support volume expansion, or delete and recreate the PVC) or lower `backup.pvc.retentionCount`. |
-| Restore `select` initContainer can't mount the PVC / stays `ContainerCreating` | The PVC's StorageClass is `ReadWriteOnce` and something else has it mounted read-write on a different node at the same moment (e.g. a backup CronJob run overlapping the restore) | Wait for the other pod to release it, or re-run once the backup Job has completed. If this happens often, check whether your StorageClass supports `ReadWriteMany` (`backup.pvc.accessMode`) to remove the conflict entirely. |
-| Restore `Job` name conflict / immutable field error | Reused the same `restore.jobSuffix` as a previous attempt | Use a fresh value, e.g. `$(date +%s)`, every time. |
+| Symptom                                                                                          | Likely cause                                                                                                                                                                      | Fix                                                                                                                                                                                                                           |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `upload` container errors immediately, no `Uploading to ...` line                                | Bad endpoint/bucket/credentials                                                                                                                                                   | Double-check `backup.s3.endpoint`/`bucket` and that the Secret's `access-key`/`secret-key` are correct.                                                                                                                       |
+| `x509: certificate signed by unknown authority`                                                  | On-prem endpoint uses a self-signed/internal CA                                                                                                                                   | Set `backup.s3.insecure: true` (and `restore.s3.insecure` if restoring from the same endpoint).                                                                                                                               |
+| Restore job never renders (`oc apply` says nothing to apply)                                     | `restore.confirm` doesn't exactly match `yes-overwrite-database`, or `restore.enabled` wasn't set                                                                                 | Both are required together — this is deliberate (§0). Re-check the exact `--set` flags.                                                                                                                                       |
+| `ERROR: bucket would still exceed maxObjects=... even after deleting all ... of our own backups` | Other data in the bucket (outside `backup.s3.path`) is already near/over the cap you set                                                                                          | Raise `maxObjects` if it's actually higher, free space at the object-store level, or point `backup.s3.path`/bucket at somewhere with headroom. Nothing was uploaded or deleted — safe to just fix and retry.                  |
+| `ERROR: backup.s3.path must be a dedicated folder, not the bucket root`                          | `backup.s3.path` was left empty or set to `/`                                                                                                                                     | Set it to an actual folder name, e.g. `/matomo-backups`.                                                                                                                                                                      |
+| `no backup found under ...` (S3) / `no backup found on PVC at ...`                               | Wrong `backup.s3.path`/`bucket`/`restore.source`, or genuinely no backups exist yet on that destination                                                                           | List the source directly (§2.5 / §3) to confirm what's actually there — and double-check `restore.source` matches the destination you actually have backups on.                                                               |
+| `pvc-backup` container errors, `No space left on device`                                         | `backup.pvc.size` too small for `backup.pvc.retentionCount` backups                                                                                                               | Either raise `backup.pvc.size` (requires the PVC's StorageClass to support volume expansion, or delete and recreate the PVC) or lower `backup.pvc.retentionCount`.                                                            |
+| Restore `select` initContainer can't mount the PVC / stays `ContainerCreating`                   | The PVC's StorageClass is `ReadWriteOnce` and something else has it mounted read-write on a different node at the same moment (e.g. a backup CronJob run overlapping the restore) | Wait for the other pod to release it, or re-run once the backup Job has completed. If this happens often, check whether your StorageClass supports `ReadWriteMany` (`backup.pvc.accessMode`) to remove the conflict entirely. |
+| Restore `Job` name conflict / immutable field error                                              | Reused the same `restore.jobSuffix` as a previous attempt                                                                                                                         | Use a fresh value, e.g. `$(date +%s)`, every time.                                                                                                                                                                            |

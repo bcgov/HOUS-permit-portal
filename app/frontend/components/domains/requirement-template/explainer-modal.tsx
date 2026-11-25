@@ -51,7 +51,7 @@ import useUppyS3 from "../../../hooks/use-uppy-s3"
 import { IExplainer } from "../../../models/explainer"
 import { IJurisdictionExplainer } from "../../../models/jurisdiction-explainer"
 import { IRequirementTemplate } from "../../../models/requirement-template"
-import { IExplainerParams, IUppyAttachmentFile } from "../../../types/api-request"
+import { IExplainerDocumentAttribute, IUppyAttachmentFile } from "../../../types/api-request"
 import { EFileUploadAttachmentType } from "../../../types/enums"
 import { IOption } from "../../../types/types"
 import { groupFilterOptions, shouldShowFilterGroupLabels } from "../../../utils/group-filter-options"
@@ -92,8 +92,8 @@ const extractUploadedFileKey = (file: UppyFile<{}, {}>, response: any) => {
   return key || file.name || file.id
 }
 
-const documentsAttributesForSave = (documents: IDocumentFormValue[]): IExplainerParams["documentsAttributes"] =>
-  documents.flatMap((document) => {
+const documentsAttributesForSave = (documents: IDocumentFormValue[]): IExplainerDocumentAttribute[] =>
+  documents.flatMap((document): IExplainerDocumentAttribute[] => {
     if (document._destroy) return document.id ? [{ id: document.id, _destroy: true }] : []
     if (document.id) return [{ id: document.id }]
     if (document.file) return [{ file: document.file }]

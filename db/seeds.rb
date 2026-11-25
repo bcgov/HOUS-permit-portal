@@ -21,9 +21,9 @@ north_van =
     name: "North Vancouver",
     locality_type: "corporation of the city"
   )
-north_van&.update(map_position: [49.319981, -123.072414], map_zoom: 13)
+north_van&.update!(map_position: [49.319981, -123.072414], map_zoom: 13)
 
-north_van.update(external_api_state: :j_on, allow_designated_reviewer: true)
+north_van.update!(external_api_state: :j_on, allow_designated_reviewer: true)
 
 van = Jurisdiction.find_by(name: "Vancouver")
 
@@ -149,7 +149,7 @@ Jurisdiction.all.each do |j|
       email: "#{j.name.parameterize}@laterolabs.com",
       confirmed_at: Time.now
     )
-  j.update(inbox_enabled: true, show_about_page: true)
+  j.update!(inbox_enabled: true, show_about_page: true)
 end
 
 if north_van
@@ -756,6 +756,8 @@ if north_van_projects.size >= 10
         submitted_at: submitted_at,
         viewed_at: idx % 3 == 0 ? submitted_at + 2.hours : nil,
         confirmed_date: confirmed_date,
+        contact_method:
+          (status.in?(%i[scheduled completed]) ? :videoconference : nil),
         scheduled_at:
           status.in?(%i[scheduled completed]) ? submitted_at + 1.day : nil,
         completed_at: status == :completed ? submitted_at + 3.days : nil,

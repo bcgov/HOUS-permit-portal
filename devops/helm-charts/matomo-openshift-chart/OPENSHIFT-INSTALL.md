@@ -61,11 +61,11 @@ once per database, using these steps:
 2. Visit the dashboard URL (`matomo.dashboard.hostname`) in a browser.
    - If you see the **Installation** wizard (0% progress), just continue to step 3.
    - If you instead see `Error: Matomo is already installed. Original error was
-     ...Table '...matomo_option' doesn't exist`, the pod's `config.ini.php`
+...Table '...matomo_option' doesn't exist`, the pod's `config.ini.php`
      already has database credentials in it (written automatically on every pod
      start) but the schema was never created — usually because you pointed the
      chart at a database/PVC that was never installed through the wizard.
-     Force the wizard to reappear by removing that file from the *running* pod
+     Force the wizard to reappear by removing that file from the _running_ pod
      (it will be regenerated on the next pod restart, so this is safe):
      ```bash
      oc exec -n <namespace> deploy/matomo-dashboard -c matomo -- \

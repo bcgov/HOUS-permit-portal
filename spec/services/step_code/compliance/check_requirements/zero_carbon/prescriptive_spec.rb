@@ -49,7 +49,7 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
-          hot_water: 0.8
+          hot_water: 1.1
         },
         {
           heating_furnace: 0.9,
@@ -70,9 +70,9 @@ RSpec.describe StepCode::Compliance::CheckRequirements::ZeroCarbon::Prescriptive
           heating_furnace: 0.9,
           heating_boiler: 0,
           heating_combo: 0.9,
-          hot_water: 0.8,
+          hot_water: 0.5,
           cooking: 0.2,
-          laundry: 0.6
+          laundry: 1.1
         },
         {
           heating_furnace: 0.9,

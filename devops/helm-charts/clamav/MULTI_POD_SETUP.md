@@ -11,12 +11,14 @@ This guide explains how to scale ClamAV to multiple pods with session affinity, 
 **Session Affinity (ClientIP):** Ensures that all requests from the same client IP go to the same ClamAV pod.
 
 **Why This Matters:**
+
 - ClamAV maintains connection state per pod
 - Same client always talks to same pod = consistent behavior
 - Prevents connection pooling issues across pods
 - Reduces latency (no pod switching)
 
 **How It Works:**
+
 ```
 Client 1 (IP: 10.97.1.5) --> Always goes to Pod A
 Client 2 (IP: 10.97.2.10) --> Always goes to Pod B
@@ -31,8 +33,8 @@ Client 3 (IP: 10.97.3.15) --> Always goes to Pod C
 
 ```yaml
 service:
-  sessionAffinity: ClientIP           # Sticky sessions by client IP
-  sessionAffinityTimeout: 3600        # Keep affinity for 1 hour
+  sessionAffinity: ClientIP # Sticky sessions by client IP
+  sessionAffinityTimeout: 3600 # Keep affinity for 1 hour
 ```
 
 ### 2. Pod Placement (deployment.yaml)
@@ -51,12 +53,14 @@ affinity:
 ## Scaling to Multiple Pods
 
 ### Single Pod (Current)
+
 ```bash
 helm upgrade clamav -f values.yaml -f values-dev.yaml -n bb18ab-tools
 # replicaCount: 1 (from values-dev.yaml)
 ```
 
 ### Multiple Pods (Load Distribution)
+
 ```bash
 helm upgrade clamav \
   -f values.yaml \
@@ -66,6 +70,7 @@ helm upgrade clamav \
 ```
 
 **With 3 pods:**
+
 - Pod 1: Nodes in zone A
 - Pod 2: Nodes in zone B
 - Pod 3: Nodes in zone C
@@ -78,12 +83,14 @@ helm upgrade clamav \
 ### PVC Sharing (RWO vs RWX)
 
 **Current Setup:** `ReadWriteOnce (RWO)` 500Mi PVC
+
 - ✅ Single pod: Works perfectly
 - ⚠️ Multiple pods: **Cannot share** (RWO = single mount)
 
 **Options if scaling to 3+ pods:**
 
 #### Option 1: Per-Pod PVCs (Recommended)
+
 ```yaml
 # Each pod gets its own PVC
 Pod 1 → PVC-A (500Mi)
@@ -95,6 +102,7 @@ Cons: ✗ 1.5Gi total storage needed
 ```
 
 #### Option 2: Shared PVC (RWX)
+
 ```yaml
 # All pods share one PVC
 Pod 1 ┐
@@ -106,6 +114,7 @@ Cons: ✗ Requires NFS/RWX storage, ✗ Concurrency issues
 ```
 
 #### Option 3: emptyDir with Replication Job
+
 - Each pod gets emptyDir (per-pod storage)
 - CronJob replicates databases to all pods
 
@@ -116,6 +125,7 @@ Cons: ✗ Requires NFS/RWX storage, ✗ Concurrency issues
 **1 Pod with 500Mi Persistent Storage**
 
 ✅ Pros:
+
 - Simple, no concurrency issues
 - 500Mi sufficient for 3-4 database versions
 - Auto-cleanup prevents overflow
@@ -123,6 +133,7 @@ Cons: ✗ Requires NFS/RWX storage, ✗ Concurrency issues
 - Low maintenance
 
 ⚠️ When to scale:
+
 - If single pod CPU maxes out (monitor: `oc top pods -n bb18ab-tools`)
 - If response times increase >5 seconds
 - If serving >100 concurrent clients
@@ -142,7 +153,7 @@ oc top pods -n bb18ab-tools | grep clamav
 
 # Session distribution (rough estimate from logs)
 for pod in $(oc get pods -n bb18ab-tools -o name | grep clamav); do
-  echo "=== $pod ===" 
+  echo "=== $pod ==="
   oc logs $pod -n bb18ab-tools --tail=10 | grep -c "Connection from"
 done
 ```
@@ -162,14 +173,17 @@ done
 ## Troubleshooting
 
 ### Issue: Requests going to different pods for same client
+
 - Check: `oc get svc clamav -n bb18ab-tools -o yaml | grep sessionAffinity`
 - Should show: `sessionAffinity: ClientIP`
 
 ### Issue: Uneven load distribution (all traffic to one pod)
+
 - Likely: Only 1 unique client IP (common in proxied setups)
 - Solution: Load balance at client level, or use `sessionAffinity: None` (then add HAProxy/Ingress load balancing)
 
 ### Issue: Pod anti-affinity preventing scale-up
+
 - Error: "pod does not fit on any node"
 - Solution: Have ≥3 nodes with available resources, or relax anti-affinity
 
@@ -178,12 +192,14 @@ done
 ## Summary
 
 ✅ **Current Configuration is Optimal for:**
+
 - Single pod, single or multiple clients
 - Session affinity ensures consistency
 - Pod anti-affinity spreads load across nodes
 - 500Mi PVC with auto-cleanup handles storage efficiently
 
 🚀 **To Scale Further:**
+
 1. Monitor current pod metrics
 2. When needed, set `replicaCount: 2-3` (requires review of PVC strategy)
 3. Ensure sufficient nodes (one pod per node minimum)

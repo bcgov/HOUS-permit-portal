@@ -1138,7 +1138,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_22_120000) do
     t.jsonb "windows_glazed_doors", default: {"lines" => [{}], "performance_type" => "usi"}
     t.jsonb "doors_lines", default: [{"performance_type" => "rsi"}]
     t.jsonb "airtightness", default: {}
-    t.jsonb "space_heating_cooling_lines", default: [{"variant" => "principal"}, {"variant" => "secondary"}]
+    t.jsonb "space_heating_cooling_lines", default: [{}, {}, {}, {}]
     t.jsonb "hot_water_lines", default: [{"performance_type" => "ef"}]
     t.jsonb "ventilation_lines", default: [{}]
     t.jsonb "other_lines", default: [{}]
