@@ -151,8 +151,9 @@ export const Part9StepCodeChecklistModel = types.snapshotProcessor(
         )
 
         // HUB-5472: Rev. 7 four open heating/cooling lines — pad without dropping existing rows.
+        // Read the snapshot: renameKeys is untyped and returns {}.
         const OPEN_LINE_COUNT = 4
-        const bcs = values.buildingCharacteristicsSummaryAttributes
+        const bcs = snapshot.buildingCharacteristicsSummary
         if (!bcs) return values
 
         const lines = [...(bcs.spaceHeatingCoolingLines || [])]
