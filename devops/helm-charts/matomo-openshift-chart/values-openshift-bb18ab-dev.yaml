@@ -12,7 +12,7 @@ defaultResources:
     memory: 25Mi
 
 matomo:
-  image: matomo:5.12.0-fpm
+  image: matomo:5.14.2-fpm
   runAsUser: null
   resources:
     requests:
@@ -83,7 +83,9 @@ db:
   image: mariadb:11.4
   collation: "utf8mb4_uca1400_ai_ci"
   storage:
-    size: 1Gi
+    # 500Mi (was 1Gi). A PVC cannot be shrunk and volumeClaimTemplates are immutable, so changing
+    # this on a RUNNING release needs the runbook in UPGRADE-AND-RESTORE-GUIDE.md ("Shrinking the DB volume").
+    size: 500Mi
     storageClass: ""
     mountPath: /var/lib/mysql
   temp:
@@ -101,7 +103,7 @@ db:
     limits:
       memory: 1Gi
 backup:
-  enabled: false
+  enabled: true    # live: dev runs the nightly S3 backup (PVC destination stays off)
   schedule: "0 2 * * *"
   retentionCount: 3            # low count while testing
   pruneEnabled: true

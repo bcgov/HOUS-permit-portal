@@ -154,6 +154,7 @@ matomo:
     max_requests: 500
     process_idle_timeout: "480s"
     memory_limit: "2048M"
+    sessionUploadProgress: false  # PHP2Shell (CVE-2026-109619) workaround; keep off
     status_path: "/status"
   # Post install for helm chart. Starts a post-install-job.
   postInstallSleepTime: 5
@@ -344,6 +345,7 @@ matomo:
       min_spare_servers: 5
       max_spare_servers: 75
       memory_limit: "2048M"
+      sessionUploadProgress: false  # PHP2Shell (CVE-2026-109619) workaround; keep off
       status_path: "/status"
     ingressClassName: ""
     ingress:
