@@ -19,6 +19,11 @@ class ProjectMembershipPolicy < ApplicationPolicy
     project_access.manage_member_standing?
   end
 
+  # The member's own project email and phone. Not the standing update.
+  def share_contact_details?
+    own_membership?
+  end
+
   def update_role_tags?
     project_access.edit_role_tags?(record)
   end

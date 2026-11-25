@@ -1,4 +1,19 @@
-import { Avatar, Box, Button, Flex, HStack, IconButton, Radio, RadioGroup, Text, VStack } from "@chakra-ui/react"
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+  HStack,
+  IconButton,
+  Input,
+  Radio,
+  RadioGroup,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
 import { CaretLeft, X } from "@phosphor-icons/react"
 import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -29,6 +44,7 @@ interface IPersonDetailsPanelProps {
   primaryContactName?: string | null
   alternateContactNames?: string[]
   isSaving: boolean
+  startSharing?: boolean
   onClose: () => void
   onSave: (changes: {
     roleTags?: string[]
@@ -36,11 +52,14 @@ interface IPersonDetailsPanelProps {
     access?: EProjectAccess
     allowInvite?: boolean
   }) => void
+  onShareContact?: (details: { projectContactEmail?: string; projectContactPhone?: string }) => Promise<boolean>
   onReinvite?: () => Promise<boolean>
   onRemove: () => void
 }
 
-type TPanelView = "summary" | "role" | "contact" | "access" | "resend"
+type TPanelView = "summary" | "role" | "contact" | "access" | "resend" | "share"
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const SectionDivider = () => (
   <Box as="hr" w="full" flexShrink={0} my={0} border="0" borderTop="1px solid" borderColor="border.light" />
@@ -329,8 +348,10 @@ export const PersonDetailsPanel = ({
   primaryContactName,
   alternateContactNames,
   isSaving,
+  startSharing = false,
   onClose,
   onSave,
+  onShareContact,
   onReinvite,
   onRemove,
 }: IPersonDetailsPanelProps) => {
@@ -341,12 +362,32 @@ export const PersonDetailsPanel = ({
   const [draftRoles, setDraftRoles] = useState<string[]>([])
   const [draftContact, setDraftContact] = useState<EProjectContactDesignation>(person.contactDesignation)
   const [draftAccess, setDraftAccess] = useState<EProjectAccess | null>(person.access)
+  const [draftEmail, setDraftEmail] = useState("")
+  const [draftPhone, setDraftPhone] = useState("")
+  const [shareError, setShareError] = useState<string | null>(null)
   const [resent, setResent] = useState(false)
+  const hasSharedContact = Boolean(person.projectContactEmail || person.projectContactPhone)
+  const isDesignatedContact =
+    person.contactDesignation === EProjectContactDesignation.primary ||
+    person.contactDesignation === EProjectContactDesignation.alternate
+  const needsSharedContact = isActive && isDesignatedContact && !hasSharedContact
+  const canDesignateContact = canManageStanding && isActive && hasSharedContact
+
+  const fillShareDrafts = () => {
+    setDraftEmail(person.projectContactEmail ?? "")
+    setDraftPhone(person.projectContactPhone ?? "")
+    setShareError(null)
+  }
 
   useEffect(() => {
-    setView("summary")
     setResent(false)
-  }, [person.id])
+    if (startSharing) {
+      fillShareDrafts()
+      setView("share")
+      return
+    }
+    setView("summary")
+  }, [person.id, startSharing])
 
   const contactLabel = (designation: EProjectContactDesignation) => {
     if (designation === EProjectContactDesignation.primary) return t("permitProject.people.primaryContact")
@@ -363,6 +404,11 @@ export const PersonDetailsPanel = ({
 
   const openResendView = () => setView("resend")
 
+  const openShareView = () => {
+    fillShareDrafts()
+    setView("share")
+  }
+
   const handleSendReinvite = async () => {
     if (!onReinvite) return
     const ok = await onReinvite()
@@ -375,6 +421,22 @@ export const PersonDetailsPanel = ({
   const backToSummary = () => setView("summary")
 
   const save = async () => {
+    if (view === "share") {
+      const email = draftEmail.trim()
+      const phone = draftPhone.trim()
+      if (email && !EMAIL_PATTERN.test(email)) {
+        setShareError(t("permitProject.people.shareContactEmailInvalid"))
+        return
+      }
+      setShareError(null)
+      if (!email && !phone && !hasSharedContact) {
+        setView("summary")
+        return
+      }
+      const saved = await onShareContact?.({ projectContactEmail: email, projectContactPhone: phone })
+      if (saved) setView("summary")
+      return
+    }
     if (view === "role" && !sameTags(draftRoles, person.roleTags)) {
       await Promise.resolve(onSave({ roleTags: draftRoles }))
     }
@@ -480,36 +542,65 @@ export const PersonDetailsPanel = ({
                   <Box as="dl">
                     {(
                       [
-                        { label: t("permitProject.people.personalDetailsFields.name"), value: person.name },
+                        {
+                          label: t("permitProject.people.personalDetailsFields.name"),
+                          value: person.name || t("ui.notProvided"),
+                        },
                         {
                           label: t("permitProject.people.personalDetailsFields.organization"),
-                          value: person.organization,
+                          value: person.organization || t("ui.notProvided"),
                         },
-                      ] as const
+                        person.projectContactEmail
+                          ? {
+                              label: t("permitProject.people.personalDetailsFields.email"),
+                              value: person.projectContactEmail,
+                            }
+                          : null,
+                        person.projectContactPhone
+                          ? {
+                              label: t("permitProject.people.personalDetailsFields.phone"),
+                              value: person.projectContactPhone,
+                            }
+                          : null,
+                      ].filter((item) => item !== null) as { label: string; value: string }[]
                     ).map((item) => (
                       <Box key={item.label} mb={2}>
                         <Text as="dt" fontSize="xs" fontWeight="bold" color="text.secondary">
                           {item.label}
                         </Text>
                         <Text as="dd" fontSize="md">
-                          {item.value || t("ui.notProvided")}
+                          {item.value}
                         </Text>
                       </Box>
                     ))}
                   </Box>
-                  <Text fontSize="sm" color="text.secondary">
-                    {isSelf ? (
-                      <>
-                        {t("permitProject.people.personalDetailsSelfPrefix")}
-                        <RouterLink to="/profile" color="text.link">
-                          {t("permitProject.people.personalDetailsSelfLink")}
-                        </RouterLink>
-                        .
-                      </>
-                    ) : (
-                      t("permitProject.people.personalDetailsOtherNote")
-                    )}
-                  </Text>
+                  {isSelf && onShareContact && (hasSharedContact || !needsSharedContact) ? (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      h="auto"
+                      minH={0}
+                      px={0}
+                      alignSelf="flex-start"
+                      fontWeight="normal"
+                      textDecoration="underline"
+                      whiteSpace="normal"
+                      textAlign="left"
+                      onClick={openShareView}
+                    >
+                      {t(
+                        hasSharedContact
+                          ? "permitProject.people.manageSharedContactLink"
+                          : "permitProject.people.shareContactLink"
+                      )}
+                    </Button>
+                  ) : (
+                    !isSelf && (
+                      <Text fontSize="sm" color="text.secondary">
+                        {t("permitProject.people.personalDetailsOtherNote")}
+                      </Text>
+                    )
+                  )}
                 </VStack>
               ) : (
                 <Text fontSize="md">{t("permitProject.people.personalDetailsPlaceholder")}</Text>
@@ -565,7 +656,45 @@ export const PersonDetailsPanel = ({
               </Text>
               <VStack align="stretch" spacing={3}>
                 <Text fontSize="md">{contactLabel(person.contactDesignation)}</Text>
-                {changeButton("contact", canManageStanding)}
+                {needsSharedContact && (
+                  <CustomMessageBox status={EFlashMessageStatus.warning}>
+                    <Text as="div" fontSize="md">
+                      {t(
+                        isSelf
+                          ? "permitProject.people.contactDetailsMissingSelf"
+                          : "permitProject.people.contactDetailsMissing"
+                      )}
+                      {isSelf && onShareContact && (
+                        <>
+                          {" "}
+                          <Button
+                            variant="link"
+                            size="sm"
+                            h="auto"
+                            minH={0}
+                            px={0}
+                            fontWeight="normal"
+                            textDecoration="underline"
+                            whiteSpace="normal"
+                            textAlign="left"
+                            onClick={openShareView}
+                          >
+                            {t("permitProject.people.manageSharedContactLink")}
+                          </Button>
+                        </>
+                      )}
+                    </Text>
+                  </CustomMessageBox>
+                )}
+                {canManageStanding &&
+                  isActive &&
+                  !hasSharedContact &&
+                  person.contactDesignation === EProjectContactDesignation.none && (
+                    <Text fontSize="sm" color="text.secondary">
+                      {t("permitProject.people.cannotBeProjectContact")}
+                    </Text>
+                  )}
+                {changeButton("contact", canDesignateContact)}
               </VStack>
             </Box>
 
@@ -680,6 +809,29 @@ export const PersonDetailsPanel = ({
             onBack={backToSummary}
             onDraftRolesChange={setDraftRoles}
           />
+        )}
+        {view === "share" && (
+          <VStack align="stretch" spacing={4}>
+            <BackLink onClick={backToSummary} />
+            <Text {...sectionTitleProps}>{t("permitProject.people.shareContactTitle")}</Text>
+            <Text fontSize="md" lineHeight="1.68">
+              {t("permitProject.people.shareContactIntro")}
+            </Text>
+            <FormControl isInvalid={!!shareError}>
+              <FormLabel fontWeight="bold">{t("permitProject.people.personalDetailsFields.email")}</FormLabel>
+              <Input
+                type="email"
+                value={draftEmail}
+                bg="greys.white"
+                onChange={(event) => setDraftEmail(event.target.value)}
+              />
+              <FormErrorMessage>{shareError}</FormErrorMessage>
+            </FormControl>
+            <FormControl>
+              <FormLabel fontWeight="bold">{t("permitProject.people.personalDetailsFields.phone")}</FormLabel>
+              <Input value={draftPhone} bg="greys.white" onChange={(event) => setDraftPhone(event.target.value)} />
+            </FormControl>
+          </VStack>
         )}
         {view === "contact" && (
           <ContactEditor

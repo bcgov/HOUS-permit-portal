@@ -102,6 +102,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       missingPdfs: types.maybeNull(types.array(types.string)),
       reportGenerationIssues: types.optional(types.frozen<IReportGenerationIssue[]>(), []),
       isFullyLoaded: types.optional(types.boolean, false),
+      submitterNeedsSharedContact: types.optional(types.boolean, false),
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),

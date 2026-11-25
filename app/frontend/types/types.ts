@@ -702,6 +702,8 @@ export interface IProjectPerson {
   roleTags: string[]
   access: EProjectAccess | null
   contactDesignation: EProjectContactDesignation
+  projectContactEmail?: string | null
+  projectContactPhone?: string | null
   status: EProjectMembershipStatus
   canEditRoleTags: boolean
   allowInvite?: boolean
@@ -739,6 +741,12 @@ export interface IProjectInvitation {
   invitedByName?: string | null
   status: EProjectMembershipStatus
   alreadyMember?: boolean
+}
+
+export interface IAcceptedProjectInvitation {
+  permitProjectId: string
+  projectTitle: string
+  membershipId: string
 }
 
 export interface IPermitProjectSearchFilters {

@@ -2,7 +2,8 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
   include Api::Concerns::Search::ProjectMemberships
 
   before_action :set_permit_project
-  before_action :set_membership, only: %i[update destroy reinvite]
+  before_action :set_membership,
+                only: %i[update destroy reinvite share_contact_details]
 
   # Authorized by the project; rows are filtered in membership_where.
   skip_after_action :verify_policy_scoped, only: :index
@@ -26,8 +27,7 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
         invited_first_name: create_membership_params[:first_name],
         invited_last_name: create_membership_params[:last_name],
         invited_email: create_membership_params[:email],
-        contact_designation:
-          create_membership_params[:contact_designation].presence || :none,
+        contact_designation: :none,
         access: create_membership_params[:access].presence || :limited,
         role_tags: create_membership_params[:role_tags] || []
       )
@@ -105,6 +105,34 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
     end
 
     deliver_invitation(@membership, raw_token)
+
+    render_success @membership.reload,
+                   nil,
+                   {
+                     blueprint: ProjectMembershipBlueprint,
+                     blueprint_opts: membership_blueprint_opts
+                   }
+  end
+
+  def share_contact_details
+    authorize @membership
+
+    unless @membership.update(contact_detail_params)
+      return(
+        render_error(
+          "project_membership.update_error",
+          {
+            status: :unprocessable_content,
+            message_opts: {
+              error_message: @membership.errors.full_messages.join(", ")
+            },
+            log_args: {
+              errors: @membership.errors.full_messages
+            }
+          }
+        )
+      )
+    end
 
     render_success @membership.reload,
                    nil,
@@ -242,9 +270,15 @@ class Api::PermitProjects::MembershipsController < Api::ApplicationController
       :first_name,
       :last_name,
       :email,
-      :contact_designation,
       :access,
       role_tags: []
+    )
+  end
+
+  def contact_detail_params
+    params.require(:membership).permit(
+      :project_contact_email,
+      :project_contact_phone
     )
   end
 

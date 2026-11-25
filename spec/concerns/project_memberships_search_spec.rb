@@ -1,6 +1,8 @@
 require "rails_helper"
 
-RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
+RSpec.describe Api::Concerns::Search::ProjectMemberships,
+               type: :controller,
+               search: true do
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::ProjectMemberships
   end
@@ -65,8 +67,14 @@ RSpec.describe Api::Concerns::Search::ProjectMemberships, type: :controller do
       let(:search_params) { { query: "", page: 1, per_page: 10 } }
 
       it "names the primary contact and every alternate" do
-        architect_membership.update!(contact_designation: :alternate)
-        builder_membership.update!(contact_designation: :alternate)
+        architect_membership.update!(
+          contact_designation: :alternate,
+          project_contact_email: "architect@example.com"
+        )
+        builder_membership.update!(
+          contact_designation: :alternate,
+          project_contact_phone: "2505551212"
+        )
         controller.perform_project_membership_search
 
         meta = controller.project_people_meta

@@ -42,6 +42,7 @@ class ProjectMembership < ApplicationRecord
        validate: true
 
   before_validation :normalize_invited_fields
+  before_validation :normalize_project_contact_fields
 
   validates :user_id, uniqueness: { scope: :permit_project_id }, allow_nil: true
   validates :invited_first_name,
@@ -54,9 +55,17 @@ class ProjectMembership < ApplicationRecord
               with: URI::MailTo::EMAIL_REGEXP
             },
             if: -> { user_id.nil? }
+  validates :project_contact_email,
+            format: {
+              with: URI::MailTo::EMAIL_REGEXP
+            },
+            allow_blank: true
+  validates :project_contact_phone, phone: true, allow_blank: true
   validate :unique_pending_or_active_invited_email, if: -> { user_id.nil? }
   validate :one_primary_contact
   validate :keeps_a_full_member, on: :update
+  # on: :update — a new project's owner is created as primary.
+  validate :shared_contact_for_designation, on: :update
 
   # dependent: :nullify runs in definition order. Prepend so a blocked
   # destroy aborts before the foreign key is cleared.
@@ -125,6 +134,32 @@ class ProjectMembership < ApplicationRecord
     self.invited_email = invited_email&.strip&.downcase
     self.invited_first_name = invited_first_name&.strip
     self.invited_last_name = invited_last_name&.strip
+  end
+
+  def normalize_project_contact_fields
+    return unless has_attribute?(:project_contact_email)
+
+    self.project_contact_email =
+      project_contact_email.to_s.strip.downcase.presence
+    self.project_contact_phone = project_contact_phone.to_s.strip.presence
+    return if project_contact_phone.blank?
+
+    parsed = Phonelib.parse(project_contact_phone)
+    self.project_contact_phone = parsed.e164 if parsed.valid?
+  end
+
+  # A primary or alternate must already be an active member who shared a
+  # project email or phone. Existing designations are left in place.
+  def shared_contact_for_designation
+    return unless will_save_change_to_contact_designation?
+    return if none?
+    return if active? && project_contact_provided?
+
+    errors.add(:contact_designation, :shared_contact_required)
+  end
+
+  def project_contact_provided?
+    project_contact_email.present? || project_contact_phone.present?
   end
 
   def unique_pending_or_active_invited_email

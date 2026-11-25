@@ -1,7 +1,12 @@
 class ProjectMembershipBlueprint < Blueprinter::Base
   identifier :id
 
-  fields :user_id, :access, :contact_designation, :status
+  fields :user_id,
+         :access,
+         :contact_designation,
+         :status,
+         :project_contact_email,
+         :project_contact_phone
 
   field :name do |membership|
     membership.display_name

@@ -10,6 +10,8 @@ export const ProjectMembershipModel = types.model("ProjectMembershipModel", {
   roleTags: types.optional(types.array(types.string), []),
   access: types.maybeNull(types.enumeration(Object.values(EProjectAccess))),
   contactDesignation: types.enumeration(Object.values(EProjectContactDesignation)),
+  projectContactEmail: types.optional(types.maybeNull(types.string), null),
+  projectContactPhone: types.optional(types.maybeNull(types.string), null),
   status: types.enumeration(Object.values(EProjectMembershipStatus)),
   canEditRoleTags: types.optional(types.boolean, false),
   allowInvite: types.optional(types.boolean, false),

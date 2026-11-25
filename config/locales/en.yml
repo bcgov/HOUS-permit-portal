@@ -124,6 +124,8 @@ en:
             invited_email:
               already_member: "is already a member of this project."
               already_invited: "already has a pending invitation for this project."
+            contact_designation:
+              shared_contact_required: "can only be set for an active member who has shared an email address or phone number."
         submission_contact:
           last_confirmed_contact: "cannot be deleted while %{feature} is enabled. Turn the setting off before deleting the last confirmed contact."
         part3_occupancy_required_step:
@@ -827,6 +829,12 @@ en:
       create_error:
         title: Error
         message: "Permit project could not be created"
+      creator_contact_required:
+        title: Error
+        message: "Enter an email address, a phone number, or both."
+      creator_contact_invalid:
+        title: Error
+        message: "%{error_message}"
       pin_success:
         title: ""
         message: "Permit project pinned successfully"

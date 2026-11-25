@@ -19,15 +19,14 @@ import {
 } from "@chakra-ui/react"
 import { CaretLeft } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect } from "react"
+import React from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus, EProjectAccess, EProjectContactDesignation } from "../../../types/enums"
+import { EFlashMessageStatus, EProjectAccess } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
-import { InfoTooltip } from "../../shared/info-tooltip"
 import { RouterLink } from "../../shared/navigation/router-link"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
@@ -45,7 +44,6 @@ interface IAddProjectPersonFormValues {
   lastName: string
   email: string
   roleTags: string[]
-  contactDesignation: EProjectContactDesignation | ""
   access: EProjectAccess | ""
   allowInvite: boolean | ""
 }
@@ -58,11 +56,7 @@ export const AddProjectPersonForm = observer(({ permitProject, onCancel, onCreat
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { projectPeopleStore } = useMst()
-  const { primaryContactName, alternateContactNames, createProjectPerson, search } = projectPeopleStore
-
-  useEffect(() => {
-    search()
-  }, [permitProject.id])
+  const { createProjectPerson } = projectPeopleStore
 
   const {
     register,
@@ -76,7 +70,6 @@ export const AddProjectPersonForm = observer(({ permitProject, onCancel, onCreat
       lastName: "",
       email: "",
       roleTags: [],
-      contactDesignation: "",
       access: "",
       allowInvite: "",
     },
@@ -86,7 +79,7 @@ export const AddProjectPersonForm = observer(({ permitProject, onCancel, onCreat
   const peoplePath = `/projects/${permitProject.id}/people`
 
   const onSubmit = async (values: IAddProjectPersonFormValues) => {
-    if (!values.contactDesignation || !values.access) return
+    if (!values.access) return
     if (values.access === EProjectAccess.expanded && typeof values.allowInvite !== "boolean") return
 
     const created = await createProjectPerson({
@@ -94,7 +87,6 @@ export const AddProjectPersonForm = observer(({ permitProject, onCancel, onCreat
       lastName: values.lastName.trim(),
       email: values.email.trim(),
       roleTags: values.roleTags,
-      contactDesignation: values.contactDesignation,
       access: values.access,
       ...(typeof values.allowInvite === "boolean" ? { allowInvite: values.allowInvite } : {}),
     })
@@ -109,14 +101,9 @@ export const AddProjectPersonForm = observer(({ permitProject, onCancel, onCreat
     errors.firstName && { id: "add-person-first-name", message: errors.firstName.message },
     errors.lastName && { id: "add-person-last-name", message: errors.lastName.message },
     errors.email && { id: "add-person-email", message: errors.email.message },
-    errors.contactDesignation && { id: "add-person-contact-designation", message: errors.contactDesignation.message },
     errors.access && { id: "add-person-access", message: errors.access.message },
     errors.allowInvite && { id: "add-person-allow-invite", message: errors.allowInvite.message },
   ].filter(Boolean) as { id: string; message?: string }[]
-
-  const resolvedPrimaryName = primaryContactName || permitProject.ownerName || t("permitProject.people.notAssigned")
-  const resolvedAlternateNames =
-    alternateContactNames.length > 0 ? alternateContactNames.join(", ") : t("permitProject.people.notAssigned")
 
   const form = (
     <Box as="form" onSubmit={handleSubmit(onSubmit)} noValidate maxW="640px" w="full">
@@ -223,78 +210,6 @@ export const AddProjectPersonForm = observer(({ permitProject, onCancel, onCreat
             name="roleTags"
             control={control}
             render={({ field }) => <ProjectRoleSelect roleTags={field.value} onChange={field.onChange} />}
-          />
-        </VStack>
-
-        <SectionDivider />
-
-        <VStack align="stretch" spacing={4}>
-          <Box>
-            <Heading as="h3" size="md" mb={1}>
-              {t("permitProject.people.projectContacts")}
-            </Heading>
-            <Text fontSize="md" color="text.secondary">
-              {t("permitProject.people.projectContactsDescription")}
-            </Text>
-          </Box>
-
-          <VStack
-            align="stretch"
-            spacing={2}
-            p={4}
-            bg="greys.grey03"
-            borderRadius="md"
-            border="1px solid"
-            borderColor="border.light"
-          >
-            <Flex justify="space-between" gap={4}>
-              <Text fontWeight="bold" fontSize="sm">
-                {t("permitProject.people.primaryContact")}
-              </Text>
-              <Text fontSize="sm">{resolvedPrimaryName}</Text>
-            </Flex>
-            <Flex justify="space-between" gap={4}>
-              <Text fontWeight="bold" fontSize="sm">
-                {t("permitProject.people.alternateContact")}
-              </Text>
-              <Text fontSize="sm">{resolvedAlternateNames}</Text>
-            </Flex>
-          </VStack>
-
-          <Controller
-            name="contactDesignation"
-            control={control}
-            rules={{ required: t("permitProject.people.contactDesignationRequired") }}
-            render={({ field }) => (
-              <FormControl as="fieldset" isInvalid={Boolean(errors.contactDesignation)}>
-                <FormLabel as="legend" fontWeight="bold" mb={2}>
-                  <HStack spacing={2} align="center">
-                    <Text as="span">{t("permitProject.people.makeProjectContactPrompt")}</Text>
-                    <InfoTooltip
-                      hasArrow
-                      placement="top"
-                      openDelay={200}
-                      maxW="320px"
-                      whiteSpace="normal"
-                      label={t("permitProject.people.contactEmailHelp")}
-                      ariaLabel={t("permitProject.people.contactEmailHelp")}
-                    />
-                  </HStack>
-                </FormLabel>
-                <RadioGroup value={field.value} onChange={field.onChange}>
-                  <VStack align="flex-start" spacing={2}>
-                    <Radio id="add-person-contact-designation" value={EProjectContactDesignation.primary}>
-                      {t("permitProject.people.contactChoicePrimary")}
-                    </Radio>
-                    <Radio value={EProjectContactDesignation.alternate}>
-                      {t("permitProject.people.contactChoiceAlternate")}
-                    </Radio>
-                    <Radio value={EProjectContactDesignation.none}>{t("permitProject.people.contactChoiceNone")}</Radio>
-                  </VStack>
-                </RadioGroup>
-                <FormErrorMessage>{errors.contactDesignation?.message}</FormErrorMessage>
-              </FormControl>
-            )}
           />
         </VStack>
 

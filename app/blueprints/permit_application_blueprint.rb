@@ -127,6 +127,15 @@ class PermitApplicationBlueprint < Blueprinter::Base
       true
     end
 
+    # The application contact who has not shared a project email or phone.
+    field :submitter_needs_shared_contact do |pa, options|
+      membership = pa.submitter_membership
+      user = options[:current_user]
+      membership.present? && user.present? && membership.user_id == user.id &&
+        membership.project_contact_email.blank? &&
+        membership.project_contact_phone.blank?
+    end
+
     # The caller's project access. The UI hides what the API refuses.
     field :current_user_access do |pa, options|
       ProjectAccess.new(

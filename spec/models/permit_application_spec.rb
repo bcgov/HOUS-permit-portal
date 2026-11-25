@@ -24,7 +24,10 @@ RSpec.describe PermitApplication, type: :model do
           permit_project: project,
           user: create(:user, :submitter)
         )
-      replacement.update!(contact_designation: :primary)
+      replacement.update!(
+        contact_designation: :primary,
+        project_contact_email: "replacement@example.com"
+      )
 
       expect(application.reload.submitter_membership).to eq(owner_membership)
       expect(application.submitter).to eq(project.owner)
@@ -168,7 +171,7 @@ RSpec.describe PermitApplication, type: :model do
                "ProjectMembership"
              ).optional
     end
-    it { should belong_to(:permit_project).optional }
+    it { should belong_to(:permit_project) }
   end
 
   describe "enums" do
