@@ -22,28 +22,20 @@ jobs:
 
     steps:
       - name: Checkout Workflow Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Deploy to OpenShift
         uses: ./.github/actions/openshift-deploy
         with:
           branch: ${{ github.event.inputs.branch }}
           github_token: ${{ github.token }}
+          sentry_auth_token: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          sentry_upload_sourcemaps: ${{ vars.SENTRY_UPLOAD_SOURCEMAPS || 'false' }}
           deployment_environment: test
           environment_label: Test
           image_name: test-hous-permit-portal
-          build_args: |
-            VITE_ENABLE_TEMPLATE_FORCE_PUBLISH=${{ vars.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH }}
-            VITE_BASIC_BCEID_REGISTRATION_URL=${{ vars.VITE_BASIC_BCEID_REGISTRATION_URL }}
-            VITE_BUSINESS_BCEID_REGISTRATION_URL=${{ vars.VITE_BUSINESS_BCEID_REGISTRATION_URL }}
-            VITE_BCSC_REGISTRATION_URL=${{ vars.VITE_BCSC_REGISTRATION_URL }}
-            VITE_BCEID_URL=${{ vars.VITE_BCEID_URL }}
-            VITE_BCEID_PARTNER_URL=${{ vars.VITE_BCEID_PARTNER_URL }}
-            VITE_MATOMO_URL=${{ vars.VITE_MATOMO_URL }}
-            VITE_RELEASE_VERSION=test-${{ github.event.inputs.branch }}-${{ github.sha }}
-            VITE_SITEMINDER_LOGOUT_URL=${{ vars.VITE_SITEMINDER_LOGOUT_URL }}
-            VITE_KEYCLOAK_LOGOUT_URL=${{ vars.VITE_KEYCLOAK_LOGOUT_URL }}
-            VITE_POST_LOGOUT_REDIRECT_URL=${{ vars.VITE_POST_LOGOUT_REDIRECT_URL }}
+          release_version_prefix: test-${{ github.event.inputs.branch }}
+          frontend_vars_json: ${{ toJSON(vars) }}
           registry_url: ${{ secrets.REGISTRY_URL }}
           builder_username: ${{ secrets.BUILDER_USERNAME }}
           builder_token: ${{ secrets.BUILDER_TOKEN }}

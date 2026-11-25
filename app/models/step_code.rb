@@ -30,6 +30,7 @@ class StepCode < ApplicationRecord
 
   # Associations
   belongs_to :permit_application, optional: true
+  belongs_to :sandbox, optional: true
   has_one :permit_project, through: :permit_application
   has_many :report_documents, dependent: :destroy, inverse_of: :step_code
 
@@ -43,8 +44,27 @@ class StepCode < ApplicationRecord
             uniqueness: {
               conditions: -> { kept }
             },
-            allow_nil: true
+            allow_nil: true,
+            if: :will_save_change_to_permit_application_id?
   validates :current_stage, inclusion: { in: STAGES }
+
+  scope :for_effective_sandbox,
+        ->(sandbox_id) do
+          left_joins(permit_application: :permit_project).where(
+            <<~SQL.squish,
+              CASE
+                WHEN step_codes.permit_application_id IS NULL THEN step_codes.sandbox_id
+                ELSE permit_projects.sandbox_id
+              END IS NOT DISTINCT FROM ?
+            SQL
+            sandbox_id
+          )
+        end
+
+  def permit_date
+    return permit_application.permit_date if permit_application
+    self[:permit_date]
+  end
 
   delegate :submitter,
            :newly_submitted_at,
@@ -108,7 +128,7 @@ class StepCode < ApplicationRecord
       submitter_id: permit_application&.submitter_id,
       permit_project_id: permit_project&.id,
       jurisdiction_id: jurisdiction&.id,
-      sandbox_id: permit_application&.sandbox_id,
+      sandbox_id: sandbox_id,
       discarded: discarded_at.present?
     }
   end
@@ -136,7 +156,10 @@ class StepCode < ApplicationRecord
   end
 
   def generate_report_document
-    StepCodeReportGenerationJob.perform_async(id)
+    options = {}
+    checklist = current_checklist
+    options["checklist_id"] = checklist.id if checklist
+    StepCodeReportGenerationJob.perform_async(id, options)
   end
 
   def public_record?

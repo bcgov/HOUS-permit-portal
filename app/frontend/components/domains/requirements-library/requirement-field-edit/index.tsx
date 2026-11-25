@@ -16,19 +16,25 @@ import { CalendarBlank, Envelope, MapPin, Phone, X } from "@phosphor-icons/react
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
 import React from "react"
-import { Controller, FieldValues, useController, useFieldArray, useFormContext } from "react-hook-form"
-import { UseFieldArrayProps } from "react-hook-form/dist/types"
-import { useTranslation } from "react-i18next"
 import {
-  EEnergyStepCodeDependencyRequirementCode,
-  ENumberUnit,
-  ERequirementContactFieldItemType,
-  ERequirementType,
-} from "../../../../types/enums"
+  Controller,
+  FieldArray,
+  FieldValues,
+  UseFieldArrayProps,
+  useController,
+  useFieldArray,
+  useFormContext,
+} from "react-hook-form"
+import { useTranslation } from "react-i18next"
+import { EEnergyStepCodeDependencyRequirementCode, ENumberUnit, ERequirementType } from "../../../../types/enums"
 import { IOption } from "../../../../types/types"
 import { isContactRequirement, isMultiOptionRequirement } from "../../../../utils/utility-functions"
 import { UnitSelect } from "../../../shared/select/selectors/unit-select"
 import { MultiplySumGridPreview } from "../multiply-sum-grid-preview"
+import {
+  generalContactFieldItems,
+  professionalContactFieldItems,
+} from "../requirement-field-display/contact-field-items"
 import { EditableGroup, TEditableGroupProps } from "./editable-group"
 import { GenericContactEdit } from "./generic-contact-edit"
 import { PidInfoEdit } from "./pid-info-edit"
@@ -39,11 +45,14 @@ export type TRequirementEditProps<TFieldValues extends FieldValues> = TEditableG
   editableInstructionsTextProps?: TEditableInstructionsTextProps<TFieldValues>
   multiOptionProps?: {
     useFieldArrayProps: UseFieldArrayProps<TFieldValues>
+    emptyOption: FieldArray<TFieldValues>
     onOptionValueChange: (optionIndex: number, optionValue: string) => void
     getOptionValue: (idx: number) => IOption | undefined
   }
   canAddMultipleContactProps?: IControlProps<TFieldValues>
   isMultipleFilesCheckboxProps?: TIsMultipleFilesCheckboxProps<TFieldValues>
+  /** Contact previews use the same required flags as the read-only preview. */
+  required?: boolean
 }
 
 const requirementsComponentMap = {
@@ -150,7 +159,11 @@ const requirementsComponentMap = {
             <Controller<TFieldValues>
               {...unitSelectControlProps}
               render={({ field: { onChange, value } }) => (
-                <UnitSelect value={value as ENumberUnit} onChange={onChange} />
+                <UnitSelect
+                  value={value as ENumberUnit}
+                  onChange={onChange}
+                  isDisabled={editableGroupProps.lockDefinition}
+                />
               )}
             />
           </HStack>
@@ -180,11 +193,12 @@ const requirementsComponentMap = {
       return null
     }
 
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+    const { useFieldArrayProps, emptyOption, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
     const isLockedOptions =
+      editableGroupProps.lockDefinition ||
       editableGroupProps.requirementCode === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
@@ -219,11 +233,10 @@ const requirementsComponentMap = {
               </HStack>
             ))}
 
-            {/*  @ts-ignore*/}
             <Button
               variant={"link"}
               textDecoration={"underline"}
-              onClick={() => append({ value: "", label: "" })}
+              onClick={() => append(emptyOption)}
               isDisabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
@@ -275,9 +288,10 @@ const requirementsComponentMap = {
       return null
     }
 
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+    const { useFieldArrayProps, emptyOption, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>({ ...useFieldArrayProps })
+    const isLockedOptions = !!editableGroupProps.lockDefinition
 
     return (
       <EditableGroup
@@ -299,18 +313,24 @@ const requirementsComponentMap = {
                   value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
+                  isDisabled={isLockedOptions}
                 />
                 <IconButton
                   aria-label={"remove option"}
                   variant={"unstyled"}
                   icon={<X />}
                   onClick={() => remove(idx)}
+                  isDisabled={isLockedOptions}
                 />
               </HStack>
             ))}
 
-            {/*  @ts-ignore*/}
-            <Button variant={"link"} textDecoration={"underline"} onClick={() => append({ value: "", label: "" })}>
+            <Button
+              variant={"link"}
+              textDecoration={"underline"}
+              onClick={() => append(emptyOption)}
+              isDisabled={isLockedOptions}
+            >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
           </>
@@ -330,11 +350,12 @@ const requirementsComponentMap = {
       import.meta.env.DEV && console.error("multiOptionProps is required for select requirement edit")
       return null
     }
-    const { useFieldArrayProps, onOptionValueChange, getOptionValue } = multiOptionProps
+    const { useFieldArrayProps, emptyOption, onOptionValueChange, getOptionValue } = multiOptionProps
 
     const { fields, append, remove } = useFieldArray<TFieldValues>(useFieldArrayProps)
 
-    const isEnergyStepCodeDependency =
+    const isLockedOptions =
+      editableGroupProps.lockDefinition ||
       String(editableGroupProps.requirementCode) === EEnergyStepCodeDependencyRequirementCode.energyStepCodeMethod
 
     return (
@@ -349,14 +370,14 @@ const requirementsComponentMap = {
                   value={getOptionValue(idx)?.label}
                   onChange={(e) => onOptionValueChange(idx, e.target.value)}
                   w={"150px"}
-                  isDisabled={isEnergyStepCodeDependency}
+                  isDisabled={isLockedOptions}
                 />
                 <IconButton
                   aria-label={"remove option"}
                   variant={"unstyled"}
                   icon={<X />}
                   onClick={() => remove(idx)}
-                  isDisabled={isEnergyStepCodeDependency}
+                  isDisabled={isLockedOptions}
                 />
               </HStack>
             ))}
@@ -364,9 +385,8 @@ const requirementsComponentMap = {
             <Button
               variant={"link"}
               textDecoration={"underline"}
-              //  @ts-ignore
-              onClick={() => append({ value: "", label: "" })}
-              isDisabled={isEnergyStepCodeDependency}
+              onClick={() => append(emptyOption)}
+              isDisabled={isLockedOptions}
             >
               {t("requirementsLibrary.modals.addOptionButton")}
             </Button>
@@ -409,25 +429,6 @@ const requirementsComponentMap = {
     canAddMultipleContactProps,
     ...rest
   }: TRequirementEditProps<TFieldValues>) {
-    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
-      { type: ERequirementContactFieldItemType.firstName },
-      { type: ERequirementContactFieldItemType.lastName },
-      { type: ERequirementContactFieldItemType.email },
-      { type: ERequirementContactFieldItemType.phone },
-      {
-        type: ERequirementContactFieldItemType.address,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.organization },
-    ]
-
     if (!canAddMultipleContactProps) {
       import.meta.env.DEV && console.error("canAddMultipleContactProps is required for contact requirement edit")
       return null
@@ -436,7 +437,7 @@ const requirementsComponentMap = {
     return (
       <GenericContactEdit<TFieldValues>
         requirementType={ERequirementType.generalContact}
-        contactFieldItems={contactFieldItemTypes}
+        contactFieldItems={generalContactFieldItems}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
         {...rest}
@@ -454,36 +455,10 @@ const requirementsComponentMap = {
       return null
     }
 
-    const contactFieldItemTypes: Array<{ type: ERequirementContactFieldItemType; containerProps?: BoxProps }> = [
-      { type: ERequirementContactFieldItemType.firstName },
-      { type: ERequirementContactFieldItemType.lastName },
-      { type: ERequirementContactFieldItemType.email },
-      { type: ERequirementContactFieldItemType.phone },
-      {
-        type: ERequirementContactFieldItemType.address,
-        containerProps: {
-          gridColumn: "1 / span 2",
-          sx: {
-            ".chakra-form-control input": {
-              maxW: "full",
-            },
-          },
-        },
-      },
-      { type: ERequirementContactFieldItemType.professionalAssociation },
-      { type: ERequirementContactFieldItemType.contactType },
-      {
-        type: ERequirementContactFieldItemType.professionalNumber,
-        containerProps: {
-          gridColumn: "1 / span 2",
-        },
-      },
-      { type: ERequirementContactFieldItemType.organization },
-    ]
     return (
       <GenericContactEdit<TFieldValues>
         requirementType={ERequirementType.professionalContact}
-        contactFieldItems={contactFieldItemTypes}
+        contactFieldItems={professionalContactFieldItems}
         editableLabelProps={editableLabelProps}
         {...canAddMultipleContactProps}
         {...rest}
@@ -576,12 +551,16 @@ const requirementsComponentMap = {
                 quantity: quantity.field.value as any,
                 ab: ab.field.value as any,
               }}
-              controls={{
-                firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
-                a: { value: a.field.value as any, onChange: a.field.onChange },
-                quantity: { value: quantity.field.value as any, onChange: quantity.field.onChange },
-                ab: { value: ab.field.value as any, onChange: ab.field.onChange },
-              }}
+              controls={
+                props.lockDefinition
+                  ? undefined
+                  : {
+                      firstColumn: { value: first.field.value as any, onChange: first.field.onChange },
+                      a: { value: a.field.value as any, onChange: a.field.onChange },
+                      quantity: { value: quantity.field.value as any, onChange: quantity.field.onChange },
+                      ab: { value: ab.field.value as any, onChange: ab.field.onChange },
+                    }
+              }
             />
             <Stack spacing={2}>
               <Grid templateColumns="2fr 2fr 1fr 1fr" gap={2}>
@@ -598,6 +577,7 @@ const requirementsComponentMap = {
                             value={`${field.value ?? ""}`}
                             onChange={field.onChange}
                             w="100%"
+                            isDisabled={props.lockDefinition}
                           />
                         )}
                       />
@@ -614,12 +594,19 @@ const requirementsComponentMap = {
                             value={`${field.value ?? ""}`}
                             onChange={(e) => field.onChange(e.target.value === "" ? "" : Number(e.target.value))}
                             w="100%"
+                            isDisabled={props.lockDefinition}
                           />
                         )}
                       />
                     </GridItem>
                     <GridItem display="flex" alignItems="right" justifyContent="flex-start">
-                      <IconButton aria-label="Remove" icon={<X />} variant="ghost" onClick={() => remove(idx)} />
+                      <IconButton
+                        aria-label="Remove"
+                        icon={<X />}
+                        variant="ghost"
+                        onClick={() => remove(idx)}
+                        isDisabled={props.lockDefinition}
+                      />
                     </GridItem>
                     <GridItem />
                   </React.Fragment>
@@ -630,6 +617,7 @@ const requirementsComponentMap = {
                 variant="secondary"
                 onClick={() => append({ name: "", a: "" } as any)}
                 alignSelf="flex-start"
+                isDisabled={props.lockDefinition}
               >
                 {t("requirementsLibrary.multiplySumGrid.addRow")}
               </Button>

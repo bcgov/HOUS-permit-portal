@@ -28,7 +28,7 @@
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
             Your archived Building Permit Hub account is scheduled for permanent deletion on
-            <strong><%= @scheduled_date.in_time_zone("Pacific Time (US & Canada)").strftime("%B %-d, %Y at %-I:%M %p Pacific Time") %></strong>.
+            <strong><%= @scheduled_date.in_time_zone.strftime("%B %-d, %Y at %-I:%M %p Pacific Time") %></strong>.
           </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 4px;">
@@ -85,7 +85,7 @@
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">
             You can request that your account be reopened before
-            <strong><%= @scheduled_date.in_time_zone("Pacific Time (US & Canada)").strftime("%B %-d, %Y at %-I:%M %p Pacific Time") %></strong>.
+            <strong><%= @scheduled_date.in_time_zone.strftime("%B %-d, %Y at %-I:%M %p Pacific Time") %></strong>.
           </p>
 
           <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 12px;">

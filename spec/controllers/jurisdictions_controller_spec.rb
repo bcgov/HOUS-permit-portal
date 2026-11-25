@@ -15,10 +15,10 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     create_list(:user, 5, :reviewer, jurisdiction: jurisdiction)
   end
 
-  describe "POST #search_users" do
+  describe "POST #search_users", search: true do
     before do
       sign_in super_admin
-      User.reindex
+      reindex_search(User)
     end
 
     context "It only returns review_managers and not reviewers" do
@@ -66,8 +66,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
         user.jurisdiction_memberships.find_by!(jurisdiction: jurisdiction)
       user.update_column(:created_at, 2.years.ago)
       membership.update_column(:created_at, 1.week.ago)
-      User.reindex
-
+      reindex_search(User)
       post :search_users, params: { id: jurisdiction.id, query: user.email }
 
       user_json =
@@ -78,7 +77,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     end
   end
 
-  describe "logged in as super_admin" do
+  describe "logged in as super_admin", search: true do
     let!(:review_manager) do
       create(
         :user,
@@ -98,7 +97,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
 
     before do
       sign_in super_admin
-      Jurisdiction.reindex
+      reindex_search(Jurisdiction)
     end
 
     context "searching with review manager email" do
@@ -132,7 +131,7 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
     end
   end
 
-  describe "Didn't logged in and" do
+  describe "Didn't logged in and", search: true do
     before {}
 
     context "searching with review manager email" do
@@ -397,6 +396,60 @@ RSpec.describe Api::JurisdictionsController, type: :controller do
             format: :json
 
       expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "PATCH #update resources about page display" do
+    it "persists show_on_about and about_position" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      resource = create(:resource, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                resources_attributes: [
+                  { id: resource.id, show_on_about: false, about_position: 3 }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      resource.reload
+      expect(resource.show_on_about).to be(false)
+      expect(resource.about_position).to eq(3)
+    end
+  end
+
+  describe "PATCH #update contacts" do
+    it "persists contact extension" do
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      sign_in manager
+
+      patch :update,
+            params: {
+              id: jurisdiction.id,
+              jurisdiction: {
+                contacts_attributes: [
+                  {
+                    first_name: "Ada",
+                    last_name: "Lovelace",
+                    title: "Director",
+                    department: "Planning",
+                    email: "ada@example.com",
+                    phone: "604-555-0100",
+                    extension: "123"
+                  }
+                ]
+              }
+            },
+            format: :json
+
+      expect(response).to have_http_status(:ok)
+      contact = jurisdiction.reload.contacts.first
+      expect(contact.extension).to eq("123")
     end
   end
 end

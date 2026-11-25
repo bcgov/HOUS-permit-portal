@@ -13,18 +13,10 @@ module Api::Concerns::Search::ProjectMeetings
         { status: :word_middle }
       ],
       where: project_meeting_where_clause,
-      page: project_meeting_search_params[:page],
+      page: project_meeting_search_params[:page].presence || 1,
       per_page:
-        (
-          if project_meeting_search_params[:page]
-            (
-              project_meeting_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        project_meeting_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: ProjectMeeting::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }

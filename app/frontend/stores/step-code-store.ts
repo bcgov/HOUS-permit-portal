@@ -5,12 +5,16 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IPart3StepCode, Part3StepCodeModel } from "../models/part-3-step-code"
-import { IPart3StepCodeChecklist } from "../models/part-3-step-code-checklist"
 import { IPart9StepCode, Part9StepCodeModel } from "../models/part-9-step-code"
-import { IPart9StepCodeChecklist } from "../models/part-9-step-code-checklist"
 import { EEnergyStep, EStepCodeSortFields, EStepCodeType, EZeroCarbonStep } from "../types/enums"
 import { IPart3ChecklistSelectOptions, IPart9ChecklistSelectOptions, TSearchParams } from "../types/types"
-import { convertToDate, setQueryParam, startBlobDownload } from "../utils/utility-functions"
+import {
+  convertToDate,
+  downloadFromApi,
+  isSafeAppPath,
+  setQueryParam,
+  startBlobDownload,
+} from "../utils/utility-functions"
 
 export const StepCodeModel = types.union(
   {
@@ -44,6 +48,7 @@ export const StepCodeStoreModel = types
       isOptionsLoaded: types.maybeNull(types.boolean),
       selectOptions: types.frozen<Partial<IPart9ChecklistSelectOptions & IPart3ChecklistSelectOptions>>(),
       currentStepCode: types.maybeNull(types.reference(StepCodeModel)),
+      indexExitPath: types.maybeNull(types.string),
       typeFilter: types.optional(types.array(types.enumeration(Object.values(EStepCodeType) as any)), []),
     }),
     createSearchModel<EStepCodeSortFields>("searchStepCodes", "setStepCodeFilters")
@@ -79,6 +84,9 @@ export const StepCodeStoreModel = types
   .actions((self) => ({
     setCurrentStepCode(stepCodeId) {
       self.currentStepCode = stepCodeId
+    },
+    setIndexExitPath(path: string | null) {
+      self.indexExitPath = path && path.startsWith("/step-codes") && isSafeAppPath(path) ? path : null
     },
     setTableStepCodes(stepCodes: Array<IPart9StepCode | IPart3StepCode>) {
       // @ts-ignore
@@ -228,6 +236,57 @@ export const StepCodeStoreModel = types
         throw error
       }
     }),
+    downloadPart3StepCodeChecklistsCsv: flow(function* () {
+      try {
+        const range = self.rootStore.reportStore.rangePreset
+        const fileName = `${t("reporting.stepCodeDataPart3.filename")}_${range}_${new Date().toISOString().slice(0, 10)}.csv`
+        yield* toGenerator(
+          downloadFromApi(
+            `/api/step_codes/download_part_3_step_code_checklists_csv?range=${encodeURIComponent(range)}`,
+            fileName
+          )
+        )
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download Part 3 Step Code checklists:`, error)
+        }
+        throw error
+      }
+    }),
+    downloadPart9StepCodeChecklistsCsv: flow(function* () {
+      try {
+        const range = self.rootStore.reportStore.rangePreset
+        const fileName = `${t("reporting.stepCodeData.filename")}_${range}_${new Date().toISOString().slice(0, 10)}.csv`
+        yield* toGenerator(
+          downloadFromApi(
+            `/api/step_codes/download_part_9_step_code_checklists_csv?range=${encodeURIComponent(range)}`,
+            fileName
+          )
+        )
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download Part 9 Step Code checklists:`, error)
+        }
+        throw error
+      }
+    }),
+    downloadStepCodeFileUploadsZip: flow(function* () {
+      try {
+        const range = self.rootStore.reportStore.rangePreset
+        const fileName = `${t("reporting.stepCodeData.filenameFileUploads")}_${range}_${new Date().toISOString().slice(0, 10)}.zip`
+        yield* toGenerator(
+          downloadFromApi(
+            `/api/step_codes/download_step_code_file_uploads_zip?range=${encodeURIComponent(range)}`,
+            fileName
+          )
+        )
+      } catch (error) {
+        if (import.meta.env.DEV) {
+          console.error(`Failed to download Step Code file uploads:`, error)
+        }
+        throw error
+      }
+    }),
     createPart3StepCode: flow(function* (values: {
       permitApplicationId?: string
       preConstructionChecklistAttributes: { sectionCompletionStatus: Record<string, any> }
@@ -283,6 +342,4 @@ export const StepCodeStoreModel = types
     }),
   }))
 
-export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {
-  getChecklist(stepCodeId: any): IPart9StepCodeChecklist | IPart3StepCodeChecklist
-}
+export interface IStepCodeStore extends Instance<typeof StepCodeStoreModel> {}

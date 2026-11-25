@@ -1,4 +1,4 @@
-import { Button, Checkbox, FormControl, FormLabel, HStack, Text, VStack, useDisclosure } from "@chakra-ui/react"
+import { Button, Checkbox, FormControl, HStack, Text, VStack, useDisclosure } from "@chakra-ui/react"
 import { AddressBook, Envelope, MapPin } from "@phosphor-icons/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
@@ -7,8 +7,7 @@ import { Controller, useFormContext } from "react-hook-form"
 import { IPart9StepCodeChecklist } from "../../../../../../models/part-9-step-code-checklist"
 import { IContact, IOption } from "../../../../../../types/types"
 import { ContactModal } from "../../../../../shared/contact/contact-modal"
-import { DatePicker } from "../../../../../shared/date-picker"
-import { PhoneFormControl, TextFormControl } from "../../../../../shared/form/input-form-control"
+import { DatePickerFormControl, PhoneFormControl, TextFormControl } from "../../../../../shared/form/input-form-control"
 import { ChecklistSection } from "../shared/checklist-section"
 import { i18nPrefix } from "./i18n-prefix"
 
@@ -58,16 +57,7 @@ export const CompletedBy = observer(function CompletedBy({ checklist }: IProps) 
           </HStack>
         </VStack>
 
-        <FormControl>
-          <FormLabel>{t(`${i18nPrefix}.date`)}</FormLabel>
-          <Controller
-            control={control}
-            name="completedAt"
-            render={({ field: { onChange, value } }) => {
-              return <DatePicker selected={value} onChange={onChange} />
-            }}
-          />
-        </FormControl>
+        <DatePickerFormControl label={t(`${i18nPrefix}.date`)} fieldName="completedAt" required />
 
         <FormControl>
           <Controller

@@ -60,14 +60,15 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
   const onOpen = internalOnOpen
 
   const draftTemplateVersionIds = requirementTemplate.draftTemplateVersions
-    .map((templateVersion) => templateVersion.id)
+    .map((templateVersion) => templateVersion?.id)
+    .filter(Boolean)
     .join(",")
 
   React.useEffect(() => {
     if (!isOpen || !draftTemplateVersionIds) return
 
     requirementTemplate.draftTemplateVersions.forEach((templateVersion) => {
-      templateVersionStore.fetchTemplateVersion(templateVersion.id).catch(() => {})
+      if (templateVersion?.id) templateVersionStore.fetchTemplateVersion(templateVersion.id).catch(() => {})
     })
   }, [draftTemplateVersionIds, isOpen, requirementTemplate.draftTemplateVersions, templateVersionStore])
 
@@ -80,7 +81,7 @@ export const TemplateVersionsSidebar = observer(function TemplateVersionsSidebar
       )}
       <Drawer isOpen={isOpen} placement="right" onClose={onClose} finalFocusRef={btnRef}>
         <DrawerOverlay />
-        <DrawerContent maxW="644px" pt="var(--app-navbar-height)">
+        <DrawerContent maxW="644px" pt="var(--app-navbar-offset)">
           <DrawerCloseButton />
           <DrawerHeader mt={4} px={8} borderBottom="1px solid" borderColor={"border.light"}>
             <Text as="h2" fontWeight={700} fontSize={"2xl"}>
@@ -183,7 +184,7 @@ const BuilderPanel = ({
           <Box>
             <Text fontWeight={700}>{t("requirementTemplate.versionSidebar.builderTitle")}</Text>
             <Text color={"text.secondary"} fontSize={"sm"}>
-              {t("requirementTemplate.versionSidebar.lastUpdated")} {format(updatedAt, datefnsTableDateTimeFormat)}
+              {format(updatedAt, datefnsTableDateTimeFormat)}
             </Text>
           </Box>
         </HStack>
@@ -206,7 +207,8 @@ const VersionFlow = observer(function VersionFlow({
   const publishedTemplateVersions = requirementTemplate.publishedTemplateVersion
     ? [requirementTemplate.publishedTemplateVersion]
     : []
-  const draftTemplateVersions = requirementTemplate.draftTemplateVersions
+  const draftTemplateVersions = requirementTemplate.draftTemplateVersions.filter(Boolean)
+  const scheduledTemplateVersions = requirementTemplate.scheduledTemplateVersions.filter(Boolean)
 
   return (
     <Box>
@@ -238,6 +240,7 @@ const VersionFlow = observer(function VersionFlow({
                 viewRoute={`/template-versions/${templateVersion.id}`}
                 status={ETemplateVersionStatus.draft}
                 publishedAt={templateVersion.createdAt}
+                changeNotes={templateVersion.changeNotes}
                 borderRadius="none"
                 border="none"
               />
@@ -249,9 +252,9 @@ const VersionFlow = observer(function VersionFlow({
         <VersionFlowStep
           label={t("requirementTemplate.versionSidebar.listTitles.scheduled")}
           emptyLabel={t("requirementTemplate.versionSidebar.noScheduledVersion")}
-          hasContent={requirementTemplate.scheduledTemplateVersions.length > 0}
+          hasContent={scheduledTemplateVersions.length > 0}
         >
-          {requirementTemplate.scheduledTemplateVersions.map((templateVersion, index) => (
+          {scheduledTemplateVersions.map((templateVersion, index) => (
             <VersionCard
               key={templateVersion.id}
               viewRoute={`/template-versions/${templateVersion.id}`}
@@ -259,7 +262,7 @@ const VersionFlow = observer(function VersionFlow({
               versionDate={templateVersion.versionDate}
               borderTop={index !== 0 ? "none" : undefined}
               borderTopRadius={index === 0 ? "sm" : undefined}
-              borderBottomRadius={index === requirementTemplate.scheduledTemplateVersions.length - 1 ? "sm" : undefined}
+              borderBottomRadius={index === scheduledTemplateVersions.length - 1 ? "sm" : undefined}
               borderRadius={"none"}
               onUnschedule={() => requirementTemplate.unscheduleTemplateVersion(templateVersion.id)}
             />
@@ -404,7 +407,11 @@ const VersionsList = observer(function VersionsList({
   )
 })
 
-type TVersionCardProps = Partial<FlexProps> & { viewRoute: string; onUnschedule?: () => Promise<boolean> } & (
+type TVersionCardProps = Partial<FlexProps> & {
+  viewRoute: string
+  onUnschedule?: () => Promise<boolean>
+  changeNotes?: string
+} & (
     | {
         status: Exclude<ETemplateVersionStatus, ETemplateVersionStatus.draft>
         versionDate: Date
@@ -426,6 +433,7 @@ const VersionCard = observer(function VersionCard({
   versionDate,
   publishedAt,
   deprecationReasonLabel,
+  changeNotes,
   ...containerProps
 }: TVersionCardProps) {
   const { t } = useTranslation()
@@ -478,18 +486,21 @@ const VersionCard = observer(function VersionCard({
       gap={4}
       {...containerProps}
     >
-      <HStack spacing={16}>
+      <HStack spacing={6} flex={1} minW={0}>
         <TemplateStatusTag
           status={status}
           scheduledFor={status === ETemplateVersionStatus.scheduled && versionDate ? versionDate : undefined}
           subText={status === ETemplateVersionStatus.deprecated ? deprecationReasonLabel : undefined}
         />
         {status === ETemplateVersionStatus.draft ? (
-          <Text>
-            {t("requirementTemplate.versionSidebar.publishedAt")}
-            <br />
-            {format(publishedAt, datefnsTableDateTimeFormat)}
-          </Text>
+          <Box minW="110px" flex={1} overflow="hidden">
+            <Text fontSize="xs">{format(publishedAt, datefnsTableDateTimeFormat)}</Text>
+            {changeNotes && (
+              <Text fontSize="xs" noOfLines={1} title={changeNotes}>
+                {changeNotes}
+              </Text>
+            )}
+          </Box>
         ) : (
           <VersionTag versionDate={versionDate} />
         )}

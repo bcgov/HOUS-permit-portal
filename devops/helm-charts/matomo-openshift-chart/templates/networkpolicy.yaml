@@ -1,0 +1,74 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: matomo-allow-database
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: matomo
+spec:
+  podSelector:
+    matchLabels:
+      app: matomo-db
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: matomo-dashboard
+        - podSelector:
+            matchLabels:
+              app: matomo-tracker
+        - podSelector:
+            matchLabels:
+              app: matomo-cli
+        - podSelector:
+            matchLabels:
+              app: matomo-queuedtracking-monitor
+        - podSelector:
+            matchLabels:
+              app: matomo-queuedtracking-process
+        - podSelector:
+            matchLabels:
+              app: matomo-jobs-corearchive
+        - podSelector:
+            matchLabels:
+              app: matomo-jobs-scheduled-tasks
+        - podSelector:
+            matchLabels:
+              app: matomo-db-backup
+        - podSelector:
+            matchLabels:
+              app: matomo-db-restore
+      ports:
+        - protocol: TCP
+          port: 3306
+---
+{{- if .Values.networkPolicy.allowOpenShiftIngress }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: matomo-allow-router
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: matomo
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - matomo-dashboard
+          - matomo-tracker
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            {{- toYaml .Values.networkPolicy.ingressNamespaceSelector | nindent 12 }}
+      ports:
+        - protocol: TCP
+          port: 8080
+{{- end }}
+{{- end }}

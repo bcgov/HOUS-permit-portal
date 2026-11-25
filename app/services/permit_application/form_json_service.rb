@@ -2,10 +2,15 @@ class PermitApplication::FormJsonService
   attr_accessor :form_json
   attr_reader :permit_application, :current_user
 
-  def initialize(permit_application:, current_user: nil)
+  def initialize(
+    permit_application:,
+    current_user: nil,
+    customizations: permit_application.form_customizations
+  )
     @permit_application = permit_application
     @form_json = permit_application.template_version.form_json.deep_dup
     @current_user = current_user
+    @form_customizations = customizations
   end
 
   def call
@@ -79,7 +84,7 @@ class PermitApplication::FormJsonService
           next unless has_only_elective_fields
 
           enabled_elective_field_ids =
-            permit_application.form_customizations&.dig(
+            @form_customizations&.dig(
               "requirement_block_changes",
               rb_id,
               "enabled_elective_field_ids"

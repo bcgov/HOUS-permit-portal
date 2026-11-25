@@ -28,8 +28,9 @@ import { Warning } from "@phosphor-icons/react"
 import { format, isValid, parseISO } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useMemo, useState } from "react"
-import { Controller, useFormContext } from "react-hook-form"
+import { Controller, useForm, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { IDataValidation } from "../../../../types/api-request"
 import { EDataValidationOperation, ERequirementType } from "../../../../types/enums"
 import { DatePicker } from "../../../shared/date-picker"
 import { IRequirementBlockForm } from "../requirements-block-modal"
@@ -38,6 +39,7 @@ interface IProps {
   triggerButtonProps?: Partial<ButtonProps>
   renderTriggerButton?: (props: ButtonProps) => JSX.Element
   index: number
+  isUnsupported?: boolean
   requirementType?: ERequirementType
 }
 
@@ -307,44 +309,70 @@ const ValidationValueInput = ({ requirementType, value, onChange }: IValidationV
 }
 
 export const DataValidationSetupModal = observer(
-  ({ triggerButtonProps, renderTriggerButton, index, requirementType }: IProps) => {
+  ({ triggerButtonProps, renderTriggerButton, index, isUnsupported = false, requirementType }: IProps) => {
     const { isOpen, onOpen, onClose } = useDisclosure()
     const { t } = useTranslation()
 
-    const { control, setValue, getValues } = useFormContext<IRequirementBlockForm>()
+    const {
+      watch: watchParent,
+      setValue: setParentValue,
+      getValues: getParentValues,
+    } = useFormContext<IRequirementBlockForm>()
+    const draftFormMethods = useForm<IDataValidation>()
+    const { control, reset, getValues, watch } = draftFormMethods
 
     const validationConfig = useValidationConfig(requirementType) as any
     const { defaultOperation, operations, valueLabel, errorMessagePlaceholder } = validationConfig as IValidationConfig
-
-    useEffect(() => {
-      if (isOpen) {
-        const operationPath = `requirementsAttributes.${index}.inputOptions.dataValidation.operation` as any
-        const currentOperation = getValues(operationPath)
-
-        if (!currentOperation && defaultOperation) {
-          setValue(operationPath, defaultOperation as EDataValidationOperation, {
-            shouldDirty: true,
-            shouldTouch: true,
-            shouldValidate: true,
-          })
-        }
-      }
-    }, [isOpen, defaultOperation, index, setValue, getValues])
+    const watchedDataValidation = watchParent(`requirementsAttributes.${index}.inputOptions.dataValidation`)
+    const hasExistingDataValidation = !!watchedDataValidation && Object.keys(watchedDataValidation).length > 0
+    const draftOperation = watch("operation")
+    const draftValue = watch("value")
+    const isComplete = !!draftOperation && draftValue !== undefined && draftValue !== null && draftValue !== ""
 
     const onReset = () => {
-      setValue(`requirementsAttributes.${index}.inputOptions.dataValidation`, undefined, {
+      reset()
+    }
+
+    const openModal = () => {
+      const dataValidation = getParentValues(`requirementsAttributes.${index}.inputOptions.dataValidation`)
+      reset(
+        dataValidation
+          ? { ...dataValidation }
+          : {
+              operation: defaultOperation as EDataValidationOperation,
+              value: "",
+              errorMessage: "",
+            }
+      )
+      onOpen()
+    }
+
+    const onSave = () => {
+      if (!isComplete) return
+
+      setParentValue(`requirementsAttributes.${index}.inputOptions.dataValidation`, getValues(), {
         shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
       })
+      onClose()
+    }
+
+    const onRemove = () => {
+      setParentValue(`requirementsAttributes.${index}.inputOptions.dataValidation`, undefined, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      })
+      onClose()
     }
 
     return (
       <>
         {renderTriggerButton ? (
-          renderTriggerButton({ onClick: onOpen })
+          renderTriggerButton({ onClick: openModal })
         ) : (
-          <MenuItem color={"text.primary"} onClick={onOpen} {...triggerButtonProps}>
+          <MenuItem color={"text.primary"} onClick={openModal} {...triggerButtonProps}>
             <HStack spacing={2} fontSize={"sm"}>
               <Warning />
               <Text as={"span"}>{t("requirementsLibrary.modals.optionsMenu.dataValidation")}</Text>
@@ -379,7 +407,10 @@ export const DataValidationSetupModal = observer(
                 },
               }}
             >
-              <Flex direction="column" gap={4}>
+              {/* HUB-5289: Field types cannot currently be changed in this UI, so stale validation is removal-only. */}
+              {isUnsupported ? (
+                <Text>{t("requirementsLibrary.modals.dataValidationSetup.unsupportedMessage")}</Text>
+              ) : (
                 <Flex direction="column" gap={4}>
                   {operations && (
                     <>
@@ -388,7 +419,7 @@ export const DataValidationSetupModal = observer(
                       </Text>
 
                       <Controller
-                        name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
+                        name="operation"
                         control={control}
                         defaultValue={defaultOperation as EDataValidationOperation}
                         render={({ field: { onChange, value } }) => (
@@ -407,7 +438,7 @@ export const DataValidationSetupModal = observer(
                   )}
                   {!operations && (
                     <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.dataValidation.operation`}
+                      name="operation"
                       control={control}
                       defaultValue={defaultOperation as EDataValidationOperation}
                       render={() => <></>}
@@ -419,7 +450,7 @@ export const DataValidationSetupModal = observer(
                       {valueLabel}
                     </FormLabel>
                     <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.dataValidation.value`}
+                      name="value"
                       control={control}
                       render={({ field: { onChange, value } }) => (
                         <ValidationValueInput requirementType={requirementType} onChange={onChange} value={value} />
@@ -435,27 +466,38 @@ export const DataValidationSetupModal = observer(
                       )}
                     </FormLabel>
                     <Controller
-                      name={`requirementsAttributes.${index}.inputOptions.dataValidation.errorMessage`}
+                      name="errorMessage"
                       control={control}
                       render={({ field }) => <Input {...field} placeholder={errorMessagePlaceholder} bg="white" />}
                     />
                   </Box>
                 </Flex>
-              </Flex>
+              )}
             </ModalBody>
 
             <ModalFooter justifyContent={"flex-start"}>
-              <ButtonGroup>
-                <Button variant={"primary"} onClick={onClose}>
-                  {t("ui.save")}
+              {isUnsupported ? (
+                <Button variant={"primary"} onClick={onRemove}>
+                  {t("requirementsLibrary.modals.dataValidationSetup.remove")}
                 </Button>
-                <Button variant={"secondary"} onClick={onClose}>
-                  {t("ui.cancel")}
-                </Button>
-                <Button variant={"ghost"} onClick={onReset} ml="auto">
-                  {t("ui.reset")}
-                </Button>
-              </ButtonGroup>
+              ) : (
+                <ButtonGroup>
+                  <Button variant={"primary"} onClick={onSave} isDisabled={!isComplete}>
+                    {t("ui.save")}
+                  </Button>
+                  <Button variant={"secondary"} onClick={onClose}>
+                    {t("ui.cancel")}
+                  </Button>
+                  <Button variant={"ghost"} onClick={onReset} ml="auto">
+                    {t("ui.reset")}
+                  </Button>
+                  {hasExistingDataValidation && (
+                    <Button variant={"ghost"} color={"semantic.error"} onClick={onRemove}>
+                      {t("requirementsLibrary.modals.dataValidationSetup.remove")}
+                    </Button>
+                  )}
+                </ButtonGroup>
+              )}
             </ModalFooter>
           </ModalContent>
         </Modal>

@@ -99,6 +99,35 @@ RSpec.describe Resource, type: :model do
 
       expect(described_class.by_category("planning_zoning")).to match_array([a])
     end
+
+    it ".on_about excludes hidden resources and orders by about_position" do
+      jurisdiction = create(:sub_district)
+      create(
+        :resource,
+        jurisdiction: jurisdiction,
+        show_on_about: false,
+        about_position: 0
+      )
+      second = create(:resource, jurisdiction: jurisdiction, about_position: 2)
+      first = create(:resource, jurisdiction: jurisdiction, about_position: 1)
+
+      expect(described_class.on_about.where(jurisdiction: jurisdiction)).to eq(
+        [first, second]
+      )
+    end
+  end
+
+  describe "about page defaults" do
+    it "defaults show_on_about to true and assigns about_position" do
+      jurisdiction = create(:sub_district)
+      first = create(:resource, jurisdiction: jurisdiction)
+      second = create(:resource, jurisdiction: jurisdiction)
+
+      expect(first.show_on_about).to be(true)
+      expect(second.show_on_about).to be(true)
+      expect(first.about_position).to eq(0)
+      expect(second.about_position).to eq(1)
+    end
   end
 
   describe "dependent destroy" do

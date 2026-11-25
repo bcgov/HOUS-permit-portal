@@ -9,6 +9,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                   schedule
                   force_publish_now
                   create_draft
+                  validate_config
                   update_jurisdiction_availabilities
                 ]
   before_action :set_template_version, only: %i[unschedule_template_version]
@@ -31,10 +32,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def for_filter
     authorize :requirement_template, :for_filter?
-    templates = RequirementTemplate.with_published_version.kept
+    templates = filter_requirement_templates
     render_success templates,
                    nil,
-                   { blueprint: OptionsBlueprint, view: :default }
+                   { blueprint: RequirementTemplateOptionBlueprint }
   end
 
   def show
@@ -137,6 +138,10 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
         render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message:
+                         @requirement_template.errors.full_messages.join(", ")
+                     },
                      log_args: {
                        errors: @requirement_template.errors.full_messages
                      }
@@ -145,11 +150,18 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       begin
         TemplateVersioningService.schedule!(
           @requirement_template,
-          Date.parse(schedule_params)
+          Date.parse(schedule_params[:version_date]),
+          change_notes: schedule_params[:change_notes]
         )
+      rescue TemplateVersionConfigError => e
+        render_template_config_error(e)
+        raise ActiveRecord::Rollback
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         render_error "requirement_template.schedule_error",
+                     message_opts: {
+                       error_message: e.message
+                     },
                      log_args: {
                        errors: e.message
                      }
@@ -164,7 +176,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                      {
                        blueprint: RequirementTemplateBlueprint,
                        blueprint_opts: {
-                         view: :extended
+                         view: :extended,
+                         current_user: current_user
                        }
                      }
     end
@@ -177,6 +190,7 @@ class Api::RequirementTemplatesController < Api::ApplicationController
     error_message = ""
 
     published_template_version = nil
+    config_error = nil
 
     ActiveRecord::Base.transaction do
       unless @requirement_template.update(requirement_template_params)
@@ -187,7 +201,13 @@ class Api::RequirementTemplatesController < Api::ApplicationController
       @requirement_template.touch
       begin
         published_template_version =
-          TemplateVersioningService.force_publish_now!(@requirement_template)
+          TemplateVersioningService.force_publish_now!(
+            @requirement_template,
+            change_notes: force_publish_params[:change_notes]
+          )
+      rescue TemplateVersionConfigError => e
+        config_error = e
+        raise ActiveRecord::Rollback
       rescue StandardError => e
         # If there is an error in TemplateVersioningService.schedule!, rollback the transaction
         error_message = e.message
@@ -206,11 +226,17 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                        blueprint: RequirementTemplateBlueprint,
                        blueprint_opts: {
                          view: :extended,
-                         published_template_version: published_template_version
+                         published_template_version: published_template_version,
+                         current_user: current_user
                        }
                      }
+    elsif config_error
+      render_template_config_error(config_error)
     else
       render_error "requirement_template.force_publish_now_error",
+                   message_opts: {
+                     error_message: error_message
+                   },
                    log_args: {
                      errors: [error_message]
                    }
@@ -236,14 +262,22 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def destroy
     authorize @requirement_template
-    if @requirement_template.discard
-      render_success(
-        @requirement_template,
-        "requirement_template.destroy_success"
-      )
-    else
-      render_error "requirement_template.destroy_error"
-    end
+
+    TemplateVersioningService.archive!(@requirement_template, current_user)
+    render_success(
+      @requirement_template,
+      "requirement_template.destroy_success"
+    )
+  rescue TemplateVersionArchiveError => e
+    render_error "requirement_template.archive_blocked_published",
+                 log_args: {
+                   errors: e.message
+                 }
+  rescue StandardError => e
+    render_error "requirement_template.destroy_error",
+                 log_args: {
+                   errors: e.message
+                 }
   end
 
   def restore
@@ -274,7 +308,8 @@ class Api::RequirementTemplatesController < Api::ApplicationController
               else
                 nil
               end
-            )
+            ),
+          change_notes: draft_params[:change_notes]
         )
 
       @requirement_template.reload
@@ -288,11 +323,26 @@ class Api::RequirementTemplatesController < Api::ApplicationController
                          current_user: current_user
                        }
                      }
+    rescue TemplateVersionConfigError => e
+      render_template_config_error(e)
     rescue TemplateVersionDraftError => e
       render_error "requirement_template.create_draft_error",
                    message_opts: {
                      error_message: e.message
                    }
+    end
+  end
+
+  def validate_config
+    authorize @requirement_template
+
+    begin
+      TemplateVersioningService.validate_requirement_template!(
+        @requirement_template
+      )
+      render_success nil, nil, { meta: { config_errors: [] } }
+    rescue TemplateVersionConfigError => e
+      render_template_config_error(e)
     end
   end
 
@@ -331,6 +381,18 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   private
 
+  def render_template_config_error(error)
+    render_error nil,
+                 {
+                   meta: {
+                     config_errors: error.config_errors
+                   },
+                   log_args: {
+                     errors: error.message
+                   }
+                 }
+  end
+
   def set_requirement_template
     # eager loading of associations as most of the time we return the extended view
     @requirement_template =
@@ -347,6 +409,41 @@ class Api::RequirementTemplatesController < Api::ApplicationController
 
   def set_template_version
     @template_version = TemplateVersion.find(params[:id])
+  end
+
+  def filter_requirement_templates
+    apps =
+      policy_scope(
+        PermitApplication.kept.joins(
+          :permit_project,
+          template_version: :requirement_template
+        )
+      )
+
+    if params[:jurisdiction_id].present?
+      jurisdiction = Jurisdiction.friendly.find(params[:jurisdiction_id])
+      authorize jurisdiction, :search_permit_applications?
+      apps = apps.where(permit_projects: { jurisdiction_id: jurisdiction.id })
+      apps = apps.submitted_at_least_once if params[:permit_project_id].blank?
+    end
+
+    if params[:permit_project_id].present?
+      project =
+        ensure_in_sandbox!(PermitProject.find(params[:permit_project_id]))
+      authorize project, :show?
+      apps = apps.where(permit_project_id: project.id)
+    end
+
+    # The jurisdiction queue stays submitted-only. A project search includes
+    # new drafts, matching the inbox search where-clause.
+    if current_user.review_staff? && params[:permit_project_id].blank?
+      apps = apps.where.not(status: :new_draft)
+    end
+
+    RequirementTemplate
+      .preload(:template_category)
+      .where(id: apps.select("requirement_templates.id"))
+      .ordered_by_template_category
   end
 
   def requirement_template_params
@@ -417,10 +514,16 @@ class Api::RequirementTemplatesController < Api::ApplicationController
   end
 
   def schedule_params
-    params.require(:version_date)
+    params
+      .permit(:version_date, :change_notes)
+      .tap { |permitted| permitted.require(:version_date) }
+  end
+
+  def force_publish_params
+    params.permit(:change_notes)
   end
 
   def draft_params
-    params.permit(:assignee_id)
+    params.permit(:assignee_id, :change_notes)
   end
 end

@@ -1,4 +1,4 @@
-import { Flex, Text } from "@chakra-ui/react"
+import { Flex, FlexProps, Text } from "@chakra-ui/react"
 import { CheckCircle, CircleDashed } from "@phosphor-icons/react"
 import { t } from "i18next"
 import * as R from "ramda"
@@ -8,7 +8,7 @@ import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step
 import { IPart9NavLink } from "../../../../../types/types"
 import { RouterLink } from "../../../../shared/navigation/router-link"
 
-interface IProps {
+interface IProps extends FlexProps {
   navLink: IPart9NavLink
   isDisabled?: boolean
 }

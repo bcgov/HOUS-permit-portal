@@ -1,9 +1,9 @@
 import { flow } from "mobx"
-import { Instance, toGenerator, types } from "mobx-state-tree"
+import { Instance, IType, ReferenceIdentifier, toGenerator, types } from "mobx-state-tree"
 import { withEnvironment } from "../lib/with-environment"
 import { IRequirementMap, ISimplifiedRequirementsMap } from "../types/types"
 import { IRequirementBlockMapping, RequirementsMapping } from "./requirement-block-mapping"
-import { TemplateVersionModel } from "./template-version"
+import { ITemplateVersion, TemplateVersionModel } from "./template-version"
 
 type TRawRequirementsMapping = Record<string, { id: string; requirements: Record<string, IRequirementMap> }>
 
@@ -14,7 +14,9 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       // this needs to be string as the IntegrationMappingModel needs to be stored in
       // a map where the key is not it's own id
       id: types.string,
-      templateVersion: types.reference(types.late(() => TemplateVersionModel)),
+      templateVersion: types.late(
+        (): IType<ReferenceIdentifier, ReferenceIdentifier, ITemplateVersion> => types.reference(TemplateVersionModel)
+      ),
       jurisdictionId: types.string,
       requirementsMapping: RequirementsMapping,
       query: types.maybeNull(types.string),
@@ -23,7 +25,7 @@ export const IntegrationMappingModel = types.snapshotProcessor(
     })
     .extend(withEnvironment())
     .views((self) => ({
-      get tableRequirementsMapping() {
+      get tableRequirementsMapping(): IRequirementBlockMapping[] {
         const filteredRequirementsMapping = (
           Array.from(self.requirementsMapping.values()) as IRequirementBlockMapping[]
         ).filter((r) => r.hasAnyMatchesAfterQuery)
@@ -87,7 +89,9 @@ export const IntegrationMappingModel = types.snapshotProcessor(
       },
     }))
     .actions((self) => ({
-      updateRequirementsMapping: flow(function* (simplifiedRequirementsMapping: ISimplifiedRequirementsMap) {
+      updateRequirementsMapping: flow(function* (
+        simplifiedRequirementsMapping: ISimplifiedRequirementsMap
+      ): Generator<Promise<unknown>, boolean> {
         const response = yield* toGenerator(
           self.environment.api.updateIntegrationMapping(self.id, {
             simplifiedMap: simplifiedRequirementsMapping,
@@ -117,9 +121,11 @@ export const IntegrationMappingModel = types.snapshotProcessor(
 )
 
 function preProcessor(snapshot) {
-  let requirementsMapping = snapshot.requirementsMappingJson
+  const rawMapping = snapshot.requirementsMappingJson
     ? JSON.parse(snapshot.requirementsMappingJson)
     : snapshot.requirementsMapping
+  // MST getSnapshot is frozen; clone before writing sku/requirementCode.
+  const requirementsMapping = rawMapping ? JSON.parse(JSON.stringify(rawMapping)) : {}
 
   for (let [sku, requirementBlockMapping] of Object.entries(requirementsMapping)) {
     ;(requirementBlockMapping as any).sku = sku
@@ -135,7 +141,7 @@ function preProcessor(snapshot) {
     ...snapshot,
     // hack so to get uncamelized codes
     requirementsMapping,
-    templateVersion: snapshot.templateVersionId,
+    templateVersion: snapshot.templateVersionId ?? snapshot.templateVersion,
   }
 }
 

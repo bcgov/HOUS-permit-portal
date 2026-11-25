@@ -1,0 +1,2 @@
+class TemplateVersionArchiveError < StandardError
+end

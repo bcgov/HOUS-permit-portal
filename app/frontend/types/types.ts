@@ -9,6 +9,7 @@ import {
   EBaselinePerformanceRequirement,
   ECollaborationType,
   ECollaboratorType,
+  EConditionalOperator,
   EDocumentReferenceDocumentType,
   EDoorsPerformanceType,
   EEnabledElectiveFieldReason,
@@ -28,7 +29,10 @@ import {
   EPermitApplicationStatus,
   EProjectMeetingStatus,
   EProjectState,
+  EReleaseNoteNotificationAudience,
+  EReleaseNoteType,
   ERequirementType,
+  ERevisionRequestType,
   ESocketDomainTypes,
   ESocketEventTypes,
   ESortDirection,
@@ -101,7 +105,6 @@ export interface ISubmissionContact {
   email: string
   title?: string
   confirmedAt: string
-  default: boolean
   confirmationSentAt?: string
   type: ESubmissionContactClass
 }
@@ -126,6 +129,13 @@ export interface IOption<TValue = string> {
   label: string
   value: TValue
   description?: string
+  groupId?: string | null
+  groupLabel?: string | null
+  groupSortOrder?: number | null
+}
+
+export interface ISiteOption extends IOption {
+  coordinates?: TLatLngTuple
 }
 
 export type TDebouncedFunction<T extends (...args: any[]) => any> = (...args: Parameters<T>) => void
@@ -137,6 +147,8 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   perPage?: number
   showArchived?: boolean
   publishedOnly?: boolean
+  releaseType?: EReleaseNoteType
+  year?: number
   filters?: IModelFilterFields
   mode?: "list" | "kanban"
   perColumn?: number
@@ -159,7 +171,7 @@ export interface IRequirementOptions {
   conditional?: TConditional
   computedCompliance?: TComputedCompliance
   energyStepCode?: string
-  dataValidation?: Object
+  dataValidation?: import("./api-request").IDataValidation
 }
 
 export interface IFormJson {
@@ -289,6 +301,12 @@ export interface IErrorsBoxData {
   class: string
 }
 
+export interface IOptionalElectiveFieldInfo {
+  label: string
+  tooltip?: string
+  description?: string
+}
+
 interface IStepCodeBuildingCharacteristicSummarySelectOptions {
   performanceTypes: {
     windowsGlazedDoors: EWindowsGlazedDoorsPerformanceType[]
@@ -352,6 +370,7 @@ export interface IJurisdictionStub {
 
 export interface IReportDocument extends IBaseFileAttachment {
   stepCodeId: string
+  checklistId?: string
   stale?: boolean
 }
 
@@ -368,18 +387,37 @@ export interface IResource {
   description?: string
   resourceType: string
   linkUrl?: string
+  showOnAbout?: boolean
+  aboutPosition?: number
   updatedAt: string
   createdAt: string
   resourceDocument?: IResourceDocument
 }
 
 export interface IProjectDocument extends IBaseFileAttachment {
-  permitProjectId: string // Foreign key to link to PermitProject
+  permitProjectId: string
+}
+
+export interface IRevisionReferenceDocument extends IBaseFileAttachment {
+  revisionRequestId: string
+  scanStatus?: EFileScanStatus
+  fileUrl?: string
 }
 
 export interface IMeetingRequestDocument extends IBaseFileAttachment {
   projectMeetingId?: string
   documentType?: EMeetingRequestDocumentType
+}
+
+export interface INoteAttachmentDocument extends IBaseFileAttachment {
+  noteId?: string
+  scanStatus?: EFileScanStatus
+}
+
+// A file uploaded to S3 cache but not yet persisted against a note.
+export interface INoteAttachmentDraft {
+  uppyFileId: string
+  file: IFileData
 }
 
 export interface IRequirementBlockCustomization {
@@ -395,10 +433,14 @@ export interface ITemplateCustomization {
 }
 
 export interface IDownloadableFile {
+  id: string
+  dataKey?: string
   fileUrl: string
   fileName: string
   fileSize: number
   createdAt: Date
+  submissionVersionId?: string | null
+  revisionRequestId?: string | null
 }
 
 export interface IEULA {
@@ -413,10 +455,16 @@ export interface ILicenseAgreement {
   acceptedAt: Date
 }
 
+export interface IDigitalSealChecks {
+  pendingCount: number
+  failedCount: number
+}
+
 export interface IPermitApplicationComplianceUpdate {
   id: string
   frontEndFormUpdate: Object
   formattedComplianceData: Object
+  digitalSealChecks?: IDigitalSealChecks
 }
 
 export interface IPermitNotificationObjectData {
@@ -477,27 +525,45 @@ export interface ITemplateVersionUpdate {
 
 export interface IReportDocumentNotificationObjectData {
   stepCodeId?: string
+  checklistId?: string
   reportDocumentId: string
   filename?: string
   downloadUrl?: string
 }
 
-export type TSocketEventData =
-  | IPermitApplicationComplianceUpdate
-  | IPermitApplicationSupportingDocumentsUpdate
-  | IPermitBlockStatus
-  | INotification
-  | ITemplateVersionUpdate
+export interface IReportGenerationIssue {
+  key: string
+  submissionVersionId: string
+  versionNumber: number
+  reason: string
+}
 
 export interface IPermitApplicationSupportingDocumentsUpdate {
   id: string
   supportingDocuments: IPermitApplication["supportingDocuments"]
   missingPdfs: string[]
+  reportGenerationIssues?: IReportGenerationIssue[]
   zipfileSize: null | number
   zipfileName: null | string
   zipfileUrl: null | string
   allSubmissionVersionCompletedSupportingDocuments?: IDownloadableFile[]
 }
+
+export interface IPermitApplicationSelectiveZipReady {
+  id: string
+  requestId: string
+  zipfileUrl?: string | null
+  zipfileName?: string | null
+  error?: boolean
+}
+
+export type TSocketEventData =
+  | IPermitApplicationComplianceUpdate
+  | IPermitApplicationSupportingDocumentsUpdate
+  | IPermitApplicationSelectiveZipReady
+  | IPermitBlockStatus
+  | INotification
+  | ITemplateVersionUpdate
 
 export interface IUserPushPayload {
   data: TSocketEventData
@@ -533,7 +599,7 @@ export type TConditional = {
   show: boolean
   when: string
   eq: string
-  operator: string
+  operator: EConditionalOperator
 }
 
 export interface ILinkItem {
@@ -703,12 +769,16 @@ export interface ILinkData {
 
 export interface IRevisionRequest {
   id: string
+  type?: ERevisionRequestType
+  title?: string
   reasonCode: string
   requirementJson: IFormIORequirement
   submissionData: any
   comment: string
   user?: IMinimalFrozenUser
   createdAt: number
+  revisionReferenceDocuments?: IRevisionReferenceDocument[]
+  supportingDocuments?: Array<{ id: string; fileName?: string; fileUrl?: string }>
 }
 
 export interface IMinimalFrozenUser {
@@ -728,6 +798,8 @@ export interface ISubmissionVersion {
   formJson: IFormJson
   submissionData: ISubmissionData
   revisionRequests: IRevisionRequest[]
+  jurisdictionNote?: string | null
+  submitterNote?: string | null
   viewedAt?: Date
   createdAt: number
 }
@@ -737,6 +809,7 @@ export interface IJurisdictionStepRequirement {
   default: boolean
   energyStepRequired: EEnergyStep
   zeroCarbonStepRequired: EZeroCarbonStep
+  description?: string | null
 }
 
 export interface IPart3OccupancyRequiredStep {
@@ -744,6 +817,7 @@ export interface IPart3OccupancyRequiredStep {
   occupancyKey: string
   energyStepRequired: number
   zeroCarbonStepRequired: number | null
+  description?: string | null
 }
 
 export interface IJurisdictionHeatingDegreeDay {
@@ -761,17 +835,11 @@ export type TCreateRequirementTemplateFormData = {
   nickname?: string
 }
 
-export type TCreatePermitApplicationFormData = {
-  pid?: string
-  pin?: string
-  templateVersionId: string
-  jurisdictionId?: string
-  site?: IOption
-  sandboxId?: string
-}
-
 export type TReleaseNoteFormData = {
+  releaseType: EReleaseNoteType
+  notificationAudience: EReleaseNoteNotificationAudience
   version: string
+  name: string
   releaseDate: Date | null
   content: string
   releaseNotesUrl: string
@@ -786,6 +854,16 @@ export type TReleaseNoteViewerContext = {
 
 export interface ICopyRequirementTemplateFormData extends Partial<TCreateRequirementTemplateFormData> {
   id?: string
+}
+
+export interface IRequirementTemplateConfigError {
+  category: string
+  blockId: string
+  blockName: string
+  requirementId?: string
+  requirementCode?: string
+  requirementName?: string
+  message: string
 }
 
 export interface IBaselineOccupancy {

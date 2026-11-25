@@ -15,6 +15,7 @@ import {
   IRequirementTemplateUpdateParams,
   ITemplateSectionBlockAttributes,
 } from "../../../../../types/api-request"
+import { IRequirementTemplateConfigError } from "../../../../../types/types"
 import { CalloutBanner } from "../../../../shared/base/callout-banner"
 import { ErrorScreen } from "../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../shared/base/loading-screen"
@@ -35,9 +36,10 @@ export interface IEditRequirementOptionsProps {
 
 export interface IEditRequirementActionsProps {
   minDate?: Date
-  onScheduleConfirm?: (date: Date) => void
-  onForcePublishNow?: () => void
-  onCreateDraft?: () => void
+  onScheduleConfirm?: (date: Date, changeNotes?: string) => void
+  onForcePublishNow?: (changeNotes?: string) => void
+  onCreateDraft?: (changeNotes?: string) => void
+  onSaveAndValidate?: () => Promise<IRequirementTemplateConfigError[]>
   triggerButtonProps?: Partial<ButtonProps>
   requirementTemplate?: IRequirementTemplate
   onSaveDraft?: () => void
@@ -66,12 +68,11 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
   })
   const { t } = useTranslation()
   const [isCollapsedAll, setIsCollapsedAll] = useState(false)
-  const [sectionsInViewStatuses, setSectionsInViewStatuses] = useState<Record<string, boolean>>({})
 
   const watchedSectionsAttributes = watch("requirementTemplateSectionsAttributes")
   const {
     rootContainerRef: rightContainerRef,
-    sectionRefs,
+    setSectionRef,
     sectionIdToHighlight: currentSectionId,
   } = useSectionHighlight({ sections: watchedSectionsAttributes })
 
@@ -83,26 +84,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
       requirementBlock: requirementBlockStore.getRequirementBlockById(sectionBlock.requirementBlockId),
     })),
   }))
-
-  useEffect(() => {
-    const options = {
-      root: rightContainerRef?.current,
-      rootMargin: "0px",
-      threshold: 0.1,
-    }
-
-    const observer = new IntersectionObserver(handleSectionIntersection, options)
-
-    Object.values(sectionRefs.current).forEach((ref) => {
-      if (ref) {
-        observer.observe(ref)
-      }
-    })
-
-    return () => {
-      observer.disconnect()
-    }
-  }, [watchedSectionsAttributes])
 
   useEffect(() => {
     if (requirementTemplate?.isFullyLoaded) {
@@ -124,14 +105,15 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     updatedTemplate && formFormDefaults(updatedTemplate as IRequirementTemplate)
   })
 
-  const onSchedule = async (date: Date) => {
+  const onSchedule = async (date: Date, changeNotes?: string) => {
     await handleSubmit(async (templateFormData) => {
       const formattedSubmitData = formatSubmitData(templateFormData)
 
       const updatedRequirementTemplate = await requirementTemplateStore.scheduleRequirementTemplate(
         requirementTemplate.id,
         formattedSubmitData,
-        date
+        date,
+        changeNotes
       )
 
       if (updatedRequirementTemplate) {
@@ -149,13 +131,14 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
 
   const onForcePublishNow =
     import.meta.env.VITE_ENABLE_TEMPLATE_FORCE_PUBLISH === "true"
-      ? async () => {
+      ? async (changeNotes?: string) => {
           await handleSubmit(async (templateFormData) => {
             const formattedSubmitData = formatSubmitData(templateFormData)
 
             const updatedRequirementTemplate = (await requirementTemplateStore.forcePublishRequirementTemplate(
               requirementTemplate.id,
-              formattedSubmitData
+              formattedSubmitData,
+              changeNotes
             )) as IRequirementTemplate | false
 
             if (updatedRequirementTemplate) {
@@ -169,7 +152,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
         }
       : undefined
 
-  const onCreateDraft = async () => {
+  const onCreateDraft = async (changeNotes?: string) => {
     await handleSubmit(async (templateFormData) => {
       const formattedSubmitData = formatSubmitData(templateFormData)
       const updatedTemplate = await requirementTemplateStore.updateRequirementTemplate(
@@ -179,9 +162,10 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
 
       if (!updatedTemplate) return
 
-      const templateWithDraft = (await requirementTemplateStore.createDraft(requirementTemplate.id)) as
-        | IRequirementTemplate
-        | false
+      const templateWithDraft = (await requirementTemplateStore.createDraft(
+        requirementTemplate.id,
+        changeNotes ? { changeNotes } : undefined
+      )) as IRequirementTemplate | false
       if (!templateWithDraft) return
 
       const draftTemplateVersion = templateWithDraft.draftTemplateVersions[0]
@@ -189,6 +173,20 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
         ? navigate(`/template-versions/${draftTemplateVersion.id}`)
         : navigate("/requirement-templates")
     })()
+  }
+
+  const onSaveAndValidate = async (): Promise<IRequirementTemplateConfigError[]> => {
+    let errors: IRequirementTemplateConfigError[] = []
+    await handleSubmit(async (templateFormData) => {
+      const formattedSubmitData = formatSubmitData(templateFormData)
+      const saved = await requirementTemplateStore.updateRequirementTemplate(
+        requirementTemplate.id,
+        formattedSubmitData
+      )
+      if (!saved) return
+      errors = await requirementTemplateStore.validateConfig(requirementTemplate.id)
+    })()
+    return errors
   }
 
   const hasNoSections = watchedSectionsAttributes.length === 0
@@ -233,6 +231,7 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
               onScheduleDate={onSchedule}
               onForcePublishNow={onForcePublishNow}
               onCreateDraft={onCreateDraft}
+              onSaveAndValidate={onSaveAndValidate}
               onAddSection={onAddSection}
               requirementTemplate={requirementTemplate}
               hasStepCodeDependencyError={hasStepCodeDependencyError}
@@ -459,29 +458,6 @@ export const BaseEditRequirementTemplateScreen = observer(function BaseEditRequi
     setTimeout(() => {
       scrollIntoView(sectionAttributes.id)
     }, 200)
-  }
-
-  function setSectionRef(el: HTMLElement, id: string) {
-    sectionRefs.current[id] = el
-  }
-
-  // modified use case from https://stackoverflow.com/questions/57992340/how-to-get-first-visible-body-element-on-screen-with-pure-javascript
-  function handleSectionIntersection(entries: IntersectionObserverEntry[]) {
-    setSectionsInViewStatuses((pastState) => {
-      const newState = { ...pastState }
-
-      entries.forEach((entry) => {
-        const sectionId = entry.target.getAttribute("data-section-id")
-
-        if (entry.isIntersecting) {
-          newState[sectionId] = true
-        } else {
-          newState[sectionId] = false
-        }
-      })
-
-      return newState
-    })
   }
 })
 

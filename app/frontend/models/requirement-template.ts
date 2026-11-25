@@ -1,11 +1,13 @@
 import { addDays, isAfter, isSameDay, max, startOfDay } from "date-fns"
 import { utcToZonedTime } from "date-fns-tz"
 import { Instance, flow, toGenerator, types } from "mobx-state-tree"
-import pluck from "ramda/src/pluck"
 import { vancouverTimeZone } from "../constants"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
+import { IExplainerParams } from "../types/api-request"
 import { IJurisdictionStub, IRequirementTemplateFormJson } from "../types/types"
+import { ExplainerModel } from "./explainer"
+import { IExplainerLoadResult } from "./jurisdiction-explainer"
 import { RequirementTemplateSectionModel } from "./requirement-template-section"
 import { TemplateVersionModel } from "./template-version"
 import { UserModel } from "./user"
@@ -16,40 +18,26 @@ interface ITemplateCategorySummary {
   sortOrder: number
 }
 
+// mergeDeepLeft keeps snapshot ID strings when the API omits a key. Accept both
+// objects and raw IDs; drop holes so safeReference arrays don't crash the sidebar.
+function versionId(version: any) {
+  return typeof version === "string" ? version : version?.id
+}
+
+function versionIds(versions: unknown) {
+  if (!Array.isArray(versions)) return versions
+  return versions.map(versionId).filter(Boolean)
+}
+
 function preProcessor(snapshot) {
   const processedSnapShot = {
     ...snapshot,
-    publishedTemplateVersion: snapshot.publishedTemplateVersion?.id,
+    publishedTemplateVersion: versionId(snapshot.publishedTemplateVersion),
   }
 
-  const draftTemplateVersions = snapshot.draftTemplateVersions ?? []
-
-  if (Array.isArray(draftTemplateVersions)) {
-    processedSnapShot.draftTemplateVersions = pluck(
-      "id",
-      draftTemplateVersions as Array<{
-        id: "string"
-      }>
-    )
-  }
-
-  if (Array.isArray(snapshot.scheduledTemplateVersions)) {
-    processedSnapShot.scheduledTemplateVersions = pluck(
-      "id",
-      snapshot.scheduledTemplateVersions as Array<{
-        id: "string"
-      }>
-    )
-  }
-
-  if (Array.isArray(snapshot.deprecatedTemplateVersions)) {
-    processedSnapShot.deprecatedTemplateVersions = pluck(
-      "id",
-      snapshot.deprecatedTemplateVersions as Array<{
-        id: "string"
-      }>
-    )
-  }
+  processedSnapShot.draftTemplateVersions = versionIds(snapshot.draftTemplateVersions ?? [])
+  processedSnapShot.scheduledTemplateVersions = versionIds(snapshot.scheduledTemplateVersions ?? [])
+  processedSnapShot.deprecatedTemplateVersions = versionIds(snapshot.deprecatedTemplateVersions ?? [])
 
   if (snapshot.requirementTemplateSections) {
     processedSnapShot.requirementTemplateSectionMap = snapshot.requirementTemplateSections.reduce((acc, section) => {
@@ -93,6 +81,7 @@ export const RequirementTemplateModel = types.snapshotProcessor(
       sortOrder: types.optional(types.number, 0),
       enabledJurisdictions: types.maybe(types.array(types.frozen<IJurisdictionStub>())),
       explicitlyDisabledJurisdictions: types.optional(types.array(types.frozen<IJurisdictionStub>()), []),
+      explainer: types.optional(types.maybeNull(ExplainerModel), null),
     })
     .extend(withRootStore())
     .extend(withEnvironment())
@@ -104,17 +93,15 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         // Get tomorrow's date in Vancouver time zone, starting from midnight
         const tomorrow = addDays(startOfDay(utcToZonedTime(new Date(), vancouverTimeZone)), 1)
 
-        // If no scheduled versions are available, return tomorrow's date
-        if (self.scheduledTemplateVersions.length === 0) {
+        const scheduledDates = self.scheduledTemplateVersions
+          .filter(Boolean)
+          .map((version) => startOfDay(utcToZonedTime(new Date(version.versionDate), vancouverTimeZone)))
+
+        if (scheduledDates.length === 0) {
           return tomorrow
         }
 
-        // Get the latest scheduled date in Vancouver time zone
-        const latestDate = max(
-          self.scheduledTemplateVersions.map((version) =>
-            startOfDay(utcToZonedTime(new Date(version.versionDate), vancouverTimeZone))
-          )
-        )
+        const latestDate = max(scheduledDates)
 
         // Compare the latest date with tomorrow
         if (isAfter(latestDate, tomorrow) || isSameDay(latestDate, tomorrow)) {
@@ -132,10 +119,10 @@ export const RequirementTemplateModel = types.snapshotProcessor(
         return self.requirementTemplateSectionMap.get(id)
       },
       getScheduledTemplateVersionById(id: string) {
-        return self.scheduledTemplateVersions.find((version) => version.id === id)
+        return self.scheduledTemplateVersions.find((version) => version?.id === id)
       },
       get lastThreeDeprecatedTemplateVersions() {
-        return self.deprecatedTemplateVersions.slice(0, 3)
+        return self.deprecatedTemplateVersions.filter(Boolean).slice(0, 3)
       },
       get numberSharedWith() {
         // TODO
@@ -160,6 +147,10 @@ export const RequirementTemplateModel = types.snapshotProcessor(
           return
         }
         self.scheduledTemplateVersions.remove(templateVersion)
+      },
+      setExplainer(explainer) {
+        self.explainer = null
+        if (explainer) self.explainer = ExplainerModel.create(explainer)
       },
     }))
     .actions((self) => ({
@@ -207,6 +198,24 @@ export const RequirementTemplateModel = types.snapshotProcessor(
           self.rootStore.requirementTemplateStore.mergeUpdate(templateData, "requirementTemplateMap")
           return self
         }
+      }),
+      fetchExplainer: flow(function* (): Generator<any, IExplainerLoadResult | null, any> {
+        const { ok, data: response } = yield* toGenerator(self.environment.api.fetchExplainer(self.id))
+        if (!ok || !response) return null
+
+        self.setExplainer(response.data ?? null)
+        return {
+          explainer: self.explainer,
+          relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
+          jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+          permit: response.meta?.permit ?? null,
+          relatedPermits: response.meta?.relatedPermits ?? [],
+        }
+      }),
+      saveExplainer: flow(function* (explainer: IExplainerParams) {
+        const { ok, data: response } = yield* toGenerator(self.environment.api.saveExplainer(self.id, explainer))
+        if (ok && response) self.setExplainer(response.data ?? null)
+        return ok
       }),
     })),
   {

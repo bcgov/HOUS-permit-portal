@@ -122,6 +122,7 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
   const { permitApplicationStore } = useMst()
   const isSandbox = !!application.sandbox
   const isUnread = !application.isViewed
+  const isLockedDraft = application.isLockedForReviewStaff
 
   const primaryAssignee = application.designatedReviewer?.collaborator?.user ?? null
   const additionalCollaborations = application.getCollaborationAssignees(ECollaborationType.review)
@@ -164,62 +165,73 @@ const ApplicationKanbanCard = observer(function ApplicationKanbanCard({
           borderTopRadius="md"
         />
       )}
-      <Box
-        as={Link}
-        to={`/permit-applications/${application.id}`}
-        display="block"
-        color="inherit"
-        textDecoration="none"
-        _hover={{ textDecoration: "none", color: "inherit" }}
-        _visited={{ color: "inherit" }}
-        _active={{ color: "inherit" }}
+      <Tooltip
+        isDisabled={!isLockedDraft}
+        label={t("permitProject.activity.unsubmittedPermitApplication")}
+        hasArrow
+        placement="top"
+        openDelay={200}
       >
-        <Box pr={8}>
-          <Text fontWeight={700} fontSize="md" noOfLines={2}>
-            {application.nickname}
+        <Box
+          as={isLockedDraft ? "div" : Link}
+          {...(isLockedDraft ? {} : { to: `/permit-applications/${application.id}` })}
+          display="block"
+          color="inherit"
+          textDecoration="none"
+          opacity={isLockedDraft ? 0.55 : undefined}
+          cursor={isLockedDraft ? "not-allowed" : undefined}
+          aria-disabled={isLockedDraft}
+          _hover={{ textDecoration: "none", color: "inherit" }}
+          _visited={{ color: "inherit" }}
+          _active={{ color: "inherit" }}
+        >
+          <Box pr={8}>
+            <Text fontWeight={700} fontSize="md" noOfLines={2}>
+              {application.nickname}
+            </Text>
+            <Text fontSize="xs" color="text.secondary" noOfLines={1}>
+              {application.number}
+            </Text>
+          </Box>
+
+          <Text fontSize="xs" noOfLines={1} mt={1.5}>
+            {application.shortAddress}
           </Text>
-          <Text fontSize="xs" color="text.secondary" noOfLines={1}>
-            {application.number}
-          </Text>
+          {application.pid && (
+            <Text fontSize="xs" color="text.secondary">
+              PID {application.pid}
+            </Text>
+          )}
+
+          {application.projectId && application.projectNumber && (
+            <Text fontSize="xs" mt={1}>
+              {/* @ts-ignore */}
+              {t("submissionInbox.project")}{" "}
+              <Box
+                as="span"
+                color="text.link"
+                fontWeight={600}
+                cursor="pointer"
+                _hover={{ textDecoration: "underline" }}
+                onClick={(e: React.MouseEvent) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  navigate(`projects/${application.projectId}/overview`)
+                }}
+              >
+                {application.projectNumber}
+              </Box>
+            </Text>
+          )}
+
+          {application.daysInQueue != null && (
+            <Text fontSize="xs" color="text.secondary" mt={2.5}>
+              {/* @ts-ignore */}
+              {t("submissionInbox.daysInQueue", { count: application.daysInQueue })}
+            </Text>
+          )}
         </Box>
-
-        <Text fontSize="xs" noOfLines={1} mt={1.5}>
-          {application.shortAddress}
-        </Text>
-        {application.pid && (
-          <Text fontSize="xs" color="text.secondary">
-            PID {application.pid}
-          </Text>
-        )}
-
-        {application.projectId && application.projectNumber && (
-          <Text fontSize="xs" mt={1}>
-            {/* @ts-ignore */}
-            {t("submissionInbox.project")}{" "}
-            <Box
-              as="span"
-              color="text.link"
-              fontWeight={600}
-              cursor="pointer"
-              _hover={{ textDecoration: "underline" }}
-              onClick={(e: React.MouseEvent) => {
-                e.preventDefault()
-                e.stopPropagation()
-                navigate(`projects/${application.projectId}/overview`)
-              }}
-            >
-              {application.projectNumber}
-            </Box>
-          </Text>
-        )}
-
-        {application.daysInQueue != null && (
-          <Text fontSize="xs" color="text.secondary" mt={2.5}>
-            {/* @ts-ignore */}
-            {t("submissionInbox.daysInQueue", { count: application.daysInQueue })}
-          </Text>
-        )}
-      </Box>
+      </Tooltip>
     </KanbanCard>
   )
 })

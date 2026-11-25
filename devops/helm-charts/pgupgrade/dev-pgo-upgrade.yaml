@@ -1,0 +1,9 @@
+apiVersion: postgres-operator.crunchydata.com/v1beta1
+kind: PGUpgrade
+metadata:
+    name: prod-crunchy-upgrade
+    namespace: bb18ab-prod
+spec:
+    postgresClusterName: ha-postgres-crunchydb
+    fromPostgresVersion: 16
+    toPostgresVersion: 17

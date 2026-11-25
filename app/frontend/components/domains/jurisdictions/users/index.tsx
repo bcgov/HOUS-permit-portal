@@ -60,7 +60,11 @@ export const JurisdictionUserIndexScreen = observer(function JurisdictionUserInd
           </RouterLinkButton>
         </Flex>
 
-        <SearchGrid templateColumns="160px 2fr 2fr repeat(3, 1fr)">
+        <SearchGrid
+          templateColumns="160px 2fr 2fr repeat(3, 1fr)"
+          searchModel={userStore}
+          searchLabel={t("user.index.searchLabel")}
+        >
           <GridHeaders />
           {isSearching ? (
             <Flex py="50" gridColumn={"span 6"}>

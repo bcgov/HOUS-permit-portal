@@ -3,8 +3,6 @@ import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { usePart3StepCode } from "../../../../../hooks/resources/use-part-3-step-code"
-import { ProjectInfoSidebarLink } from "../../sidebar/project-info-sidebar-link"
-import { usePart3Navigation } from "../use-part-3-navigation"
 import { navSections } from "./nav-sections"
 import { SectionHeader } from "./section-header"
 import { SectionLink } from "./section-link"
@@ -12,11 +10,9 @@ import { SubLink } from "./sub-link"
 
 export const Sidebar = observer(function Part3StepCodeSidebar() {
   const { checklist } = usePart3StepCode()
-  const { infoPagePath } = usePart3Navigation()
 
   return (
     <VStack w="full" align="stretch" pt={4}>
-      <ProjectInfoSidebarLink to={infoPagePath} />
       {navSections.map((section) => (
         <React.Fragment key={section.key}>
           <SectionHeader title={t(`stepCode.part3.sidebar.${section.key}`)} />

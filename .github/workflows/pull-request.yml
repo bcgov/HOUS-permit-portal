@@ -9,6 +9,10 @@ on:
     branches: ["main", "stable", "develop"]
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   frontend-build:
     runs-on: ubuntu-latest
@@ -19,22 +23,23 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libproj-dev libgeos-dev proj-bin
       - name: Checkout Code
-        uses: actions/checkout@v3
-      - name: Set up Ruby 3.2.5
+        uses: actions/checkout@v7
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2.5"
           bundler-cache: true
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
-          node-version: "20.19.0"
+          node-version-file: ".nvmrc"
           cache: "npm"
-      - name: Install Dependencies
-        run: |
-          bundle install
-          npm ci
-      - name: Build Frontend
+      - name: Install Node Dependencies
+        run: npm ci --ignore-scripts
+      - name: Typecheck Frontend
+        run: npm run typecheck
+      - name: Run Frontend Tests
+        run: npm test
+      - name: Build Frontend and PDF Reports
         run: npm run build
 
   test:
@@ -43,7 +48,10 @@ jobs:
     # environment: "CI-test"
     env:
       RAILS_ENV: test
-      DATABASE_URL: postgres://user:password@localhost:5432/test_db
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: "5432"
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
       ELASTICSEARCH_URL: http://localhost:9200
       SIDEKIQ_DEV_REDIS_URL: redis://localhost:6379/0
       RATE_LIMIT_DEV_REDIS_URL: redis://localhost:6379/1
@@ -106,21 +114,22 @@ jobs:
           sudo apt-get install -y git-lfs libproj-dev libgeos-dev proj-bin
           git lfs install
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
         with:
           lfs: true
-      - name: Set up Ruby 3.2.5
+      - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: "3.2.5"
-      - name: Install Dependencies
-        run: |
-          bundle install
+          bundler-cache: true
       - name: Setup Test Database
         run: |
-          bundle exec rails db:create
-          bundle exec rails db:schema:load
-          bundle exec rails db:migrate
+          cp config/database.yml.local config/database.yml
+          bundle exec rake "parallel:create[4]" "parallel:load_schema[4]"
+      - name: Restore RSpec Timings
+        uses: actions/cache@v6
+        with:
+          path: tmp/parallel_runtime_rspec.log
+          key: rspec-timings-${{ runner.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: rspec-timings-${{ runner.os }}-
       - name: Run RSpec
-        run: |
-          bundle exec rspec
+        run: bundle exec parallel_rspec -n 4 --serialize-stdout spec

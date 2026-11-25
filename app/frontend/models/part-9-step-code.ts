@@ -25,7 +25,6 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         checklistsMap: types.map(Part9StepCodeChecklistModel),
         zeroCarbonSteps: types.array(types.enumeration(Object.values(EZeroCarbonStep))),
         energySteps: types.array(types.enumeration(Object.values(EEnergyStep))),
-        permitApplicationId: types.maybeNull(types.string),
         isFullyLoaded: types.optional(types.boolean, false),
       })
     )
@@ -45,6 +44,8 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
         return self.checklists.find((checklist) => checklist.stage === stage)
       },
+    }))
+    .views((self) => ({
       get preConstructionChecklist() {
         return self.currentChecklist
       },
@@ -56,9 +57,13 @@ export const Part9StepCodeModel = types.snapshotProcessor(
       stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
         return stageStatusFor(stage, self.checklists, self.stageCompletions)
       },
+    }))
+    .views((self) => ({
       isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
         return self.stageStatus(stage) === EStepCodeStageStatus.complete
       },
+    }))
+    .views((self) => ({
       get isComplete() {
         return self.isStageComplete()
       },
@@ -74,7 +79,6 @@ export const Part9StepCodeModel = types.snapshotProcessor(
         const response = yield self.environment.api.updatePart9Checklist(id, values, options)
         if (response.ok) {
           self.mergeUpdate(response.data.data, "checklistsMap")
-          self.markReportDocumentsStale()
           return true
         }
       }),
@@ -90,10 +94,13 @@ export const Part9StepCodeModel = types.snapshotProcessor(
     preProcessor(snapshot: any) {
       const processed = { ...snapshot }
       if (Array.isArray(processed.checklists)) {
-        const map = processed.checklists.reduce((acc: Record<string, any>, checklist: any) => {
-          if (checklist && checklist.id) acc[checklist.id] = checklist
-          return acc
-        }, {})
+        // Deep-merge each checklist so PA/list payloads (summary fields only) do not
+        // wipe extended client state (complianceReports, dataEntries, isLoaded).
+        const map: Record<string, any> = { ...(processed.checklistsMap || {}) }
+        processed.checklists.forEach((checklist: any) => {
+          if (!checklist?.id) return
+          map[checklist.id] = { ...(map[checklist.id] || {}), ...checklist }
+        })
         processed.checklistsMap = map
         delete processed.checklists
       } else if (processed.checklistsMap == null) {

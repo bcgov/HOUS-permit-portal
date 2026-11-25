@@ -2,11 +2,14 @@ import { ApiResponse, ApisauceInstance, create, Monitor } from "apisauce"
 import { IRevisionRequestForm } from "../../components/domains/permit-application/revision-sidebar"
 import { IJurisdictionTemplateVersionCustomizationForm } from "../../components/domains/requirement-template/screens/jurisdiction-edit-digital-permit-screen"
 import { TContactFormData } from "../../components/shared/contact/create-edit-contact-modal"
+import { IExplainer } from "../../models/explainer"
 import { IExternalApiKey } from "../../models/external-api-key"
 import { IHelpVideo } from "../../models/help-video"
 import { IHelpVideoSection } from "../../models/help-video-section"
+import { IInfoDocument } from "../../models/info-document"
 import { IIntegrationMapping } from "../../models/integration-mapping"
 import { IJurisdiction } from "../../models/jurisdiction"
+import { IExplainerPermit, IJurisdictionExplainer } from "../../models/jurisdiction-explainer"
 import { IJurisdictionTemplateVersionCustomization } from "../../models/jurisdiction-template-version-customization"
 import { INote } from "../../models/note"
 import { IOverheatingCode } from "../../models/overheating-code"
@@ -21,6 +24,8 @@ import { IPreCheck } from "../../models/pre-check"
 import { IProjectAudit } from "../../models/project-audit"
 import { IProjectMeeting } from "../../models/project-meeting"
 import { IReleaseNote } from "../../models/release-note-model"
+import { IRequirementBlock } from "../../models/requirement-block"
+import { IRequirementQuestion } from "../../models/requirement-question"
 import { IRequirementTemplate } from "../../models/requirement-template"
 import { ITemplateCategory } from "../../models/template-category"
 import { ITemplateVersion } from "../../models/template-version"
@@ -29,10 +34,12 @@ import { IUser } from "../../models/user"
 import { ISiteConfigurationStore } from "../../stores/site-configuration-store"
 import { IStepCode } from "../../stores/step-code-store"
 import {
+  IExplainerParams,
   IExternalApiKeyParams,
   IIntegrationMappingUpdateParams,
   IPermitProjectUpdateParams,
   IRequirementBlockParams,
+  IRequirementQuestionParams,
   IRequirementTemplateUpdateParams,
   ITagSearchParams,
 } from "../../types/api-request"
@@ -49,6 +56,7 @@ import {
   IPageMeta,
   IProjectMeetingResponse,
   IRequirementBlockResponse,
+  IRequirementQuestionResponse,
   IRequirementTemplateResponse,
   IUsersResponse,
 } from "../../types/api-responses"
@@ -63,6 +71,7 @@ import {
   EPreCheckSortFields,
   EProjectAuditSortFields,
   EProjectMeetingSortFields,
+  EQuestionBankSortFields,
   EReleaseNoteSortFields,
   ERequirementLibrarySortFields,
   ERequirementTemplateSortFields,
@@ -71,20 +80,24 @@ import {
   ETemplateVersionStatus,
   EUserSortFields,
 } from "../../types/enums"
+import { IReportPayload, IReportSummary } from "../../types/report"
 import {
   IContact,
   ICopyRequirementTemplateFormData,
   IJurisdictionFilters,
   IJurisdictionSearchFilters,
+  INoteAttachmentDraft,
+  IOption,
   IPart9ChecklistSelectOptions,
   IPermitApplicationInboxSearchFilters,
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
   IProjectMeetingInboxSearchFilters,
+  IReportGenerationIssue,
+  ISubmissionContact,
   ITemplateVersionDiff,
   TAutoComplianceModuleConfigurations,
-  TCreatePermitApplicationFormData,
   TCreateRequirementTemplateFormData,
   TReleaseNoteFormData,
   TReleaseNoteViewerContext,
@@ -102,6 +115,13 @@ interface ITemplateVersionFeedback {
   updatedAt: Date
   user?: IUser
   resolvedBy?: IUser | null
+}
+
+type TExplainerMeta = {
+  relatedTemplateOptions?: IOption[]
+  jurisdictionExplainers?: IJurisdictionExplainer[]
+  relatedPermits?: IExplainerPermit[]
+  permit?: IExplainerPermit | null
 }
 
 export class Api {
@@ -144,6 +164,10 @@ export class Api {
 
   async reinviteUser(userId: string) {
     return this.client.post<ApiResponse<IUser>>(`/users/${userId}/reinvite`)
+  }
+
+  async login(params: { email: string; password: string }) {
+    return this.client.post("/login", { user: params })
   }
 
   async logout() {
@@ -254,12 +278,50 @@ export class Api {
     return this.client.post<ApiResponse<IHelpVideo>>(`/help_videos/${id}/unpublish`)
   }
 
+  async fetchInfoDocuments(params?: { publishedOnly?: boolean }) {
+    return this.client.get<ApiResponse<IInfoDocument[]>>(`/info_documents`, params)
+  }
+
+  async fetchInfoDocument(id: string) {
+    return this.client.get<ApiResponse<IInfoDocument>>(`/info_documents/${id}`)
+  }
+
+  async createInfoDocument(params) {
+    return this.client.post<ApiResponse<IInfoDocument>>(`/info_documents`, { infoDocument: params })
+  }
+
+  async updateInfoDocument(id: string, params) {
+    return this.client.patch<ApiResponse<IInfoDocument>>(`/info_documents/${id}`, { infoDocument: params })
+  }
+
+  async deleteInfoDocument(id: string) {
+    return this.client.delete<ApiResponse<null>>(`/info_documents/${id}`)
+  }
+
+  async publishInfoDocument(id: string) {
+    return this.client.post<ApiResponse<IInfoDocument>>(`/info_documents/${id}/publish`)
+  }
+
+  async unpublishInfoDocument(id: string) {
+    return this.client.post<ApiResponse<IInfoDocument>>(`/info_documents/${id}/unpublish`)
+  }
+
+  async reorderInfoDocuments(orderedIds: string[]) {
+    return this.client.post<ApiResponse<IInfoDocument[]>>(`/info_documents/reorder`, { orderedIds })
+  }
+
   async fetchPermitApplication(id: string, review?: boolean) {
     return this.client.get<ApiResponse<IPermitApplication>>(`/permit_applications/${id}`, { review })
   }
 
   async viewPermitApplication(id) {
     return this.client.post<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/mark_as_viewed`)
+  }
+
+  async acknowledgePublishedElectives(id: string, customizationChangeId: string) {
+    return this.client.post<ApiResponse<null>>(`/permit_applications/${id}/acknowledge_published_electives`, {
+      customizationChangeId,
+    })
   }
 
   async unviewPermitApplication(id: string) {
@@ -296,6 +358,18 @@ export class Api {
 
   async fetchRequirementBlocks(params?: TSearchParams<ERequirementLibrarySortFields>) {
     return this.client.post<IRequirementBlockResponse>("/requirement_blocks/search", params)
+  }
+
+  async fetchRequirementBlock(id: string) {
+    return this.client.get<ApiResponse<IRequirementBlock>>(`/requirement_blocks/${id}`)
+  }
+
+  async fetchRequirementQuestions(params?: TSearchParams<EQuestionBankSortFields>) {
+    return this.client.post<IRequirementQuestionResponse>("/requirement_questions/search", params)
+  }
+
+  async fetchRequirementQuestion(id: string) {
+    return this.client.get<ApiResponse<IRequirementQuestion>>(`/requirement_questions/${id}`)
   }
 
   async fetchJurisdictionUsers(jurisdictionId, params?: TSearchParams<EUserSortFields>) {
@@ -363,6 +437,8 @@ export class Api {
     pid?: string
     jurisdictionId?: string
     pin?: string
+    latitude?: number
+    longitude?: number
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
@@ -401,8 +477,13 @@ export class Api {
     return this.client.get<INoteResponse>(`/project_meetings/${projectMeetingId}/notes`)
   }
 
-  async createProjectMeetingNote(projectMeetingId: string, body: string) {
-    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, { note: { body } })
+  async createProjectMeetingNote(projectMeetingId: string, body: string, attachments: INoteAttachmentDraft[] = []) {
+    return this.client.post<ApiResponse<INote>>(`/project_meetings/${projectMeetingId}/notes`, {
+      note: {
+        body,
+        noteAttachmentDocumentsAttributes: attachments.map(({ file }) => ({ file })),
+      },
+    })
   }
 
   async downloadProjectMeetingNotesCsv(projectMeetingId: string) {
@@ -536,7 +617,9 @@ export class Api {
 
   async fetchJurisdictionPermitApplications(
     jurisdictionId,
-    params?: TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
+    params?:
+      | TSearchParams<EPermitApplicationInboxSortFields, IPermitApplicationInboxSearchFilters>
+      | TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
   ) {
     return this.client.post<IJurisdictionPermitApplicationResponse>(
       `/jurisdictions/${jurisdictionId}/permit_applications/search`,
@@ -551,22 +634,37 @@ export class Api {
     )
   }
 
-  async createPermitApplication(params: TCreatePermitApplicationFormData) {
-    return this.client.post<ApiResponse<IPermitApplication>>("/permit_applications", { permitApplication: params })
-  }
-
   async createProjectPermitApplications(
     permitProjectId: string,
-    params: Array<{ templateVersionId: string; jurisdictionId?: string }>
+    params: Array<{ templateVersionId: string; jurisdictionId?: string }>,
+    note?: string
   ) {
     return this.client.post<ApiResponse<IPermitApplication[]>>(
       `/permit_projects/${permitProjectId}/permit_applications`,
-      { permitApplications: params }
+      { permitApplications: params, ...(note ? { note } : {}) }
     )
   }
 
   async createRequirementBlock(params: IRequirementBlockParams) {
     return this.client.post<IRequirementBlockResponse>(`/requirement_blocks`, { requirementBlock: params })
+  }
+
+  async createRequirementQuestion(params: IRequirementQuestionParams) {
+    return this.client.post<IRequirementQuestionResponse>(`/requirement_questions`, { requirementQuestion: params })
+  }
+
+  async updateRequirementQuestion(id: string, params: IRequirementQuestionParams) {
+    return this.client.put<IRequirementQuestionResponse>(`/requirement_questions/${id}`, {
+      requirementQuestion: params,
+    })
+  }
+
+  async archiveRequirementQuestion(id: string) {
+    return this.client.delete<IRequirementQuestionResponse>(`/requirement_questions/${id}`)
+  }
+
+  async restoreRequirementQuestion(id: string) {
+    return this.client.post<IRequirementQuestionResponse>(`/requirement_questions/${id}/restore`)
   }
 
   async updateRequirementBlock(id: string, params: Partial<IRequirementBlockParams>) {
@@ -621,6 +719,20 @@ export class Api {
   async updateRevisionRequests(id, params: IRevisionRequestForm) {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/revision_requests`, {
       submissionVersion: params,
+    })
+  }
+
+  async uploadRevisionFulfillment(
+    id: string,
+    supportingDocumentsAttributes: Array<{
+      id?: string
+      revisionRequestId: string
+      _destroy?: boolean
+      file?: { id: string; storage: string; metadata: { size: number; filename: string; mimeType: string } }
+    }>
+  ) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/upload_supporting_document`, {
+      permitApplication: { supportingDocumentsAttributes },
     })
   }
 
@@ -727,7 +839,22 @@ export class Api {
   }
 
   async generatePermitApplicationMissingPdfs(id: string) {
-    return this.client.post<never>(`/permit_applications/${id}/generate_missing_pdfs`)
+    return this.client.post<IApiResponse<{ reportGenerationIssues: IReportGenerationIssue[] }, {}>>(
+      `/permit_applications/${id}/generate_missing_pdfs`
+    )
+  }
+
+  async downloadSupportingDocumentsZip(id: string, supportingDocumentIds: string[]) {
+    return this.client.post<IApiResponse<{ requestId: string }, {}>>(
+      `/permit_applications/${id}/download_supporting_documents_zip`,
+      { supportingDocumentIds }
+    )
+  }
+
+  async updateSubmitterNote(id: string, submitterNote: string) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
+      permitApplication: { submitterNote },
+    })
   }
 
   async submitPermitApplication(id, params) {
@@ -748,12 +875,42 @@ export class Api {
     return this.client.post<IRequirementTemplateResponse>(`/requirement_templates/search`, params)
   }
 
-  async fetchRequirementTemplatesForFilter() {
-    return this.client.get<IApiResponse<{ id: string; nickname: string }[], {}>>(`/requirement_templates/for_filter`)
+  async fetchRequirementTemplatesForFilter(params?: { permitProjectId?: string; jurisdictionId?: string }) {
+    return this.client.get<IOptionResponse>(`/requirement_templates/for_filter`, params)
   }
 
   async fetchRequirementTemplate(id: string) {
     return this.client.get<IApiResponse<IRequirementTemplate, {}>>(`/requirement_templates/${id}`)
+  }
+
+  async fetchExplainer(requirementTemplateId: string) {
+    return this.client.get<IApiResponse<IExplainer | null, TExplainerMeta>>(
+      `/requirement_templates/${requirementTemplateId}/explainer`
+    )
+  }
+
+  async saveExplainer(requirementTemplateId: string, explainer: IExplainerParams) {
+    return this.client.patch<IApiResponse<IExplainer | null, TExplainerMeta>>(
+      `/requirement_templates/${requirementTemplateId}/explainer`,
+      { explainer }
+    )
+  }
+
+  async fetchJurisdictionExplainer(requirementTemplateId: string, jurisdictionId: string) {
+    return this.client.get<IApiResponse<IJurisdictionExplainer | null, {}>>(
+      `/requirement_templates/${requirementTemplateId}/jurisdiction_explainers/${jurisdictionId}`
+    )
+  }
+
+  async saveJurisdictionExplainer(
+    requirementTemplateId: string,
+    jurisdictionId: string,
+    jurisdictionExplainer: { localContextHtml: string }
+  ) {
+    return this.client.patch<IApiResponse<IJurisdictionExplainer | null, {}>>(
+      `/requirement_templates/${requirementTemplateId}/jurisdiction_explainers/${jurisdictionId}`,
+      { jurisdictionExplainer }
+    )
   }
 
   async createRequirementTemplate(params: TCreateRequirementTemplateFormData) {
@@ -790,9 +947,11 @@ export class Api {
     {
       requirementTemplate,
       versionDate,
+      changeNotes,
     }: {
       requirementTemplate?: IRequirementTemplateUpdateParams
       versionDate: string
+      changeNotes?: string
     }
   ) {
     const { tags, ...rest } = requirementTemplate ?? {}
@@ -804,16 +963,22 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(`/requirement_templates/${templateId}/schedule`, {
       requirementTemplate: requirementTemplateParams,
       versionDate,
+      changeNotes,
     })
   }
 
-  async forcePublishRequirementTemplate(templateId: string, requirementTemplate: IRequirementTemplateUpdateParams) {
+  async forcePublishRequirementTemplate(
+    templateId: string,
+    requirementTemplate: IRequirementTemplateUpdateParams,
+    changeNotes?: string
+  ) {
     const { tags, ...rest } = requirementTemplate
     const requirementTemplateParams = tags ? { ...rest, tagList: tags } : rest
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/force_publish_now`,
       {
         requirementTemplate: requirementTemplateParams,
+        changeNotes,
       }
     )
   }
@@ -919,11 +1084,19 @@ export class Api {
 
   // ── Draft workflow API methods ──────────────────────────────────────
 
-  async createDraft(templateId: string, params?: { assigneeId?: string }) {
+  async createDraft(templateId: string, params?: { assigneeId?: string; changeNotes?: string }) {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/requirement_templates/${templateId}/create_draft`,
       params
     )
+  }
+
+  async validateRequirementTemplateConfig(templateId: string) {
+    return this.client.post<ApiResponse<unknown>>(`/requirement_templates/${templateId}/validate_config`)
+  }
+
+  async validateTemplateVersionConfig(templateVersionId: string) {
+    return this.client.post<ApiResponse<unknown>>(`/template_versions/${templateVersionId}/validate_config`)
   }
 
   async discardDraft(templateVersionId: string) {
@@ -947,6 +1120,17 @@ export class Api {
     return this.client.post<ApiResponse<IRequirementTemplate>>(
       `/template_versions/${templateVersionId}/promote_draft`,
       params
+    )
+  }
+
+  async restoreTemplateLayout(templateVersionId: string) {
+    return this.client.post<ApiResponse<IRequirementTemplate>>(`/template_versions/${templateVersionId}/restore_layout`)
+  }
+
+  async restoreRequirementBlockFromVersion(templateVersionId: string, requirementBlockId: string) {
+    return this.client.post<IApiResponse<IRequirementBlock, {}>>(
+      `/template_versions/${templateVersionId}/restore_requirement_block`,
+      { requirementBlockId }
     )
   }
 
@@ -986,8 +1170,13 @@ export class Api {
     )
   }
 
-  async fetchPubliclyPreviewableTemplateVersions() {
-    return this.client.get<ApiResponse<ITemplateVersion[]>>(`/template_versions/publicly_previewable`)
+  async fetchStandardizationPreviewTemplateVersions() {
+    return this.client.get<
+      ApiResponse<{
+        publishedTemplateVersions: ITemplateVersion[]
+        publiclyPreviewableTemplateVersions: ITemplateVersion[]
+      }>
+    >(`/template_versions/standardization_preview`)
   }
 
   // ── Draft feedback API methods ──────────────────────────────────────
@@ -1229,6 +1418,18 @@ export class Api {
     return this.client.post<ApiResponse<IContact>>("/contacts", { contact: params })
   }
 
+  async createSubmissionContact(params: { jurisdictionId: string; email: string; type: string }) {
+    return this.client.post<ApiResponse<ISubmissionContact>>("/submission_contacts", { submissionContact: params })
+  }
+
+  async destroySubmissionContact(id: string) {
+    return this.client.delete<ApiResponse<ISubmissionContact>>(`/submission_contacts/${id}`)
+  }
+
+  async resendSubmissionContactConfirmation(id: string) {
+    return this.client.post<ApiResponse<ISubmissionContact>>(`/submission_contacts/${id}/resend_confirmation`)
+  }
+
   async updateContact(id: string, params: TContactFormData) {
     return this.client.put<ApiResponse<IContact>>(`/contacts/${id}`, { contact: params })
   }
@@ -1324,6 +1525,10 @@ export class Api {
     return this.client.post<ApiResponse<IReleaseNote[]>>(`/release_notes/search`, params)
   }
 
+  async fetchReleaseNoteYears() {
+    return this.client.get<ApiResponse<number[]>>(`/release_notes/years`)
+  }
+
   async fetchReleaseNote(id: string) {
     return this.client.get<ApiResponse<IReleaseNote>>(`/release_notes/${id}`)
   }
@@ -1343,4 +1548,24 @@ export class Api {
   async publishReleaseNote(id: string, releaseNote: TReleaseNoteFormData) {
     return this.client.patch<ApiResponse<IReleaseNote>>(`/release_notes/${id}/publish`, { releaseNote })
   }
+
+  async fetchReportSummaries() {
+    return this.client.get<IApiResponse<IReportSummary[], {}>>(`/reports`)
+  }
+
+  async fetchReport(key: string, range: string, subject?: string) {
+    return this.client.get<IApiResponse<IReportPayload, {}>>(`/reports/${key}`, reportParams(range, subject))
+  }
+
+  async refreshReport(key: string, range: string, subject?: string) {
+    return this.client.post<IApiResponse<IReportPayload, {}>>(`/reports/${key}/refresh`, reportParams(range, subject))
+  }
+
+  async downloadReportExport(key: string, range: string, subject?: string) {
+    return this.client.get<BlobPart>(`/reports/${key}/export`, reportParams(range, subject))
+  }
+}
+
+function reportParams(range: string, subject?: string) {
+  return subject ? { range, subject } : { range }
 }

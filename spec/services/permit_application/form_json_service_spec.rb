@@ -145,4 +145,31 @@ RSpec.describe PermitApplication::FormJsonService do
       )
     ).to eq(true)
   end
+  it "retains elective-only blocks using explicit capture settings instead of the status accessor" do
+    schema = { "components" => [{ "components" => [{ "id" => "block" }] }] }
+    build_service(
+      form_json: schema,
+      requirement_blocks_json: {
+        "block" => {
+          "requirements" => [{ "id" => "question", "elective" => true }]
+        }
+      },
+      form_customizations: {
+      }
+    )
+    settings = {
+      "requirement_block_changes" => {
+        "block" => {
+          "enabled_elective_field_ids" => ["question"]
+        }
+      }
+    }
+    expect(permit_application).not_to receive(:form_customizations)
+    report =
+      described_class.new(
+        permit_application: permit_application,
+        customizations: settings
+      ).call
+    expect(report.form_json).to eq(schema)
+  end
 end

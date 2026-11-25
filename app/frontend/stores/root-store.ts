@@ -6,6 +6,7 @@ import { CollaboratorStoreModel, ICollaboratorStore } from "./collaborator-store
 import { ContactStoreModel, IContactStore } from "./contact-store"
 import { GeocoderStoreModel, IGeocoderStore } from "./geocoder-store"
 import { HelpVideoStoreModel, IHelpVideoStore } from "./help-video-store"
+import { IInfoDocumentStore, InfoDocumentStoreModel } from "./info-document-store"
 import { IJurisdictionStore, JurisdictionStoreModel } from "./jurisdiction-store"
 import { INoteStore, NoteStoreModel } from "./note-store"
 import { INotificationStore, NotificationStoreModel } from "./notification-store"
@@ -17,7 +18,9 @@ import { IProjectAuditStore, ProjectAuditStoreModel } from "./project-audit-stor
 import { IProjectMeetingInboxStore, ProjectMeetingInboxStoreModel } from "./project-meeting-inbox-store"
 import { IProjectMeetingStore, ProjectMeetingStoreModel } from "./project-meeting-store"
 import { IReleaseNoteStore, ReleaseNoteStoreModel } from "./release-note-store"
+import { IReportStore, ReportStoreModel } from "./report-store"
 import { IRequirementBlockStoreModel, RequirementBlockStoreModel } from "./requirement-block-store"
+import { IRequirementQuestionStoreModel, RequirementQuestionStoreModel } from "./requirement-question-store"
 import { IRequirementTemplateStoreModel, RequirementTemplateStoreModel } from "./requirement-template-store"
 import { ISandboxStore, SandboxStoreModel } from "./sandbox-store"
 import { ISessionStore, SessionStoreModel } from "./session-store"
@@ -46,6 +49,7 @@ export const RootStoreModel = types
     overheatingCodeStore: types.optional(OverheatingCodeStoreModel, {}),
     jurisdictionStore: types.optional(JurisdictionStoreModel, {}),
     requirementBlockStore: types.optional(RequirementBlockStoreModel, {}),
+    requirementQuestionStore: types.optional(RequirementQuestionStoreModel, {}),
     requirementTemplateStore: types.optional(RequirementTemplateStoreModel, {}),
     templateVersionPreviewStore: types.optional(TemplateVersionPreviewStoreModel, {}),
     collaboratorStore: types.optional(CollaboratorStoreModel, {}),
@@ -53,6 +57,7 @@ export const RootStoreModel = types
     templateVersionStore: types.optional(TemplateVersionStoreModel, {}),
     geocoderStore: types.optional(GeocoderStoreModel, {}),
     helpVideoStore: types.optional(HelpVideoStoreModel, {}),
+    infoDocumentStore: types.optional(InfoDocumentStoreModel, {}),
     stepCodeStore: types.optional(StepCodeStoreModel, {}),
     siteConfigurationStore: types.optional(SiteConfigurationStoreModel, {}),
     contactStore: types.optional(ContactStoreModel, {}),
@@ -60,6 +65,7 @@ export const RootStoreModel = types
     sandboxStore: types.optional(SandboxStoreModel, {}),
     submissionInboxStore: types.optional(SubmissionInboxStoreModel, {}),
     releaseNoteStore: types.optional(ReleaseNoteStoreModel, {}),
+    reportStore: types.optional(ReportStoreModel, {}),
   })
   .extend(withEnvironment())
   .volatile((self) => ({
@@ -74,6 +80,8 @@ export const RootStoreModel = types
         properties: ["afterLoginPath"],
         storage: localStorage,
       })
+      // Persist hydrates props directly; re-run setter so unsafe paths are dropped
+      self.sessionStore.setAfterLoginPath(self.sessionStore.afterLoginPath)
       yield makePersistable(self.uiStore, {
         name: `${self.userStore.currentUser?.id}-UIStore`,
         properties: ["currentlySelectedJurisdictionId"],
@@ -93,6 +101,12 @@ export const RootStoreModel = types
         properties: ["viewMode", "displayMode", "collapsedColumns"],
         storage: localStorage,
       })
+      yield makePersistable(self.stepCodeStore, {
+        name: "StepCodeStore",
+        properties: ["indexExitPath"],
+        storage: sessionStorage,
+      })
+      self.stepCodeStore.setIndexExitPath(self.stepCodeStore.indexExitPath)
       protect(self)
     }),
     subscribeToUserChannel() {
@@ -117,6 +131,8 @@ export const RootStoreModel = types
       })
     },
     afterCreate() {
+      // UI store is created before session store, so this cannot run from uiStore.afterCreate.
+      self.uiStore.showQueryParamFlash()
       self.loadLocalPersistedData()
     },
   }))
@@ -135,11 +151,13 @@ export interface IRootStore extends IStateTreeNode {
   jurisdictionStore: IJurisdictionStore
   userStore: IUserStore
   requirementBlockStore: IRequirementBlockStoreModel
+  requirementQuestionStore: IRequirementQuestionStoreModel
   requirementTemplateStore: IRequirementTemplateStoreModel
   templateVersionPreviewStore: ITemplateVersionPreviewStoreModel
   templateVersionStore: ITemplateVersionStoreModel
   geocoderStore: IGeocoderStore
   helpVideoStore: IHelpVideoStore
+  infoDocumentStore: IInfoDocumentStore
   stepCodeStore: IStepCodeStore
   siteConfigurationStore: ISiteConfigurationStore
   contactStore: IContactStore
@@ -149,6 +167,7 @@ export interface IRootStore extends IStateTreeNode {
   sandboxStore: ISandboxStore
   submissionInboxStore: ISubmissionInboxStore
   releaseNoteStore: IReleaseNoteStore
+  reportStore: IReportStore
   subscribeToUserChannel: () => void
   disconnectUserChannel: () => void
   loadLocalPersistedData: () => void

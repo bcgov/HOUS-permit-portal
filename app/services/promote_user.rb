@@ -40,12 +40,20 @@ class PromoteUser
         invited_user.destroy!
         existing_user.jurisdiction_ids = jurisdiction_ids
         existing_user.save!
+        discard_live_owned_projects
       end
     end
   end
 
   def merge_overheating_codes
     invited_user.overheating_codes.update_all(creator_id: existing_user.id)
+  end
+
+  def discard_live_owned_projects
+    existing_user.permit_projects.live.kept.find_each do |project|
+      project.discard!
+      project.permit_applications.kept.discard_all
+    end
   end
 
   def merge_collaborations

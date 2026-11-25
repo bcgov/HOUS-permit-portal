@@ -4,6 +4,11 @@ RSpec.describe RequirementBlock, type: :model do
   describe "associations" do
     # Testing direct associations
     it { should have_many(:requirements) }
+    it do
+      should have_many(:requirement_templates).through(
+               :requirement_template_sections
+             )
+    end
     it "should order requirements by position in ascending order" do
       requirement_block =
         FactoryBot.create(

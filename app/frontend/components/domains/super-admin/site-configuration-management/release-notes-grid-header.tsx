@@ -45,6 +45,12 @@ const RELEASE_NOTE_GRID_HEADER_COLUMNS = [
     i18nKey: "releaseNote.columns.version",
     showDivider: true,
   },
+  {
+    type: "text" as const,
+    id: "releaseType",
+    i18nKey: "releaseNote.columns.releaseType",
+    showDivider: true,
+  },
   { type: "sortable" as const, field: EReleaseNoteSortFields.releaseDate },
   { type: "sortable" as const, field: EReleaseNoteSortFields.status },
   { type: "sortable" as const, field: EReleaseNoteSortFields.lastEdited },
@@ -54,7 +60,7 @@ const RELEASE_NOTE_GRID_HEADER_COLUMNS = [
     i18nKey: "releaseNote.columns.actions",
     showDivider: false,
   },
-] satisfies ReadonlyArray<ReleaseNoteGridHeaderColumn>
+] as const satisfies ReadonlyArray<ReleaseNoteGridHeaderColumn>
 
 export const ReleaseNotesGridHeaders = observer(function ReleaseNotesGridHeaders() {
   const { t } = useTranslation()

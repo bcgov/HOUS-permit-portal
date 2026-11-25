@@ -1,14 +1,18 @@
 import { Box, Center } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
-import React, { Suspense, lazy, useEffect } from "react"
+import React, { lazy, Suspense, useEffect } from "react"
 import { useTranslation } from "react-i18next"
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { BrowserRouter, Route, useLocation, useNavigate } from "react-router-dom"
+import { useMatomoAuthFunnel } from "../../../hooks/use-matomo-auth-funnel"
 import useSyncPathWithStore from "../../../hooks/use-sync-path-with-root-store"
 import { useMst } from "../../../setup/root"
 import { EFlashMessageStatus } from "../../../types/enums"
+import { isSafeAppPath } from "../../../utils/utility-functions"
 import { FlashMessage } from "../../shared/base/flash-message"
 import { LoadingScreen } from "../../shared/base/loading-screen"
+import { ObservedRoutes } from "../../shared/sentry/observed-routes"
 import { EULAScreen } from "../onboarding/eula"
+import { MatomoSpaPageviews } from "./matomo-spa-pageviews"
 import { NavBar } from "./nav-bar"
 import { ProtectedRoute } from "./protected-route"
 import { QaToolsPopout } from "./qa-tools-popout"
@@ -31,12 +35,6 @@ const NotFoundScreen = lazy(() =>
   import("../../shared/base/not-found-screen").then((module) => ({ default: module.NotFoundScreen }))
 )
 
-const PermitApplicationPDFViewer = lazy(() =>
-  import("../../shared/permit-applications/pdf-content/viewer").then((module) => ({
-    default: module.PermitApplicationPDFViewer,
-  }))
-)
-
 const EmailConfirmedScreen = lazy(() =>
   import("../authentication/email-confirmed-screen").then((module) => ({ default: module.EmailConfirmedScreen }))
 )
@@ -50,6 +48,10 @@ const HelpVideosIndexScreen = lazy(() =>
   import("../help-videos").then((module) => ({ default: module.HelpVideosIndexScreen }))
 )
 
+const InfoDocumentsIndexScreen = lazy(() =>
+  import("../info-documents").then((module) => ({ default: module.InfoDocumentsIndexScreen }))
+)
+
 const HelpVideoScreen = lazy(() =>
   import("../help-videos/help-video-screen").then((module) => ({ default: module.HelpVideoScreen }))
 )
@@ -57,6 +59,11 @@ const HelpVideoScreen = lazy(() =>
 const StandardizationPreviewScreen = lazy(() =>
   import("../landing/standardization-preview-screen").then((module) => ({
     default: module.StandardizationPreviewScreen,
+  }))
+)
+const PermitApplicationInfoScreen = lazy(() =>
+  import("../requirement-template/screens/permit-application-info-screen").then((module) => ({
+    default: module.PermitApplicationInfoScreen,
   }))
 )
 
@@ -116,6 +123,11 @@ const ResourcesScreenLazy = lazy(() =>
 const HelpVideosManagementScreen = lazy(() =>
   import("../super-admin/help-videos-management-screen").then((module) => ({
     default: module.HelpVideosManagementScreen,
+  }))
+)
+const InfoDocumentsManagementScreen = lazy(() =>
+  import("../super-admin/info-documents-management-screen").then((module) => ({
+    default: module.InfoDocumentsManagementScreen,
   }))
 )
 const ReviewStaffMyJurisdictionAboutPageScreen = lazy(() =>
@@ -284,6 +296,11 @@ const JurisdictionDigitalPermitSettingsScreen = lazy(() =>
     default: module.JurisdictionDigitalPermitSettingsScreen,
   }))
 )
+const JurisdictionPermitApplicationInfoEditScreen = lazy(() =>
+  import("../requirement-template/screens/permit-application-info-screen").then((module) => ({
+    default: module.JurisdictionPermitApplicationInfoEditScreen,
+  }))
+)
 const JurisdictionApiMappingsSetupIndexScreen = lazy(() =>
   import("../requirement-template/screens/jurisdiction-api-mappings-setup-index-screen").then((module) => ({
     default: module.JurisdictionApiMappingsSetupIndexScreen,
@@ -321,6 +338,9 @@ const ExportTemplatesScreen = lazy(() =>
 const RequirementsLibraryScreen = lazy(() =>
   import("../requirements-library").then((module) => ({ default: module.RequirementsLibraryScreen }))
 )
+const QuestionBankScreen = lazy(() =>
+  import("../question-bank").then((module) => ({ default: module.QuestionBankScreen }))
+)
 const Part9StepCodeForm = lazy(() =>
   import("../step-code/part-9").then((module) => ({ default: module.Part9StepCodeForm }))
 )
@@ -340,11 +360,6 @@ const OverheatingCodeUnavailableScreen = lazy(() =>
   }))
 )
 
-const StepCodeChecklistPDFViewer = lazy(() =>
-  import("../step-code/checklist/pdf-content/viewer").then((module) => ({
-    default: module.StepCodeChecklistPDFViewer,
-  }))
-)
 const SiteConfigurationManagementScreen = lazy(() =>
   import("../super-admin/site-configuration-management").then((module) => ({
     default: module.SiteConfigurationManagementScreen,
@@ -442,9 +457,19 @@ const ReportingScreen = lazy(() =>
   import("../super-admin/reporting/reporting-screen").then((module) => ({ default: module.ReportingScreen }))
 )
 
+const ReportScreen = lazy(() =>
+  import("../super-admin/reporting/report-screen").then((module) => ({ default: module.ReportScreen }))
+)
+
 const ExportTemplateSummaryScreen = lazy(() =>
   import("../super-admin/reporting/export-template-summary-screen").then((module) => ({
     default: module.ExportTemplateSummaryScreen,
+  }))
+)
+
+const StepCodeDataScreen = lazy(() =>
+  import("../super-admin/reporting/step-code-data-screen").then((module) => ({
+    default: module.StepCodeDataScreen,
   }))
 )
 
@@ -483,6 +508,8 @@ export const Navigation = observer(() => {
   const { validateToken, isValidating } = sessionStore
   const { t } = useTranslation()
 
+  useMatomoAuthFunnel()
+
   useEffect(() => {
     validateToken()
   }, [])
@@ -491,6 +518,7 @@ export const Navigation = observer(() => {
 
   return (
     <BrowserRouter>
+      <MatomoSpaPageviews />
       <Box pos="relative" w="full">
         <Box pos="absolute" top={0} zIndex="toast" w="full">
           <FlashMessage />
@@ -536,7 +564,8 @@ const AppRoutes = observer(() => {
 
   useEffect(() => {
     if (loggedIn && afterLoginPath) {
-      navigate(afterLoginPath)
+      // Defense in depth for after-login redirects
+      if (isSafeAppPath(afterLoginPath)) navigate(afterLoginPath)
       setAfterLoginPath(null)
     }
   }, [loggedIn, afterLoginPath])
@@ -566,6 +595,7 @@ const AppRoutes = observer(() => {
     <>
       <Route path="/jurisdictions/new" element={<NewJurisdictionScreen />} />
       <Route path="/requirements-library" element={<RequirementsLibraryScreen />} />
+      <Route path="/question-bank" element={<QuestionBankScreen />} />
       <Route path="/requirement-templates" element={<RequirementTemplatesScreen />} />
       <Route path="/requirement-templates/new" element={<NewRequirementTemplateScreen />} />
       <Route path="/requirement-templates/:requirementTemplateId/edit" element={<EditRequirementTemplateScreen />} />
@@ -575,6 +605,7 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/sitewide-message" element={<SitewideMessageScreen />} />
       <Route path="/configuration-management/help-drawer-setup" element={<HelpDrawerSetupScreen />} />
       <Route path="/configuration-management/help-videos" element={<HelpVideosManagementScreen />} />
+      <Route path="/configuration-management/info-documents" element={<InfoDocumentsManagementScreen />} />
       <Route path="/configuration-management/template-categories" element={<TemplateCategoriesScreen />} />
       <Route path="/configuration-management/revision-reason-setup" element={<RevisionReasonSetupScreen />} />
       {/* DEPRECATED: /configuration-management/standardization-setup route removed.
@@ -613,6 +644,8 @@ const AppRoutes = observer(() => {
       <Route path="/configuration-management/users/invite" element={<AdminInviteScreen />} />
       <Route path="/reporting" element={<ReportingScreen />} />
       <Route path="/reporting/export-template-summary" element={<ExportTemplateSummaryScreen />} />
+      <Route path="/reporting/step-code-data" element={<StepCodeDataScreen />} />
+      <Route path="/reporting/:reportKey" element={<ReportScreen />} />
     </>
   )
 
@@ -668,10 +701,10 @@ const AppRoutes = observer(() => {
 
   const managerOrReviewerRoutes = (
     <>
-      <Route
-        path="/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId/*"
-        element={<InboxProjectDetailScreen />}
-      />
+      <Route path="/jurisdictions/:jurisdictionId/submission-inbox/projects/:permitProjectId">
+        <Route index element={<InboxProjectDetailScreen />} />
+        <Route path="*" element={<InboxProjectDetailScreen />} />
+      </Route>
       <Route path="/jurisdictions/:jurisdictionId/submission-inbox" element={<ReviewerWorkspaceScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/meetings/:meetingId" element={<ReviewerWorkspaceScreen />} />
       <Route path="/jurisdictions/:jurisdictionId/meetings" element={<ReviewerWorkspaceScreen />} />
@@ -706,26 +739,6 @@ const AppRoutes = observer(() => {
         element={<ClimateZonesScreen />}
       />
       <Route path="/permit-applications/:permitApplicationId" element={<ReviewPermitApplicationScreen />} />
-      {import.meta.env.DEV && (
-        <>
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-content"
-            element={<PermitApplicationPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/pdf-html"
-            element={<PermitApplicationPDFViewer mode={"html"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-content"
-            element={<StepCodeChecklistPDFViewer mode={"pdf"} />}
-          />
-          <Route
-            path="/permit-applications/:permitApplicationId/step-code-pdf-html"
-            element={<StepCodeChecklistPDFViewer mode={"html"} />}
-          />
-        </>
-      )}
     </>
   )
 
@@ -734,6 +747,10 @@ const AppRoutes = observer(() => {
       <Route
         path="/digital-building-permits/:templateVersionId/edit"
         element={<JurisdictionEditDigitalPermitScreen />}
+      />
+      <Route
+        path="/digital-building-permits/:templateVersionId/application-info/edit"
+        element={<JurisdictionPermitApplicationInfoEditScreen />}
       />
       <Route
         path="/digital-building-permits/:templateVersionId/settings"
@@ -785,7 +802,7 @@ const AppRoutes = observer(() => {
 
   return (
     <>
-      <Routes location={background || location}>
+      <ObservedRoutes location={background || location}>
         {mustAcceptEula && (
           // Onboarding step 1: EULA
           <Route path="/" element={<EULAScreen />} />
@@ -800,7 +817,7 @@ const AppRoutes = observer(() => {
           </>
         )}
         {loggedIn && !isUnconfirmed && <Route path="/" element={<HomeScreen />} />}
-        {!loggedIn && <Route path="/" element={<RedirectScreen path="/welcome" />} />}
+        {!loggedIn && <Route path="/" element={<RedirectScreen path="/about" />} />}
         <Route
           element={
             <ProtectedRoute
@@ -811,14 +828,23 @@ const AppRoutes = observer(() => {
         >
           {/* Migrate old permit-projects paths to new structure */}
           <Route path="/permit-projects" element={<RedirectScreen path="/projects" />} />
-          <Route path="/permit-projects/projects/*" element={<RedirectScreen path="/projects" />} />
-          <Route path="/permit-projects/step-codes/*" element={<RedirectScreen path="/step-codes" />} />
+          <Route path="/permit-projects/projects">
+            <Route index element={<RedirectScreen path="/projects" />} />
+            <Route path="*" element={<RedirectScreen path="/projects" />} />
+          </Route>
+          <Route path="/permit-projects/step-codes">
+            <Route index element={<RedirectScreen path="/step-codes" />} />
+            <Route path="*" element={<RedirectScreen path="/step-codes" />} />
+          </Route>
           {/* Disabled: New Permit Application screen */}
           <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
           <Route
             element={<ProtectedRoute isAllowed={loggedIn && !mustAcceptEula} redirectPath={mustAcceptEula && "/"} />}
           >
-            <Route path="/step-codes" element={<ProjectDashboardScreen />} />
+            <Route path="/step-codes">
+              <Route index element={<ProjectDashboardScreen />} />
+              <Route path="*" element={<ProjectDashboardScreen />} />
+            </Route>
             <Route path="/pre-checks" element={<ProjectDashboardScreen />} />
             <Route path="/pre-checks/new" element={<PreCheckForm />} />
             <Route path="/pre-checks/new/:section" element={<PreCheckForm />} />
@@ -834,13 +860,19 @@ const AppRoutes = observer(() => {
                 <Route path="/overheating-codes/:overheatingCodeId/edit/:section" element={<OverheatingCodeForm />} />
               </>
             ) : (
-              <Route path="/overheating-codes/*" element={<OverheatingCodeUnavailableScreen />} />
+              <Route path="/overheating-codes">
+                <Route index element={<OverheatingCodeUnavailableScreen />} />
+                <Route path="*" element={<OverheatingCodeUnavailableScreen />} />
+              </Route>
             )}
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
-            <Route path="/projects/:permitProjectId/*" element={<PermitProjectScreen />} />
+            <Route path="/projects/:permitProjectId">
+              <Route index element={<PermitProjectScreen />} />
+              <Route path="*" element={<PermitProjectScreen />} />
+            </Route>
             <Route path="/projects/:permitProjectId/add-permits" element={<AddPermitApplicationToProjectScreen />} />
             <Route element={<ProtectedRoute isAllowed={projectMeetingsEnabled} redirectPath="/not-found" />}>
               <Route path="/projects/:permitProjectId/meetings/new" element={<ProjectMeetingRequestScreen />} />
@@ -853,7 +885,6 @@ const AppRoutes = observer(() => {
                 element={<ProjectMeetingSentScreen />}
               />
             </Route>
-            <Route path="/step-codes/*" element={<ProjectDashboardScreen />} />
             {/* Disabled: New Permit Application screen */}
             <Route path="/permit-applications/:permitApplicationId/edit" element={<EditPermitApplicationScreen />} />
             <Route
@@ -888,10 +919,9 @@ const AppRoutes = observer(() => {
               element={<SuccessfulSubmissionScreen />}
             />
             <Route
-              path="/project-readiness-tools/check-step-code-requirements/select"
+              path="/project-readiness-tools/create-a-step-codes-compliance-report/building-categories"
               element={<SelectStepCodeRequirementsScreen />}
             />
-            <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
           </Route>
         </Route>
 
@@ -972,7 +1002,9 @@ const AppRoutes = observer(() => {
         <Route path="/release-notes" element={<ReleaseNotesScreen />} />
         <Route path="/videos" element={<HelpVideosIndexScreen />} />
         <Route path="/videos/:videoId" element={<HelpVideoScreen />} />
+        <Route path="/info-documents" element={<InfoDocumentsIndexScreen />} />
         <Route path="/standardization-preview" element={<StandardizationPreviewScreen />} />
+        <Route path="/permit-application-info/:requirementTemplateId" element={<PermitApplicationInfoScreen />} />
         <Route path="/template-versions/:templateVersionId/preview" element={<TemplateVersionPreviewScreen />} />
         <Route path="/project-readiness-tools" element={<ProjectReadinessToolsIndexScreen />} />
         <Route path="/privacy-policy" element={<PrivacyPolicyScreen />} />
@@ -981,11 +1013,11 @@ const AppRoutes = observer(() => {
           element={<LettersOfAssuranceScreen />}
         />
         <Route
-          path="/project-readiness-tools/check-step-code-requirements"
+          path="/project-readiness-tools/create-a-step-codes-compliance-report"
           element={<CheckStepCodeRequirementsScreen />}
         />
         <Route
-          path="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          path="/project-readiness-tools/look-up-step-codes-requirements"
           element={<LookUpStepCodesRequirementsForYourProjectScreen />}
         />
         <Route path="/project-readiness-tools/pre-check" element={<PreCheckInfoScreen />} />
@@ -994,7 +1026,7 @@ const AppRoutes = observer(() => {
           element={<OnboardingChecklistPageForLgAdoptingScreen />}
         />
         <Route path="/confirmed" element={<EmailConfirmedScreen />} />
-        <Route path="/welcome" element={<LandingScreen />} />
+        <Route path="/about" element={<LandingScreen />} />
         <Route
           path="/jurisdictions"
           element={
@@ -1024,7 +1056,7 @@ const AppRoutes = observer(() => {
         <Route path="/part-9-step-code/:stepCodeId/stages/:stage/:section" element={<Part9StepCodeForm />} />
         <Route path="/part-9-step-code/:section" element={<Part9StepCodeForm />} />
         <Route path="*" element={<NotFoundScreen />} />
-      </Routes>
+      </ObservedRoutes>
     </>
   )
 })

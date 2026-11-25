@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../models/permit-project"
 import { EFlashMessageStatus } from "../../../types/enums"
 import { CustomMessageBox } from "../../shared/base/custom-message-box"
-import { ProjectMeetingNotesList } from "../../shared/project-meetings/project-meeting-notes-list"
+import { ProjectNotesList } from "../../shared/notes/project-notes-list"
 
 interface IProps {
   permitProject: IPermitProject
@@ -46,10 +46,11 @@ export const ProjectNotesTabPanelContent = observer(({ permitProject }: IProps) 
           {t("submissionInbox.projectDetail.projectMeetingNotes")}
         </Heading>
 
-        <ProjectMeetingNotesList
+        <ProjectNotesList
           notes={permitProject.notes}
           emptyDescription={t("permitProject.notes.emptyDescription")}
           getMeetingPath={(note) => `/projects/${permitProject.id}/meetings/${note.projectMeetingId}`}
+          getApplicationPath={(note) => `/permit-applications/${note.permitApplicationId}/edit`}
         />
       </Box>
     </Flex>

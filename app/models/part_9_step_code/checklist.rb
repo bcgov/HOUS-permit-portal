@@ -46,6 +46,8 @@ class Part9StepCode::Checklist < ActiveRecord::Base
              class_name: "JurisdictionStepRequirement",
              optional: true
 
+  has_one :report_document, as: :checklist, dependent: :destroy
+
   has_many :data_entries,
            class_name: "Part9StepCode::DataEntry",
            dependent: :destroy

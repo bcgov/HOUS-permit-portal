@@ -2,7 +2,8 @@ require "rails_helper"
 
 RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
                type: :controller,
-               search: true do
+               search: true,
+               search_callbacks: false do
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::JurisdictionPermitProjects
   end
@@ -146,8 +147,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       queue_clock_started_at: 20.days.ago
     )
 
-    PermitProject.reindex
-    PermitApplication.reindex
+    reindex_search(PermitProject)
+    reindex_search(PermitApplication)
   end
 
   let(:cur_user) { review_manager }
@@ -243,7 +244,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
       context "when a project is marked as viewed" do
         before do
           project_a.update_column(:viewed_at, Time.current)
-          PermitProject.reindex
+          reindex_search(PermitProject)
         end
 
         it "reflects the updated unread count" do
@@ -274,6 +275,38 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
 
         expect(ids).to include(project_a.id, project_c.id)
         expect(ids).not_to include(project_b.id)
+      end
+
+      context "when a project only has a draft of the filtered template" do
+        let(:search_params) do
+          {
+            query: "",
+            page: 1,
+            per_page: 50,
+            filters: {
+              requirement_template_ids: [template_b.id]
+            }
+          }
+        end
+
+        before do
+          create(
+            :permit_application,
+            status: :new_draft,
+            submitter: submitter,
+            permit_project: project_a,
+            template_version: template_version_b
+          )
+          reindex_search(PermitProject)
+        end
+
+        it "does not return that project" do
+          perform_search
+          ids = search_result_ids
+
+          expect(ids).to include(project_b.id)
+          expect(ids).not_to include(project_a.id)
+        end
       end
     end
 
@@ -326,7 +359,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
         create(:project_meeting, :open, permit_project: project_a)
         create(:project_meeting, :scheduled, permit_project: project_b)
         create(:project_meeting, :completed, permit_project: project_c)
-        PermitProject.reindex
+        reindex_search(PermitProject)
       end
 
       context "only_show active meetings" do
@@ -454,7 +487,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitProjects,
             queue_time_seconds: 12 * 86_400,
             queue_clock_started_at: nil
           )
-          PermitProject.reindex
+          reindex_search(PermitProject)
         end
 
         let(:search_params) do

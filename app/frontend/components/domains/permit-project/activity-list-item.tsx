@@ -5,6 +5,7 @@ import React from "react"
 import { useTranslation } from "react-i18next"
 import { datefnsTableDateTimeFormat } from "../../../constants"
 import { IProjectAudit } from "../../../models/project-audit"
+import { useMst } from "../../../setup/root"
 import { EPermitApplicationStatus } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
 
@@ -16,10 +17,16 @@ interface IActivityListItemProps {
 export const ActivityListItem = observer(({ projectAudit, fromInbox = false }: IActivityListItemProps) => {
   const { createdAt, description, permitName, permitApplicationId, permitApplicationStatus } = projectAudit
   const { t } = useTranslation()
+  const { userStore, permitProjectStore } = useMst()
   const permitApplicationPath =
     permitApplicationId &&
     (fromInbox ? `/permit-applications/${permitApplicationId}` : `/permit-applications/${permitApplicationId}/edit`)
-  const suppressPermitApplicationLink = fromInbox && permitApplicationStatus === EPermitApplicationStatus.newDraft
+  const currentProject = permitProjectStore.currentPermitProject
+  const suppressPermitApplicationLink =
+    permitApplicationStatus === EPermitApplicationStatus.newDraft &&
+    !!userStore.currentUser?.isReviewStaff &&
+    !currentProject?.isOwner &&
+    !currentProject?.hasActiveProjectMeeting
 
   return (
     <Flex align="center" justify="space-between" py={3} px={4} gap={4} minH={20}>

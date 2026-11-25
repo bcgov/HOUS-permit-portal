@@ -159,7 +159,7 @@ RSpec.describe ProjectAuditFormatters::PermitApplicationFormatter do
 
         it "returns revisions requested message" do
           expect(formatter.description).to eq(
-            "Revisions requested — sent to submitter"
+            "Alice requested revisions — sent to submitter"
           )
         end
       end

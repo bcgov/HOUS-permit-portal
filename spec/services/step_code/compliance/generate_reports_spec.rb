@@ -54,12 +54,14 @@ RSpec.describe StepCode::Compliance::GenerateReports do
           {
             zero_carbon: zero_carbon_result,
             energy: energy_result,
-            requirement_id: 10
+            requirement_id: 10,
+            description: nil
           },
           {
             zero_carbon: zero_carbon_result,
             energy: energy_result,
-            requirement_id: 11
+            requirement_id: 11,
+            description: nil
           }
         ]
       )

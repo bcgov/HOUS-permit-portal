@@ -5,10 +5,11 @@ import React, { Suspense } from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { useNavigate } from "react-router-dom"
 import { useJurisdiction } from "../../../../../../hooks/resources/use-jurisdiction"
+import { ESubmissionContactClass } from "../../../../../../types/enums"
 import { ErrorScreen } from "../../../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../../../shared/base/loading-screen"
 import { SwitchButton } from "../../../../../shared/buttons/switch-button"
-import { Form } from "./form"
+import { SubmissionContactForm } from "../shared/submission-contact-form"
 
 export const SubmissionsInboxSetupScreen: React.FC = observer(function SubmissionsInboxSetupScreen() {
   const i18nPrefix = "home.configurationManagement.featureAccess" // from inbox-feature-access
@@ -40,9 +41,18 @@ export const SubmissionsInboxSetupScreen: React.FC = observer(function Submissio
         </Flex>
       </VStack>
       {/* Content from original SubmissionsInboxSetupScreen's VStack */}
-      <VStack spacing={8} align="start" w="full" mt={8}>
+      <VStack spacing={4} align="start" w="full" mt={8}>
+        <Heading as="h2" fontSize="lg" m={0}>
+          {t(`${i18nPrefix}.emailRecipients`)}
+        </Heading>
+        <Text color="text.secondary">{t(`${i18nPrefix}.emailRecipientsDescription`)}</Text>
         <Suspense fallback={<LoadingScreen />}>
-          {currentJurisdiction && <Form jurisdiction={currentJurisdiction} />}
+          {currentJurisdiction && (
+            <SubmissionContactForm
+              jurisdiction={currentJurisdiction}
+              contactClass={ESubmissionContactClass.application}
+            />
+          )}
         </Suspense>
       </VStack>
       {/* Content from InboxFeatureAccessScreen for the toggle */}

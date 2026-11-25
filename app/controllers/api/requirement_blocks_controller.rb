@@ -30,7 +30,6 @@ class Api::RequirementBlocksController < Api::ApplicationController
     authorize @requirement_block
 
     if @requirement_block.save
-      RequirementBlock.search_index.refresh
       render_success @requirement_block,
                      "requirement_block.create_success",
                      { blueprint: RequirementBlockBlueprint }
@@ -117,6 +116,7 @@ class Api::RequirementBlocksController < Api::ApplicationController
       ],
       requirements_attributes: [
         :id,
+        :requirement_question_id,
         :requirement_code,
         :label,
         :input_type,

@@ -29,15 +29,13 @@ export const EULAScreen = observer(function EULAScreen({ withClose }: { withClos
     !eula && fetch()
   }, [eula])
 
-  const navHeight = document.getElementById("mainNav")?.offsetHeight
-
   const onClose = () => {
     window.history.state && window.history.state.idx > 0 ? navigate(-1) : navigate(`/profile`)
   }
 
   return (
     <>
-      <VStack direction="column" spacing={8} py={20} w="full" h={`calc(100vh - ${navHeight}px)`}>
+      <VStack direction="column" spacing={8} py={20} w="full" h="calc(100vh - var(--app-navbar-height))">
         <Heading as="h1" m={0} flex={0} flexBasis="auto">
           {t("eula.title")}
         </Heading>

@@ -4,6 +4,7 @@ module Infrastructure
   class TemplateImportService
     IMPORT_ORDER = [
       { model: RequirementBlock, filename: "requirement_blocks.ndjson" },
+      { model: RequirementQuestion, filename: "requirement_questions.ndjson" },
       {
         model: RequirementTemplate,
         filename: "requirement_templates.ndjson",
@@ -88,6 +89,7 @@ module Infrastructure
       RequirementDocument.destroy_all
       TemplateVersion.destroy_all
       Requirement.destroy_all
+      RequirementQuestion.destroy_all
       TemplateSectionBlock.destroy_all
       RequirementTemplateSection.destroy_all
       RequirementTemplate.destroy_all
@@ -213,6 +215,12 @@ module Infrastructure
         # Check parent requirement block existence
         unless RequirementBlock.exists?(attributes["requirement_block_id"])
           Rails.logger.warn "Skipping Requirement #{attributes["id"]} - Block #{attributes["requirement_block_id"]} missing"
+          return nil
+        end
+
+        if attributes["requirement_question_id"].present? &&
+             !RequirementQuestion.exists?(attributes["requirement_question_id"])
+          Rails.logger.warn "Skipping Requirement #{attributes["id"]} - RequirementQuestion #{attributes["requirement_question_id"]} missing"
           return nil
         end
       end

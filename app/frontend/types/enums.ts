@@ -18,9 +18,12 @@ export enum EFileUploadAttachmentType {
   SupportingDocument = "SupportingDocument",
   ProjectDocument = "ProjectDocument",
   MeetingRequestDocument = "MeetingRequestDocument",
+  NoteAttachmentDocument = "NoteAttachmentDocument",
   ReportDocument = "ReportDocument",
   ResourceDocument = "ResourceDocument",
   DesignDocument = "DesignDocument",
+  InfoDocument = "InfoDocument",
+  ExplainerDocument = "ExplainerDocument",
 }
 
 export enum EProjectMeetingStatus {
@@ -66,6 +69,20 @@ export enum EMeetingRequestDocumentType {
 
 export enum ENoteableType {
   ProjectMeeting = "ProjectMeeting",
+  SubmissionVersion = "SubmissionVersion",
+  PermitApplication = "PermitApplication",
+}
+
+export enum ENoteKind {
+  meeting = "meeting",
+  jurisdictionMessage = "jurisdiction_message",
+  submitterMessage = "submitter_message",
+  creationMessage = "creation_message",
+}
+
+export enum ERevisionRequestType {
+  FieldRevisionRequest = "FieldRevisionRequest",
+  SupportingDocumentRevisionRequest = "SupportingDocumentRevisionRequest",
 }
 
 export enum ESubmissionContactClass {
@@ -116,6 +133,11 @@ export enum ExternalApiKeyStatus {
   notActive = "notActive",
 }
 
+export enum EExternalApiVersion {
+  v1 = "v1",
+  v2 = "v2",
+}
+
 export enum EUserRoles {
   submitter = "submitter",
   regionalReviewManager = "regional_review_manager",
@@ -130,7 +152,12 @@ export enum ERequirementLibrarySortFields {
   associations = "associations",
   requirementLabels = "requirement_labels",
   updatedAt = "updated_at",
-  configurations = "configurations",
+}
+
+export enum EQuestionBankSortFields {
+  name = "name",
+  associations = "associations",
+  updatedAt = "updated_at",
 }
 
 export enum EJurisdictionTypes {
@@ -174,9 +201,20 @@ export enum EReleaseNoteStatus {
   published = "published",
 }
 
+export enum EReleaseNoteType {
+  software = "software",
+  content = "content",
+}
+
+export enum EReleaseNoteNotificationAudience {
+  allUsers = "all_users",
+  submitters = "submitters",
+  staff = "staff",
+  none = "none",
+}
+
 export enum EPreCheckSortFields {
   fullAddress = "full_address",
-  title = "title",
   updatedAt = "updated_at",
   status = "status",
 }
@@ -199,7 +237,6 @@ export enum EPermitApplicationSortFields {
 }
 
 export enum EProjectPermitApplicationSortFields {
-  applicationNickname = "nickname",
   permit = "template_nickname",
   assignedTo = "review_delegatee_name",
   permitApplicationNumber = "number",
@@ -236,6 +273,8 @@ export enum ESortDirection {
 export enum ETagType {
   requirementTemplate = "RequirementTemplate",
   requirementBlock = "RequirementBlock",
+  infoDocument = "InfoDocument",
+  requirementQuestion = "RequirementQuestion",
 }
 
 export enum ERequirementType {
@@ -249,7 +288,6 @@ export enum ERequirementType {
   radio = "radio",
   address = "address",
   bcaddress = "bcaddress",
-  signature = "signature",
   textArea = "textarea",
   energyStepCodePart9 = "energy_step_code",
   energyStepCodePart3 = "energy_step_code_part_3",
@@ -419,6 +457,7 @@ export enum EPermitApplicationSocketEventTypes {
   updateCompliance = "update_compliance",
   updateSupportingDocuments = "update_supporting_documents",
   updatePermitBlockStatus = "update_permit_block_status",
+  selectiveZipReady = "selective_zip_ready",
 }
 
 export enum EJurisdictionSocketEventTypes {
@@ -503,6 +542,7 @@ export enum ENotificationActionType {
   permitBlockStatusReady = "permit_block_status_ready",
   applicationSubmission = "application_submission",
   applicationRevisionsRequest = "application_revisions_request",
+  applicationsAdded = "applications_added",
   reviewStarted = "review_started",
   stepCodeReportGenerated = "step_code_report_generated",
   preCheckSubmitted = "pre_check_submitted",

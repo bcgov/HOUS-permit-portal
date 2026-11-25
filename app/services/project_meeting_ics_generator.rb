@@ -3,7 +3,6 @@
 # the existing calendar item (PUBLISH is ignored as an update by most clients)
 class ProjectMeetingIcsGenerator
   DEFAULT_DURATION = 1.hour
-  TIME_ZONE = "America/Vancouver"
   PRODID = "-//Building Permit Hub//Project Meeting//EN"
   ORGANIZER_CN = "Building Permit Hub"
 
@@ -37,15 +36,16 @@ class ProjectMeetingIcsGenerator
   attr_reader :project_meeting, :hub_meeting_url, :attendee_email
 
   def event_block
-    start_at = project_meeting.confirmed_date.in_time_zone(TIME_ZONE)
+    # UTC keeps the meeting instant independent of recipients' timezone data.
+    start_at = project_meeting.confirmed_date
     end_at = start_at + DEFAULT_DURATION
 
     lines = [
       "BEGIN:VEVENT",
       "UID:#{uid}",
       "DTSTAMP:#{utc_timestamp(Time.current)}",
-      "DTSTART;TZID=#{TIME_ZONE}:#{local_timestamp(start_at)}",
-      "DTEND;TZID=#{TIME_ZONE}:#{local_timestamp(end_at)}",
+      "DTSTART:#{utc_timestamp(start_at)}",
+      "DTEND:#{utc_timestamp(end_at)}",
       "SUMMARY:#{escape(summary)}",
       "DESCRIPTION:#{escape(description)}",
       "ORGANIZER;CN=#{escape(ORGANIZER_CN)}:mailto:#{organizer_email}",
@@ -133,10 +133,6 @@ class ProjectMeetingIcsGenerator
   end
 
   def utc_timestamp(time)
-    time.utc.strftime("%Y%m%dT%H%M%SZ")
-  end
-
-  def local_timestamp(time)
-    time.strftime("%Y%m%dT%H%M%S")
+    time.getutc.strftime("%Y%m%dT%H%M%SZ")
   end
 end

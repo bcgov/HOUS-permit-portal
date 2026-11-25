@@ -25,7 +25,9 @@ RSpec.describe "Api::Notes", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
-      expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
+      expect(json_response.dig("data", 0, "author_name")).to eq(
+        jurisdiction.qualified_name
+      )
       expect(json_response.dig("data", 0)).not_to have_key("author_email")
       expect(json_response.dig("data", 0)).not_to have_key("project_meeting_id")
       expect(json_response.dig("data", 0, "noteable_type")).to eq(
@@ -43,6 +45,7 @@ RSpec.describe "Api::Notes", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", 0, "id")).to eq(note.id)
+      expect(json_response.dig("data", 0, "author_name")).to eq(reviewer.name)
     end
   end
 
@@ -109,6 +112,30 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:forbidden)
     end
 
+    it "attaches uploaded files to the created note" do
+      sign_in reviewer
+      cached_file = TestData.cached_file_data
+
+      expect do
+        post "/api/project_meetings/#{meeting.id}/notes",
+             params: {
+               note: {
+                 body: "<p>See attached.</p>",
+                 note_attachment_documents_attributes: [{ file: cached_file }]
+               }
+             },
+             headers: headers,
+             as: :json
+      end.to change(NoteAttachmentDocument, :count).by(1)
+
+      expect(response).to have_http_status(:created)
+      attachment = json_response.dig("data", "note_attachment_documents", 0)
+      expect(attachment.dig("file", "metadata", "filename")).to eq(
+        "site-plan.pdf"
+      )
+      expect(NoteAttachmentDocument.last.note).to eq(Note.last)
+    end
+
     it "allows jurisdiction review staff to create notes for withdrawn meetings" do
       withdrawn_meeting =
         create(:project_meeting, :withdrawn, permit_project: permit_project)
@@ -145,6 +172,8 @@ RSpec.describe "Api::Notes", type: :request do
       expect(response).to have_http_status(:ok)
       expect(response.media_type).to eq("text/csv")
       expect(response.body).to include("CSV body")
+      expect(response.body).to include(jurisdiction.qualified_name)
+      expect(response.body).not_to include(reviewer.name)
       expect(response.body).not_to include("<p>")
       expect(CSV.parse(response.body).first).to eq(
         [
@@ -153,10 +182,22 @@ RSpec.describe "Api::Notes", type: :request do
           "Related item type",
           "Related item id",
           "Project number",
-          "Body"
+          "Body",
+          "Attachments"
         ]
       )
-      expect(CSV.parse(response.body).last.length).to eq(6)
+      expect(CSV.parse(response.body).last.length).to eq(7)
+    end
+
+    it "lists attachment filenames in the CSV" do
+      note = create(:note, noteable: meeting, user: reviewer)
+      create(:note_attachment_document, note: note)
+      sign_in owner
+
+      get "/api/project_meetings/#{meeting.id}/notes/download_csv",
+          headers: headers
+
+      expect(CSV.parse(response.body).last.last).to eq("test.jpg")
     end
   end
 
@@ -211,6 +252,40 @@ RSpec.describe "Api::Notes", type: :request do
 
       note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
       expect(note_ids).to include(draft_note.id, withdrawn_note.id)
+    end
+
+    it "includes a published revision message and omits a draft" do
+      application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          permit_project: permit_project
+        )
+      version = application.latest_submission_version
+      published =
+        create(
+          :note,
+          noteable: version,
+          kind: :jurisdiction_message,
+          user: reviewer,
+          body: "<p>Sent to the applicant.</p>",
+          published_at: Time.current
+        )
+      create(
+        :note,
+        noteable: version,
+        kind: :submitter_message,
+        user: owner,
+        body: "<p>Still a draft.</p>",
+        published_at: nil
+      )
+      sign_in reviewer
+
+      get "/api/permit_projects/#{permit_project.id}/notes", headers: headers
+
+      note_ids = json_response.fetch("data").map { |note| note.fetch("id") }
+      expect(note_ids).to include(published.id)
+      expect(note_ids).not_to include(version.notes.submitter_message.pick(:id))
     end
   end
 

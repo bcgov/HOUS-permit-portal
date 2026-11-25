@@ -1,8 +1,9 @@
-import { Box, Divider, Flex, Grid, Heading, HStack, Text, Tooltip, useDisclosure, VStack } from "@chakra-ui/react"
+import { Box, Divider, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, Info, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { useParams } from "react-router-dom"
 import { ISearch } from "../../../../../lib/create-search-model"
 import { IPermitProject } from "../../../../../models/permit-project"
 import { useMst } from "../../../../../setup/root"
@@ -11,6 +12,7 @@ import { SearchGrid } from "../../../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../../../shared/module-wrappers/fullscreen-map-modal"
 import { ProjectMap } from "../../../../shared/module-wrappers/project-map"
 import { RouterLinkButton } from "../../../../shared/navigation/router-link-button"
+import { AddPermitsButton } from "../../../../shared/permit-projects/add-permits-button"
 import { ProjectStateTag } from "../../../../shared/permit-projects/project-state-tag"
 import ProjectInfoRow from "../../../../shared/project/project-info-row"
 import { PermitApplicationGridHeaders } from "../../../permit-project/permit-application-grid-headers"
@@ -22,6 +24,7 @@ interface IProps {
 }
 
 export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
+  const { jurisdictionId } = useParams<{ jurisdictionId: string }>()
   const {
     fullAddress,
     pid,
@@ -97,16 +100,14 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
             </VStack>
           </Box>
           <Box>
-            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
-              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-                <ProjectMap
-                  coordinates={permitProject.mapPosition}
-                  pid={pid}
-                  parcelGeometry={permitProject.parcelGeometry}
-                  onOpenFullscreen={onOpenMapFullscreen}
-                />
-              </Box>
-            </Tooltip>
+            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+              <ProjectMap
+                coordinates={permitProject.mapPosition}
+                pid={pid}
+                parcelGeometry={permitProject.parcelGeometry}
+                onOpenFullscreen={onOpenMapFullscreen}
+              />
+            </Box>
           </Box>
         </Grid>
       </Box>
@@ -118,13 +119,14 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
           <Heading as="h3" size="md" mb={0}>
             {t("submissionInbox.projectDetail.recentPermitApplications")}
           </Heading>
+          <AddPermitsButton permitProject={permitProject} />
         </Flex>
         {!(permitProject.recentPermitApplications ?? []).filter((pa) => !pa.isDiscarded).length ? (
           <Text color="text.secondary">{t("submissionInbox.projectDetail.noRecentPermitApplications")}</Text>
         ) : (
           <>
             <SearchGrid
-              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1fr 1.1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders
@@ -147,7 +149,12 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
                 ))}
             </SearchGrid>
             <Flex justify="flex-end" mt={4}>
-              <RouterLinkButton variant="tertiary" fontWeight="bold" rightIcon={<CaretRight />} to="permits">
+              <RouterLinkButton
+                variant="tertiary"
+                fontWeight="bold"
+                rightIcon={<CaretRight />}
+                to={`/jurisdictions/${jurisdictionId}/submission-inbox/projects/${permitProject.id}/permits`}
+              >
                 {t("submissionInbox.projectDetail.viewAllPermits")}
               </RouterLinkButton>
             </Flex>

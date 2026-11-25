@@ -14,12 +14,21 @@ class ZipfileJob
   end
 
   def perform(permit_application_id)
-    PdfGenerationJob.new.perform(permit_application_id)
-    SupportingDocumentsZipper.new(permit_application_id).perform
-
+    @permit_application_id = permit_application_id
     permit_application = PermitApplication.find_by_id(permit_application_id)
+    return if permit_application.blank?
 
-    if permit_application.present?
+    PrintReports::ApplicationLock.synchronize(permit_application.id) do
+      version_ids_at_start = permit_application.submission_versions.pluck(:id)
+
+      build_packages(permit_application, version_ids_at_start)
+
+      permit_application.reload
+      newly_ready = permit_application.mark_submission_packages_ready!
+      newly_ready.each do |submission_version|
+        permit_application.enqueue_package_ready_webhooks(submission_version)
+      end
+
       WebsocketBroadcaster.push_update_to_relevant_users(
         permit_application.notifiable_users.pluck(:id),
         Constants::Websockets::Events::PermitApplication::DOMAIN,
@@ -31,6 +40,62 @@ class ZipfileJob
           { view: :supporting_docs_update }
         )
       )
+
+      # ponytail: until_executed lock is still held inside perform, so a sibling
+      # submit's enqueue is rejected. after_unlock re-runs if a version appeared
+      # mid-job. Upgrade: per-version lock or a dedicated follow-up job.
+      @reenqueue =
+        (
+          permit_application.submission_versions.pluck(:id) -
+            version_ids_at_start
+        ).any?
     end
+  end
+
+  def build_packages(application, version_ids)
+    versions =
+      application
+        .submission_versions
+        .where(id: version_ids)
+        .order(:created_at, :id)
+        .to_a
+    rebuild_ids =
+      versions
+        .select do |v|
+          v.missing_pdfs? || v.zipfile_data.blank? || v.package_ready_at.blank?
+        end
+        .map(&:id)
+    # 0 is the earliest version, so this cannot be a truthiness check.
+    first_missing = versions.index(&:missing_pdfs?)
+    unless first_missing.nil?
+      rebuild_ids |= versions.drop(first_missing).map(&:id)
+    end
+    PdfGenerationJob.new.perform(application.id, version_ids)
+    cumulative_ids = []
+    versions.each do |version|
+      cumulative_ids << version.id
+      next unless rebuild_ids.include?(version.id)
+      # A missing historical report must not prevent newer PDFs being rendered,
+      # but cumulative packages must never silently omit it.
+      if versions
+           .take(cumulative_ids.length)
+           .any? { |v| v.reload.report_generation_issues.any? }
+        next
+      end
+      if version.reload.missing_pdfs?
+        raise RuntimeError, "Required PDFs are missing"
+      end
+      SupportingDocumentsZipper.new(
+        application.id,
+        submission_version: version,
+        version_ids: cumulative_ids.dup
+      ).perform
+    end
+  end
+
+  def after_unlock
+    return unless @reenqueue && @permit_application_id.present?
+
+    self.class.perform_async(@permit_application_id)
   end
 end

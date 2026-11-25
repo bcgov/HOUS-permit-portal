@@ -7,6 +7,16 @@ module Constants
       module PermitApplication
         PERMIT_SUBMITTED = "permit_submitted"
         PERMIT_RESUBMITTED = "permit_resubmitted"
+        STATUS_CHANGED = "permit_application_status_changed"
+        PACKAGE_READY = "permit_application_package_ready"
+      end
+
+      module PermitProject
+        STATE_CHANGED = "permit_project_state_changed"
+      end
+
+      module ProjectMeeting
+        REQUESTED = "project_meeting_requested"
       end
     end
   end

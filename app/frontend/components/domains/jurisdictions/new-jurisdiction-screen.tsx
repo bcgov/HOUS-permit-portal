@@ -47,7 +47,7 @@ export const NewJurisdictionScreen = observer(() => {
   const handleToggleCustom = () => setUseCustom((pastState) => !pastState)
 
   const handleLtsaMatcherFound = (matcher: string | null) => {
-    setValue("ltsaMatcher", matcher)
+    setValue<"ltsaMatcher">("ltsaMatcher", matcher)
   }
 
   return (

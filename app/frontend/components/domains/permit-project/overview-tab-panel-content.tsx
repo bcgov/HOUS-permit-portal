@@ -1,16 +1,4 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Flex,
-  Grid,
-  Heading,
-  HStack,
-  Text,
-  Tooltip,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react"
+import { Box, Button, ButtonGroup, Flex, Grid, Heading, HStack, Text, useDisclosure, VStack } from "@chakra-ui/react"
 import { CaretRight, ClipboardText, Info, Pencil, SquaresFour, Steps } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useState } from "react"
@@ -19,8 +7,9 @@ import { useTranslation } from "react-i18next"
 import { useSearchParams } from "react-router-dom"
 import { IPermitProject } from "../../../models/permit-project"
 import { useMst } from "../../../setup/root"
+import { IPermitProjectUpdateParams } from "../../../types/api-request"
 import { EProjectPermitApplicationSortFields } from "../../../types/enums"
-import { IOption } from "../../../types/types"
+import { ISiteOption } from "../../../types/types"
 import { EmptyResultsBox } from "../../shared/grid/empty-results-box"
 import { SearchGrid } from "../../shared/grid/search-grid"
 import { FullscreenMapModal } from "../../shared/module-wrappers/fullscreen-map-modal"
@@ -38,7 +27,7 @@ interface IProps {
 }
 
 interface IProjectInfoForm {
-  site: IOption | null
+  site: ISiteOption | null
   pid: string | null
   jurisdictionId: string | null
 }
@@ -88,7 +77,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
   const onSubmit = async (data: IProjectInfoForm) => {
     setIsSubmitting(true)
     try {
-      const updateParams: { fullAddress?: string; pid?: string; jurisdictionId?: string } = {}
+      const updateParams: IPermitProjectUpdateParams = {}
 
       // Get address from site option, or keep the current address if not changed
       if (data.site?.label) {
@@ -104,6 +93,12 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
 
       if (data.jurisdictionId) {
         updateParams.jurisdictionId = data.jurisdictionId
+      }
+
+      const siteCoordinates = data.site?.coordinates
+      if (!data.pid && siteCoordinates?.length >= 2) {
+        updateParams.longitude = siteCoordinates[0]
+        updateParams.latitude = siteCoordinates[1]
       }
 
       await permitProjectStore.updatePermitProject(permitProject.id, updateParams)
@@ -222,16 +217,14 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
             )}
           </Box>
           <Box>
-            <Tooltip label={t("permitProject.overview.mapVisualReferenceDisclaimer")} hasArrow>
-              <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
-                <ProjectMap
-                  coordinates={permitProject.mapPosition}
-                  pid={pid}
-                  parcelGeometry={permitProject.parcelGeometry}
-                  onOpenFullscreen={onOpenMapFullscreen}
-                />
-              </Box>
-            </Tooltip>
+            <Box height={{ base: "200px", lg: "250px" }} borderRadius="md" overflow="hidden">
+              <ProjectMap
+                coordinates={permitProject.mapPosition}
+                pid={pid}
+                parcelGeometry={permitProject.parcelGeometry}
+                onOpenFullscreen={onOpenMapFullscreen}
+              />
+            </Box>
           </Box>
         </Grid>
       </Box>
@@ -259,7 +252,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
         ) : (
           <>
             <SearchGrid
-              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1.1fr 1fr 0.5fr"
+              templateColumns="2.25fr 1.75fr 1fr 1.4fr 1fr 1.1fr 0.5fr"
               gridRowClassName="permit-application-grid-row"
             >
               <PermitApplicationGridHeaders
@@ -283,7 +276,7 @@ export const OverviewTabPanelContent = observer(({ permitProject }: IProps) => {
                 variant="tertiary"
                 fontWeight="bold"
                 rightIcon={<CaretRight />}
-                to={`/projects/${permitProject.id}/permits`}
+                to={`/projects/${permitProject.id}/applications`}
               >
                 {t("permitProject.overview.allPermits")}
               </RouterLinkButton>

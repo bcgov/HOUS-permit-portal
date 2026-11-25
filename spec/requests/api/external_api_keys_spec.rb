@@ -69,12 +69,14 @@ RSpec.describe "Api::ExternalApiKeys", type: :request do
                expired_at: 1.day.from_now,
                notification_email: "notifications@example.com",
                jurisdiction_id: jurisdiction.id,
-               webhook_url: "https://example.com/webhook"
+               webhook_url: "https://example.com/webhook",
+               api_version: "v2"
              }
            }
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "token")).to be_present
+      expect(json_response.dig("data", "api_version")).to eq("v2")
     end
   end
 
@@ -92,6 +94,20 @@ RSpec.describe "Api::ExternalApiKeys", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "name")).to eq("Updated Key")
+    end
+
+    it "does not allow the API version to be changed" do
+      sign_in review_manager
+
+      patch "/api/external_api_keys/#{external_api_key.id}",
+            params: {
+              external_api_key: {
+                api_version: "v2"
+              }
+            }
+
+      expect(response).to have_http_status(:ok)
+      expect(external_api_key.reload.api_version).to eq("v1")
     end
   end
 

@@ -126,6 +126,33 @@ RSpec.describe Qa::Part3StepCodeAutofillService do
     end
   end
 
+  describe "when the jurisdiction has multiple HDD rows" do
+    let(:jurisdiction) { create(:sub_district, inbox_enabled: false) }
+
+    before do
+      create(
+        :jurisdiction_heating_degree_day,
+        jurisdiction: jurisdiction,
+        location_name: "Waterfront",
+        heating_degree_days: 2825
+      )
+      create(
+        :jurisdiction_heating_degree_day,
+        jurisdiction: jurisdiction,
+        location_name: "Lynn Valley",
+        heating_degree_days: 3100
+      )
+    end
+
+    it "selects the first published HDD row" do
+      service.call
+
+      expect(
+        step_code.reload.pre_construction_checklist.heating_degree_days
+      ).to eq(2825)
+    end
+  end
+
   describe "standalone Step Codes" do
     let!(:fallback_jurisdiction) do
       create(:sub_district, heating_degree_days: 4180, inbox_enabled: false)

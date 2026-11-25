@@ -4,6 +4,7 @@ import { StepCodeZeroCarbonComplianceReportModel } from "./step-code-zero-carbon
 
 export const StepCodeComplianceReportModel = types.model("StepCodeComplianceReportModel", {
   requirementId: types.identifier,
+  description: types.maybeNull(types.string),
   energy: StepCodeEnergyComplianceReportModel,
   zeroCarbon: StepCodeZeroCarbonComplianceReportModel,
 })

@@ -20,7 +20,7 @@ const RequirementBlockMappingModel = types
     },
   }))
   .views((self) => ({
-    get integrationMapping() {
+    get integrationMapping(): IIntegrationMapping {
       return getParent(self, 2) as IIntegrationMapping
     },
     get fuseInstance() {
@@ -34,20 +34,20 @@ const RequirementBlockMappingModel = types
     },
   }))
   .views((self) => ({
-    get fuseSearchResults() {
+    get fuseSearchResults(): FuseResult<IRequirementMap>[] {
       return self.fuseInstance.search(self.integrationMapping?.query ?? "")
     },
 
-    get hasQuery() {
+    get hasQuery(): boolean {
       return !!self.integrationMapping?.query?.trim()
     },
   }))
   .views((self) => ({
     // Note: a lower score is better. Perfect match is 0
-    get bestSearchScore() {
+    get bestSearchScore(): number | undefined {
       return self.fuseSearchResults?.[0]?.score
     },
-    get hasAnyMatchesAfterQuery() {
+    get hasAnyMatchesAfterQuery(): boolean {
       if (!self.hasQuery) {
         return true
       }

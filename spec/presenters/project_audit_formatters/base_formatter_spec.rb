@@ -75,10 +75,6 @@ RSpec.describe ProjectAuditFormatters::BaseFormatter do
       end
 
       it "returns the jurisdiction from the associated record" do
-        allow(audit).to receive_message_chain(
-          :auditable,
-          :jurisdiction
-        ).and_return(nil)
         expect(formatter.resolve_jurisdiction).to eq(jurisdiction)
       end
     end
@@ -96,6 +92,40 @@ RSpec.describe ProjectAuditFormatters::BaseFormatter do
 
       it 'displays "System"' do
         expect(formatter.description).to eq("System made a change")
+      end
+    end
+
+    context "when audit user is a partner/system actor string" do
+      let(:audit) { build_audit_double(user: "Partner system") }
+
+      it "uses the actor string" do
+        expect(formatter.description).to eq("Partner system made a change")
+      end
+    end
+
+    context "when a submitter views a partner actor" do
+      let(:jurisdiction) do
+        instance_double(
+          Jurisdiction,
+          qualified_name: "City Hall",
+          id: 1,
+          present?: true
+        )
+      end
+      let(:auditable) do
+        instance_double(PermitProject, jurisdiction: jurisdiction)
+      end
+      let(:audit) do
+        build_audit_double(
+          user: "Partner system",
+          auditable: auditable,
+          auditable_type: "PermitProject"
+        )
+      end
+      let(:viewer) { instance_double(User, submitter?: true, present?: true) }
+
+      it "uses the jurisdiction name" do
+        expect(formatter.description).to eq("City Hall made a change")
       end
     end
 

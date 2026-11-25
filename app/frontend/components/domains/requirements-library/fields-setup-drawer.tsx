@@ -26,6 +26,7 @@ interface IProps {
   disabledRequirementTypeOptions?: Array<{
     requirementType: ERequirementType
   }>
+  excludedRequirementTypes?: ERequirementType[]
 }
 
 export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
@@ -33,6 +34,7 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
   renderTriggerButton,
   onUse,
   disabledRequirementTypeOptions = [],
+  excludedRequirementTypes = [],
 }: IProps) {
   const { t } = useTranslation()
   const { isOpen, onOpen, onClose } = useDisclosure()
@@ -41,7 +43,9 @@ export const FieldsSetupDrawer = observer(function FieldsSetupMenu({
     requirementType: ERequirementType
   }> = disabledRequirementTypeOptions
 
-  const requirementTypeOptions = Object.values(ERequirementType).map((requirementType) => ({ requirementType }))
+  const requirementTypeOptions = Object.values(ERequirementType)
+    .filter((requirementType) => !excludedRequirementTypes.includes(requirementType))
+    .map((requirementType) => ({ requirementType }))
 
   return (
     <>

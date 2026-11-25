@@ -21,6 +21,7 @@ export const SiteConfigurationStoreModel = types.snapshotProcessor(
       overheatingToolEnabled: types.maybeNull(types.boolean),
       archistarEnabledForAllJurisdictions: types.maybeNull(types.boolean),
       sitewideMessage: types.maybeNull(types.string),
+      infoDocumentsIntroText: types.maybeNull(types.string),
       helpLinkItems: types.frozen<IHelpLinkItems>(),
       revisionReasonsMap: types.map(RevisionReasonModel),
     })

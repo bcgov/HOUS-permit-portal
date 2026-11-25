@@ -1,0 +1,81 @@
+{
+  "kind": "application",
+  "identity": {
+    "number": "QA-DIGITAL-SEALS",
+    "title": "Digital seal report QA",
+    "address": "42 Synthetic Road",
+    "jurisdiction": "Example Municipality",
+    "applicant": "Test Applicant",
+    "version_number": 1,
+    "submission_version_id": "synthetic-seal-version",
+    "submitted_at": "2026-10-15T18:00:00Z",
+    "exported_at": "2026-10-15T18:00:00Z"
+  },
+  "form_json": {
+    "components": [
+      {
+        "type": "simplefile",
+        "key": "section|RBblock|design_file",
+        "label": "Design drawing package",
+        "input": true,
+        "computedCompliance": { "module": "DigitalSealValidator" }
+      },
+      {
+        "type": "simplefile",
+        "key": "section|RBblock|other_file",
+        "label": "Other checked drawings",
+        "input": true,
+        "computedCompliance": { "module": "DigitalSealValidator" }
+      },
+      {
+        "type": "simplefile",
+        "key": "section|RBblock|legacy_file",
+        "label": "Historical drawing",
+        "input": true,
+        "computedCompliance": { "module": "DigitalSealValidator" }
+      },
+      { "type": "simplefile", "key": "attachment_file", "label": "Ordinary attachment", "input": true }
+    ]
+  },
+  "submission_data": {
+    "data": {
+      "section|RBblock|design_file": [
+        { "id": "signed-one", "originalName": "drawing-one.pdf" },
+        { "id": "signed-two", "originalName": "drawing-two.pdf" }
+      ],
+      "section|RBblock|other_file": [
+        { "id": "unsigned", "originalName": "unsigned-drawing.pdf" },
+        { "id": "failed", "originalName": "failed-drawing.pdf" }
+      ],
+      "section|RBblock|legacy_file": [{ "id": "legacy", "originalName": "historical-drawing.pdf" }],
+      "attachment_file": [{ "id": "ordinary", "originalName": "ordinary-document.pdf" }]
+    }
+  },
+  "digital_seal_results": {
+    "section|RBblock|design_file": [
+      {
+        "file_id": "signed-one",
+        "status": "found",
+        "signers": [
+          { "name": "Alex Example", "organization": "INSTITUTE - AIBC,MEMBER", "date": "2024-09-06 11:26:19 PDT" },
+          { "name": "Taylor Example", "organization": "EGBC", "date": "2024-09-07 12:00:00 PDT" }
+        ]
+      },
+      {
+        "file_id": "signed-two",
+        "status": "found",
+        "signers": [
+          {
+            "name": "Jordan Example with a long name that must wrap naturally inside the report",
+            "organization": "Organization text preserved exactly, including membership details, punctuation and long descriptions that wrap onto another line",
+            "date": "2024-09-08 13:14:15 PDT"
+          }
+        ]
+      }
+    ],
+    "section|RBblock|other_file": [
+      { "file_id": "unsigned", "status": "not_found", "signers": [] },
+      { "file_id": "failed", "status": "failed", "signers": [] }
+    ]
+  }
+}

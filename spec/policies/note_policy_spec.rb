@@ -89,6 +89,36 @@ RSpec.describe NotePolicy, type: :policy do
         expect(resolved_scope_for(reviewer)).to include(sandbox_note)
         expect(resolved_scope_for(reviewer)).not_to include(live_note)
       end
+
+      it "limits the owner's notes to that sandbox" do
+        sandbox_note =
+          create(
+            :note,
+            noteable:
+              create(
+                :project_meeting,
+                :open,
+                permit_project:
+                  create(
+                    :permit_project,
+                    owner: owner,
+                    jurisdiction: jurisdiction,
+                    sandbox: sandbox
+                  )
+              )
+          )
+        live_note = note
+        resolved_live =
+          described_class::Scope.new(
+            UserContext.new(owner, nil),
+            Note.all
+          ).resolve
+
+        expect(resolved_scope_for(owner)).to include(sandbox_note)
+        expect(resolved_scope_for(owner)).not_to include(live_note)
+        expect(resolved_live).to include(live_note)
+        expect(resolved_live).not_to include(sandbox_note)
+      end
     end
   end
 end

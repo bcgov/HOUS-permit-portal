@@ -1,13 +1,29 @@
 # .dockerignore
 
 .env
+.env.*
+
+# Host-only settings, credentials and uploaded files must not enter image layers.
+.bundle
+/config/database.yml
+/config/master.key
+/config/credentials/*.key
+/storage
+/public/uploads
+/coverage
 
 node_modules
 /node_modules
 .npm
 
+# Always build application assets inside the image; exclude stale local maps.
+/public/vite*
+
 .git
 .gitignore
+.agents
+.cursor
+/AGENTS.md
 .DS_Store
 *.log
 tmp

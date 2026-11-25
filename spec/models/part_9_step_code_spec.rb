@@ -106,17 +106,28 @@ RSpec.describe Part9StepCode, type: :model do
       expect(summary.fossil_fuels.presence).to eq("yes")
     end
 
-    it "does not duplicate generated rows or overwrite non-empty manual fields on re-import" do
+    it "overwrites H2K-mapped fields on re-import without duplicating rows" do
       step_code.process_current_h2k_files(checklist)
       summary = checklist.reload.building_characteristics_summary
       roof_count = summary.roof_ceilings_lines.count
-      summary.update!(airtightness: { details: "Manual air barrier" })
+      summary.update!(
+        airtightness: {
+          details: "Manual air barrier"
+        },
+        ventilation_lines: [
+          { details: "Stale HRV", percent_eff: 50, liters_per_sec: 10 }
+        ]
+      )
 
       step_code.process_current_h2k_files(checklist)
 
       summary.reload
       expect(summary.roof_ceilings_lines.count).to eq(roof_count)
-      expect(summary.airtightness.details).to eq("Manual air barrier")
+      expect(summary.airtightness.details).not_to eq("Manual air barrier")
+      expect(summary.ventilation_lines.map(&:details)).not_to include(
+        "Stale HRV"
+      )
+      expect(summary.ventilation_lines.map(&:details)).to include("HRV - VanEE")
     end
   end
 
@@ -146,7 +157,7 @@ RSpec.describe Part9StepCode, type: :model do
         ).and_return(SupportingDocument.all)
       end
 
-      #this is true for part 9, but may need to chagne for part 3
+      # This is true for Part 9, but may need to change for Part 3
       it "is still valid" do
         step_code.save
         step_code.valid?

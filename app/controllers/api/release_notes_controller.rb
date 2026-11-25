@@ -1,15 +1,15 @@
 class Api::ReleaseNotesController < Api::ApplicationController
   include Api::Concerns::Search::ReleaseNotes
 
-  skip_before_action :authenticate_user!, only: %i[index viewer_context]
-  skip_before_action :require_confirmation, only: %i[index viewer_context]
+  skip_before_action :authenticate_user!, only: %i[index years viewer_context]
+  skip_before_action :require_confirmation, only: %i[index years viewer_context]
 
   before_action :set_release_note, only: %i[update publish show viewer_context]
 
   def create
-    @release_note = ReleaseNote.new(release_note_params)
-    authorize @release_note
+    authorize :release_note, :create?
 
+    @release_note = ReleaseNote.new(release_note_params)
     if @release_note.save
       render_success @release_note,
                      "release_note.create_success",
@@ -39,7 +39,7 @@ class Api::ReleaseNotesController < Api::ApplicationController
       )
     end
 
-    if @release_note.update(release_note_params)
+    if @release_note.update(release_note_attributes)
       render_success @release_note,
                      "release_note.update_success",
                      { blueprint: ReleaseNoteBlueprint }
@@ -57,10 +57,26 @@ class Api::ReleaseNotesController < Api::ApplicationController
   def publish
     authorize @release_note
     was_published = @release_note.published?
+    audience = params.dig(:release_note, :notification_audience)
 
-    if @release_note.update(release_note_params.merge(status: :published))
+    if !was_published && audience.present? &&
+         ReleaseNote::NOTIFICATION_AUDIENCES.exclude?(audience.to_s)
+      return(
+        render_error "release_note.publish_error",
+                     {
+                       message_opts: {
+                         error_message: "Invalid notification audience"
+                       }
+                     }
+      )
+    end
+
+    if @release_note.update(release_note_attributes.merge(status: :published))
       unless was_published
-        NotificationService.publish_release_note_publish_event(@release_note)
+        NotificationService.publish_release_note_publish_event(
+          @release_note,
+          audience
+        )
       end
       render_success @release_note,
                      "release_note.publish_success",
@@ -74,6 +90,19 @@ class Api::ReleaseNotesController < Api::ApplicationController
                      }
                    }
     end
+  end
+
+  def years
+    authorize :release_note, :index?
+    release_years =
+      policy_scope(ReleaseNote)
+        .published
+        .order(release_date: :desc)
+        .pluck(:release_date)
+        .map(&:year)
+        .uniq
+
+    render json: { data: release_years, meta: default_meta(nil) }, status: :ok
   end
 
   def index
@@ -118,12 +147,19 @@ class Api::ReleaseNotesController < Api::ApplicationController
 
   def release_note_params
     params.fetch(:release_note, {}).permit(
+      :release_type,
       :version,
+      :name,
       :release_date,
       :content,
       :release_notes_url,
       :issues
     )
+  end
+
+  # release_type is create-only; updates ignore it (model also rejects changes)
+  def release_note_attributes
+    release_note_params.except(:release_type)
   end
 
   def release_note_viewer_context_params

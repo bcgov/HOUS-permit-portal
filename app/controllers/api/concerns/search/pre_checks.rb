@@ -5,18 +5,10 @@ module Api::Concerns::Search::PreChecks
     search_conditions = {
       order: pre_check_order,
       where: pre_check_where_clause,
-      page: pre_check_search_params[:page],
+      page: pre_check_search_params[:page].presence || 1,
       per_page:
-        (
-          if pre_check_search_params[:page]
-            (
-              pre_check_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        pre_check_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       scope_results: ->(relation) { policy_scope(relation) }
     }
     @pre_check_search =
@@ -46,6 +38,8 @@ module Api::Concerns::Search::PreChecks
   end
 
   def pre_check_where_clause
-    { creator_id: current_user.id }
+    where = { creator_id: current_user.id }
+    where[:sandbox_id] = current_sandbox&.id unless current_user.super_admin?
+    where
   end
 end

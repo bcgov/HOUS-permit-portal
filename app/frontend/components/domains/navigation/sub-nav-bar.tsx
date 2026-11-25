@@ -73,7 +73,7 @@ const DynamicBreadcrumb = observer(({ path }: IDynamicBreadcrumbProps) => {
           rootStore.permitProjectStore.currentPermitProject?.number,
         meetings: t("site.breadcrumb.requestProjectMeeting"),
         videos: rootStore.helpVideoStore.currentHelpVideo?.title,
-        "release-notes": rootStore.releaseNoteStore.currentReleaseNote?.version,
+        "release-notes": rootStore.releaseNoteStore.currentReleaseNote?.displayLabel,
       }
 
       const title = resourceNeeded

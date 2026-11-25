@@ -20,6 +20,7 @@ class PreCheckExportService
       # Get the most recent 1000 pre-checks
       # Filter out users who opted out of research contact
       PreCheck
+        .where(sandbox_id: nil)
         .includes(:creator, :jurisdiction)
         .order(created_at: :desc)
         .limit(1000)

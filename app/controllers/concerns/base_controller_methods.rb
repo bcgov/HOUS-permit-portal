@@ -6,6 +6,7 @@ module BaseControllerMethods
     include ActionController::RequestForgeryProtection
 
     protect_from_forgery with: :exception
+    before_action :set_sentry_request_context
     after_action :set_csrf_cookie
   end
 
@@ -32,7 +33,7 @@ module BaseControllerMethods
         end
       )
     meta = opts[:meta].deep_merge(default_meta(message))
-    if resource.blank?
+    if resource.blank? || (opts[:blueprint].blank? && hash_payload?(resource))
       success_payload = { data: resource, meta: meta }
       status = opts[:status] || :ok
       render json: success_payload, status: status
@@ -62,6 +63,10 @@ module BaseControllerMethods
 
   # error_key maps to a translation key in en.yml
   def render_error(error_key = nil, opts = {}, exception = nil)
+    if exception.present? &&
+         Rack::Utils.status_code(opts[:status] || 400) >= 500
+      BphSentry.capture_exception(exception)
+    end
     if exception.present?
       Rails.logger.error "#{exception.message}\n#{exception.backtrace}"
     elsif opts[:log_args].present?
@@ -103,6 +108,24 @@ module BaseControllerMethods
 
   private
 
+  def set_sentry_request_context
+    unless BphSentry::Configuration.new.backend_enabled? && Sentry.initialized?
+      return
+    end
+
+    user = respond_to?(:current_user, true) ? current_user : nil
+    Sentry.set_user(BphSentry::Privacy.user_context(user))
+    Sentry.set_context(
+      "privacy",
+      { names: [user&.first_name, user&.last_name, user&.name].compact }
+    )
+    Sentry.set_tags(
+      component: "web",
+      route: "#{controller_path}##{action_name}",
+      role: BphSentry::Privacy::ROLES.include?(user&.role) ? user.role : nil
+    )
+  end
+
   def set_csrf_cookie
     cookies["CSRF-TOKEN"] = {
       value: form_authenticity_token,
@@ -118,5 +141,10 @@ module BaseControllerMethods
     meta = {}
     meta[:message] = ArbitraryMessageConstruct.message(**message) if message
     meta
+  end
+
+  def hash_payload?(resource)
+    resource.is_a?(Hash) ||
+      (resource.is_a?(Array) && resource.first.is_a?(Hash))
   end
 end

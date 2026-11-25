@@ -111,6 +111,16 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailProjectMeetingSubmittedNotification",
     },
     {
+      event: t("user.notifications.projectMeetingScheduled"),
+      inAppControl: "preferenceAttributes.enableInAppProjectMeetingScheduledNotification",
+      emailControl: "preferenceAttributes.enableEmailProjectMeetingScheduledNotification",
+    },
+    {
+      event: t("user.notifications.projectMeetingRescheduled"),
+      inAppControl: "preferenceAttributes.enableInAppProjectMeetingRescheduledNotification",
+      emailControl: "preferenceAttributes.enableEmailProjectMeetingRescheduledNotification",
+    },
+    {
       event: t("user.notifications.reviewStarted"),
       inAppControl: "preferenceAttributes.enableInAppApplicationViewNotification",
       emailControl: "preferenceAttributes.enableEmailApplicationViewNotification",
@@ -121,6 +131,11 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       emailControl: "preferenceAttributes.enableEmailApplicationRevisionsRequestNotification",
     },
     {
+      event: t("user.notifications.applicationsAdded"),
+      inAppControl: "preferenceAttributes.enableInAppApplicationsAddedNotification",
+      emailControl: "preferenceAttributes.enableEmailApplicationsAddedNotification",
+    },
+    {
       event: t("user.notifications.collaboration"),
       inAppControl: "preferenceAttributes.enableInAppCollaborationNotification",
       emailControl: "preferenceAttributes.enableEmailCollaborationNotification",
@@ -129,6 +144,31 @@ export const ProfileScreen = observer(({}: IProfileScreenProps) => {
       event: t("user.notifications.unmappedApiNotification"),
       inAppControl: "preferenceAttributes.enableInAppUnmappedApiNotification",
       emailControl: "preferenceAttributes.enableEmailUnmappedApiNotification",
+    },
+    {
+      event: t("user.notifications.preCheckSubmitted"),
+      inAppControl: "preferenceAttributes.enableInAppPreCheckSubmittedNotification",
+      emailControl: "preferenceAttributes.enableEmailPreCheckSubmittedNotification",
+    },
+    {
+      event: t("user.notifications.preCheckCompleted"),
+      inAppControl: "preferenceAttributes.enableInAppPreCheckCompletedNotification",
+      emailControl: "preferenceAttributes.enableEmailPreCheckCompletedNotification",
+    },
+    {
+      event: t("user.notifications.stepCodeReport"),
+      inAppControl: "preferenceAttributes.enableInAppStepCodeReportNotification",
+      emailChecked: false,
+    },
+    {
+      event: t("user.notifications.fileUploadFailed"),
+      inAppControl: "preferenceAttributes.enableInAppFileUploadFailedNotification",
+      emailChecked: false,
+    },
+    {
+      event: t("user.notifications.releaseNote"),
+      inAppControl: "preferenceAttributes.enableInAppReleaseNotePublishNotification",
+      emailChecked: false,
     },
   ]
 

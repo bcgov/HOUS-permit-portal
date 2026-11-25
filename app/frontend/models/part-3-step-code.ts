@@ -44,15 +44,21 @@ export const Part3StepCodeModel = types.snapshotProcessor(
         const stage = self.currentStage || EStepCodeChecklistStage.preConstruction
         return self.checklists.find((checklist) => checklist.stage === stage) || self.checklist
       },
+    }))
+    .views((self) => ({
       get checklistForPdf() {
         return self.currentChecklist
       },
       stageStatus(stage: EStepCodeChecklistStage = self.currentStage) {
         return stageStatusFor(stage, self.checklists, self.stageCompletions)
       },
+    }))
+    .views((self) => ({
       isStageComplete(stage: EStepCodeChecklistStage = self.currentStage) {
         return self.stageStatus(stage) === EStepCodeStageStatus.complete
       },
+    }))
+    .views((self) => ({
       get isComplete() {
         return self.isStageComplete()
       },
@@ -75,23 +81,24 @@ export const Part3StepCodeModel = types.snapshotProcessor(
   {
     preProcessor(snapshot: any) {
       const processed = { ...snapshot }
-      const map: Record<string, any> = {}
+      const map: Record<string, any> = { ...(processed.checklistsMap || {}) }
 
       if (Array.isArray(processed.checklists)) {
         processed.checklists.forEach((checklist: any) => {
-          if (checklist?.id) map[checklist.id] = checklist
+          if (!checklist?.id) return
+          map[checklist.id] = { ...(map[checklist.id] || {}), ...checklist }
         })
         delete processed.checklists
       }
 
       if (processed.checklist?.id) {
-        map[processed.checklist.id] = processed.checklist
+        map[processed.checklist.id] = {
+          ...(map[processed.checklist.id] || {}),
+          ...processed.checklist,
+        }
       }
 
-      processed.checklistsMap = {
-        ...(processed.checklistsMap || {}),
-        ...map,
-      }
+      processed.checklistsMap = map
       return processed
     },
   }

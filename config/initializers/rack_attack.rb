@@ -6,15 +6,7 @@ class Rack::Attack
       {
         url:
           "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["RATE_LIMIT_REDIS_DB"]&.to_i || 2}",
-        sentinels:
-          Resolv
-            .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-            .map do |address|
-              {
-                host: address,
-                port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379)
-              }
-            end
+        sentinels: RedisSentinelConfiguration.sentinels
       }
     else
       { url: ENV["RATE_LIMIT_DEV_REDIS_URL"] }

@@ -4,7 +4,7 @@ elasticsearch:
     heapSize: "512m"
     resources:
       requests:
-        cpu: "50m"
+        cpu: "30m"
         memory: "512Mi"
     persistence:
       enabled: true
@@ -16,7 +16,7 @@ elasticsearch:
     heapSize: "1024m"
     resources:
       requests:
-        cpu: "200m"
+        cpu: "100m"
         memory: "1024Mi"
     persistence:
       enabled: true

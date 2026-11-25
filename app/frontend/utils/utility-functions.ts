@@ -5,6 +5,7 @@ import {
   VALUE_EXTRACTION_AUTO_COMPLIANCE_TYPES,
   vancouverTimeZone,
 } from "../constants"
+import { requestAppNavBarReveal } from "../hooks/use-scroll-aware-nav-bar"
 import {
   EEnergyStepCodeDependencyRequirementCode,
   EEnergyStepCodePart3DependencyRequirementCode,
@@ -141,6 +142,27 @@ export function isContactRequirement(requirementType: ERequirementType): boolean
   return contactRequirementFields.includes(requirementType)
 }
 
+/** Bank definitions own these; placements own conditional / compliance / validation. */
+export function toBankDefinitionInputOptions<T extends Record<string, unknown>>(inputOptions?: T | null) {
+  if (!inputOptions) return {} as Omit<T, "conditional" | "computedCompliance" | "dataValidation">
+  const { conditional: _c, computedCompliance: _cc, dataValidation: _dv, ...definitionOptions } = inputOptions
+  return definitionOptions
+}
+
+export function pickPlacementInputOptions<T extends Record<string, unknown>>(inputOptions?: T | null) {
+  if (!inputOptions) return {}
+  const { conditional, computedCompliance, dataValidation } = inputOptions as T & {
+    conditional?: unknown
+    computedCompliance?: unknown
+    dataValidation?: unknown
+  }
+  return {
+    ...(conditional !== undefined ? { conditional } : {}),
+    ...(computedCompliance !== undefined ? { computedCompliance } : {}),
+    ...(dataValidation !== undefined ? { dataValidation } : {}),
+  }
+}
+
 /**
  * Checks if editor HTML content is empty (only whitespace/empty tags).
  */
@@ -161,6 +183,9 @@ export function handleScrollToTop() {
     behavior: "instant",
   })
   document.body.scrollTop = 0 // For Safari
+  // A tucked bar keeps its layout slot. On a short page that slot is a blank
+  // gap and no further scroll can bring the bar back.
+  requestAppNavBarReveal()
 }
 
 export function handleScrollToBottom() {
@@ -345,6 +370,11 @@ export function getCurrentSandboxId() {
   }
 }
 
+export function syncMatomoSandboxFlag(isSandbox: boolean) {
+  const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
+  _mtm.push({ isSandbox })
+}
+
 export function convertToDate(property: any) {
   if (!(property instanceof Date)) {
     return new Date(property)
@@ -377,6 +407,19 @@ export function urlForPath(path: string): string {
   return `${baseUrl}${normalizedPath}`
 }
 
+/**
+ * Same-origin app path only. Rejects open-redirect / XSS shapes in navigation targets
+ * (defense in depth for afterLoginPath; RR 7.18+ also hardens Link/navigate).
+ */
+export function isSafeAppPath(path: string): boolean {
+  if (typeof path !== "string" || path.length === 0) return false
+  if (!path.startsWith("/") || path.startsWith("//")) return false
+  if (path.includes("\\") || path.includes("@")) return false
+  // absolute URLs / scheme navigations (incl. /javascript:… path forms)
+  if (/^[a-z][a-z0-9+.-]*:/i.test(path) || /(?:^|\/)javascript:/i.test(path)) return false
+  return true
+}
+
 export async function downloadFileFromStorage(options: {
   model: string
   modelId?: string
@@ -388,6 +431,7 @@ export async function downloadFileFromStorage(options: {
     const response = await fetch(`/api/s3/params/download?model=${model}&modelId=${modelId}`, {
       method: "GET",
       headers: {
+        "X-Sandbox-ID": getCurrentSandboxId(),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -469,10 +513,10 @@ export function numberToFormattedString(
 
 /**
  * Rounds a numeric value (number or string) to a fixed number of decimal places.
- * Returns "-" for null, undefined, or NaN values.
+ * Returns "-" for missing or invalid values; preserves numeric zero.
  */
 export function roundMetric(value: string | number | null | undefined, decimals: number = 5): string {
-  if (!value) return "-"
+  if (value === null || value === undefined || value === "") return "-"
   const num = typeof value === "string" ? parseFloat(value) : value
   return isNaN(num) ? "-" : num.toFixed(decimals)
 }

@@ -65,8 +65,9 @@ export const UserInput = observer(({ index, remove, adminOnly }: IUserInputProps
           />
         </FormControl>
         <EmailFormControl fieldName={`users.${index}.email`} validate required />
-        <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} required />
-        <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} required />
+        {/* Names come from IDIR/BCeID on accept; invite-time first/last are optional. */}
+        <TextFormControl label={t("user.firstName")} fieldName={`users.${index}.firstName`} />
+        <TextFormControl label={t("user.lastName")} fieldName={`users.${index}.lastName`} />
         <Box alignSelf="flex-end" minW={150}>
           {isSubmitting ? (
             <SharedSpinner position="relative" top={4} left={5} minW="fit-content" />

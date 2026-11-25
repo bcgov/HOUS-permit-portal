@@ -48,13 +48,14 @@ function formatZeroCarbonLevel(level: number | null): string {
 function getDisplayPathways(
   occupancy: IPart3Occupancy,
   jurisdiction: IJurisdiction
-): Array<{ energyStep: string; zeroCarbonLevel: string }> {
+): Array<{ energyStep: string; zeroCarbonLevel: string; description?: string | null }> {
   if (occupancy.isConfigurable) {
     const configured = jurisdiction.part3RequiredStepsForOccupancy(occupancy.key)
     if (configured.length > 0) {
       return configured.map((p: IPart3OccupancyRequiredStep) => ({
         energyStep: formatEnergyStep(p.energyStepRequired),
         zeroCarbonLevel: formatZeroCarbonLevel(p.zeroCarbonStepRequired),
+        description: p.description,
       }))
     }
   }
@@ -104,6 +105,13 @@ const OccupancyAccordionItem = observer(
                     {pw.zeroCarbonLevel}
                   </Tag>
                 </GridItem>
+                {pw.description?.trim() ? (
+                  <GridItem colSpan={3}>
+                    <Text fontSize="sm" color="text.secondary">
+                      {pw.description.trim()}
+                    </Text>
+                  </GridItem>
+                ) : null}
                 {i !== pathways.length - 1 && (
                   <GridItem
                     colSpan={3}

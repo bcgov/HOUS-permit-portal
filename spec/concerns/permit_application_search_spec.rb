@@ -2,7 +2,8 @@ require "rails_helper"
 
 RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
                type: :controller,
-               search: true do
+               search: true,
+               search_callbacks: false do
   controller(Api::ApplicationController) do
     include Api::Concerns::Search::JurisdictionPermitApplications
   end
@@ -134,8 +135,8 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
     allow(controller).to receive(:params).and_return(
       jurisdiction_permit_application_search_params
     )
-    User.reindex
-    PermitApplication.reindex
+    reindex_search(User)
+    reindex_search(PermitApplication)
   end
 
   describe "perform_jurisdiction_permit_application_search" do
@@ -157,6 +158,26 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
           submitted_permit_applications + resubmitted_permit_applications +
             revisions_requested_permit_applications
         )
+      end
+
+      it "excludes new_draft from ES totals so pages are not policy-stripped" do
+        controller.perform_jurisdiction_permit_application_search
+        search =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_search
+          )
+        meta =
+          controller.instance_variable_get(
+            :@jurisdiction_permit_application_meta
+          )
+
+        expect(search.results.map(&:status)).not_to include("new_draft")
+        expect(meta[:total_count]).to eq(
+          submitted_permit_applications.size +
+            resubmitted_permit_applications.size +
+            revisions_requested_permit_applications.size
+        )
+        expect(meta[:status_counts].values.sum).to eq(meta[:total_count])
       end
     end
 
@@ -204,7 +225,7 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
           )
         end
 
-        PermitApplication.reindex
+        reindex_search(PermitApplication)
       end
 
       let(:cur_user) { reviewer }
@@ -416,6 +437,20 @@ RSpec.describe Api::Concerns::Search::JurisdictionPermitApplications,
         before do
           create(:project_meeting, :open, permit_project: target_project)
         end
+
+        it "includes draft applications for that permit project" do
+          controller.perform_jurisdiction_permit_application_search
+          results =
+            controller.instance_variable_get(
+              :@jurisdiction_permit_application_search
+            ).results
+
+          expect(results).to match_array(draft_permit_applications)
+        end
+      end
+
+      context "when the scoped permit project has no active meeting" do
+        let(:target_project) { draft_permit_applications.first.permit_project }
 
         it "includes draft applications for that permit project" do
           controller.perform_jurisdiction_permit_application_search

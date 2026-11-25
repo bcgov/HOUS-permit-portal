@@ -1,4 +1,5 @@
 import { persistFileUpload, uploadFile } from "../../../../../../utils/uploads"
+import { getCurrentSandboxId } from "../../../../../../utils/utility-functions"
 
 class StorageError extends Error {
   constructor(message, detail) {
@@ -109,6 +110,7 @@ const s3custom = function Provider(formio) {
         const response = await fetch(`/api/s3/params/download?${params.toString()}`, {
           method: "GET",
           headers: {
+            "X-Sandbox-ID": getCurrentSandboxId(),
             "Content-Type": "application/json",
             Accept: "application/json",
           },

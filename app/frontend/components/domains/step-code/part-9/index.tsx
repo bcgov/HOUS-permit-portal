@@ -5,12 +5,15 @@ import { useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
 import { usePermitApplication } from "../../../../hooks/resources/use-permit-application"
 import { useMst } from "../../../../setup/root"
+import { belowNavBarInFlow } from "../../../../styles/nav-bar-offset"
 import { EFlashMessageStatus } from "../../../../types/enums"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { NotFoundScreen } from "../../../shared/base/not-found-screen"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { ProjectInformation } from "../project-information"
+import { StepCodeSubNavBar } from "../step-code-sub-nav-bar"
+import { useRedirectAttachedStepCode } from "../use-redirect-attached-step-code"
 import { DrawingsWarning } from "./drawings-warning"
 import { FormSection } from "./form-section"
 import { Info } from "./info"
@@ -18,12 +21,15 @@ import { Sidebar } from "./sidebar"
 import { defaultSectionCompletionStatus } from "./sidebar/nav-sections"
 import { SideBarDrawer } from "./sidebar/side-bar-drawer"
 import { Title } from "./title"
+import { usePart9Navigation } from "./use-part-9-navigation"
 
 export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
   const {
     stepCodeStore: { createPart9StepCode, isOptionsLoaded, fetchPart9SelectOptions },
   } = useMst()
   const { currentStepCode } = usePart9StepCode()
+  const redirectingToPermit = useRedirectAttachedStepCode("part-9-step-code", currentStepCode)
+  const { infoPagePath, isPermitLinked, exitLinkPath } = usePart9Navigation()
   const { currentPermitApplication } = usePermitApplication()
   const { permitApplicationId, section, stepCodeId } = useParams()
   const isStandaloneStepCode = !permitApplicationId
@@ -38,6 +44,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
     if (stepCodeId) return
     if (!!currentStepCode) return
     if (!isStandaloneStepCode && !currentPermitApplication?.isFullyLoaded) return
+    if (!isStandaloneStepCode && currentPermitApplication?.stepCode) return
     ;(async () => {
       const result = await createPart9StepCode({
         permitApplicationId,
@@ -56,11 +63,22 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
     }
   }, [section])
 
+  if (redirectingToPermit) {
+    return (
+      <Center p={50}>
+        <SharedSpinner />
+      </Center>
+    )
+  }
+
   // Prevent viewing/editing archived Step Codes
   if (currentStepCode?.isDiscarded) return <NotFoundScreen />
 
   return (
-    <Flex direction="column" h="calc(100vh - var(--app-navbar-height))" w="full" bg="white">
+    <Flex direction="column" {...belowNavBarInFlow} w="full" bg="white">
+      {section && (
+        <StepCodeSubNavBar infoPagePath={infoPagePath} isPermitLinked={isPermitLinked} exitLinkPath={exitLinkPath} />
+      )}
       <Suspense
         fallback={
           <Center p={50}>
@@ -82,7 +100,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
             </VStack>
           </Center>
         ) : isOptionsLoaded && currentStepCode && !section ? (
-          <Flex flex={1} overflow="auto" id="stepCodeScroll" px={6} py={10}>
+          <Flex flex={1} minH={0} overflow="auto" id="stepCodeScroll" px={6} py={10}>
             <Flex direction="column" flex={1} maxW="780px" mx="auto" w="full">
               <FloatingHelpDrawer />
               <ProjectInformation
@@ -93,7 +111,7 @@ export const Part9StepCodeForm = observer(function Part9StepCodeForm() {
             </Flex>
           </Flex>
         ) : isOptionsLoaded && currentStepCode && section ? (
-          <Flex flex={1} w="full" overflow="hidden" position="relative">
+          <Flex flex={1} minH={0} w="full" overflow="hidden" position="relative">
             <Show above="lg">
               <Flex w={"sidebar.width"} boxShadow="md" borderRightWidth={1} borderColor="greys.grey02" overflow="auto">
                 <Sidebar />

@@ -22,9 +22,9 @@
 #     end
 #
 # DEFAULTS:
-#   These match the original gem's defaults. The cookie name "access_token"
-#   is what the frontend reads via withCredentials and what ApplicationCable
-#   uses to decode the JWT for WebSocket connections.
+#   These match the original gem's defaults. The application configures the name
+#   with AuthCookies.access_token_name; ApplicationCable reads that configured
+#   name to decode the JWT for WebSocket connections.
 # =============================================================================
 
 module Devise
@@ -32,9 +32,8 @@ module Devise
     module Cookie
       class Configuration
         # The name of the httpOnly cookie that stores the JWT.
-        # Default: "access_token" -- this is what the browser sends with
-        # every API request and what ApplicationCable::Connection reads
-        # from cookies["access_token"].
+        # Default: "access_token". ApplicationCable::Connection reads the
+        # configured name, matching the cookie sent with API requests.
         attr_accessor :name
 
         # Whether the cookie should have the Secure flag (only sent over HTTPS).

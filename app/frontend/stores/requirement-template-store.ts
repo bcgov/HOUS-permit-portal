@@ -7,11 +7,24 @@ import { createSearchModel } from "../lib/create-search-model"
 import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
+import { ExplainerModel } from "../models/explainer"
+import { IExplainerLoadResult, IJurisdictionExplainerLoadResult } from "../models/jurisdiction-explainer"
 import { IRequirementTemplate, RequirementTemplateModel } from "../models/requirement-template"
 import { IRequirementTemplateUpdateParams } from "../types/api-request"
 import { ERequirementTemplateSortFields, ETagType } from "../types/enums"
-import { ICopyRequirementTemplateFormData, IOption, TCreateRequirementTemplateFormData } from "../types/types"
+import {
+  ICopyRequirementTemplateFormData,
+  IOption,
+  IRequirementTemplateConfigError,
+  TCreateRequirementTemplateFormData,
+} from "../types/types"
 import { toCamelCase } from "../utils/utility-functions"
+
+interface IConfigErrorResponse {
+  meta?: {
+    configErrors?: IRequirementTemplateConfigError[]
+  }
+}
 
 export const RequirementTemplateStoreModel = types
   .compose(
@@ -118,6 +131,47 @@ export const RequirementTemplateStoreModel = types
       return response.ok
     }),
 
+    fetchExplainer: flow(function* (id: string) {
+      const { ok, data: response } = yield* toGenerator(self.environment.api.fetchExplainer(id))
+      if (!ok || !response?.data) return null
+
+      return {
+        explainer: ExplainerModel.create(response.data),
+        relatedTemplateOptions: response.meta?.relatedTemplateOptions ?? [],
+        jurisdictionExplainers: response.meta?.jurisdictionExplainers ?? [],
+        permit: response.meta?.permit ?? null,
+        relatedPermits: response.meta?.relatedPermits ?? [],
+      } as IExplainerLoadResult
+    }),
+
+    fetchJurisdictionExplainer: flow(function* (requirementTemplateId: string, jurisdictionId: string) {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.fetchJurisdictionExplainer(requirementTemplateId, jurisdictionId)
+      )
+      if (!ok || !response) return null
+
+      return {
+        localContextHtml: response.data?.localContextHtml ?? "",
+        updatedAt: response.data?.updatedAt ?? null,
+      } as IJurisdictionExplainerLoadResult
+    }),
+
+    saveJurisdictionExplainer: flow(function* (
+      requirementTemplateId: string,
+      jurisdictionId: string,
+      localContextHtml: string
+    ) {
+      const { ok, data: response } = yield* toGenerator(
+        self.environment.api.saveJurisdictionExplainer(requirementTemplateId, jurisdictionId, { localContextHtml })
+      )
+      if (!ok || !response) return null
+
+      return {
+        localContextHtml: response.data?.localContextHtml ?? "",
+        updatedAt: response.data?.updatedAt ?? null,
+      } as IJurisdictionExplainerLoadResult
+    }),
+
     createRequirementTemplate: flow(function* (formData: TCreateRequirementTemplateFormData) {
       const { ok, data: response } = yield* toGenerator(self.environment.api.createRequirementTemplate(formData))
 
@@ -143,12 +197,14 @@ export const RequirementTemplateStoreModel = types
     scheduleRequirementTemplate: flow(function* (
       templateId: string,
       requirementParams: IRequirementTemplateUpdateParams,
-      scheduleDate: Date
+      scheduleDate: Date,
+      changeNotes?: string
     ) {
       const response = yield* toGenerator(
         self.environment.api.scheduleRequirementTemplate(templateId, {
           requirementTemplate: requirementParams,
           versionDate: format(scheduleDate, datefnsAppDateFormat),
+          changeNotes,
         })
       )
 
@@ -164,10 +220,11 @@ export const RequirementTemplateStoreModel = types
     }),
     forcePublishRequirementTemplate: flow(function* (
       templateId: string,
-      requirementParams: IRequirementTemplateUpdateParams
+      requirementParams: IRequirementTemplateUpdateParams,
+      changeNotes?: string
     ) {
       const response = yield* toGenerator(
-        self.environment.api.forcePublishRequirementTemplate(templateId, requirementParams)
+        self.environment.api.forcePublishRequirementTemplate(templateId, requirementParams, changeNotes)
       )
 
       if (response.ok) {
@@ -180,12 +237,11 @@ export const RequirementTemplateStoreModel = types
 
       return false
     }),
-    fetchFilterOptions: flow(function* () {
-      const response = yield* toGenerator(self.environment.api.fetchRequirementTemplatesForFilter())
+    fetchFilterOptions: flow(function* (params?: { permitProjectId?: string; jurisdictionId?: string }) {
+      const response = yield* toGenerator(self.environment.api.fetchRequirementTemplatesForFilter(params))
       if (response.ok) {
         self.filterOptions = cast(response.data.data)
       }
-      return response.ok
     }),
     searchTagOptions: flow(function* (query: string) {
       const response = yield* toGenerator(
@@ -211,10 +267,8 @@ export const RequirementTemplateStoreModel = types
     }),
 
     // Draft workflow actions
-    createDraft: flow(function* (templateId: string, assigneeId?: string) {
-      const response = yield* toGenerator(
-        self.environment.api.createDraft(templateId, assigneeId ? { assigneeId } : undefined)
-      )
+    createDraft: flow(function* (templateId: string, params?: { assigneeId?: string; changeNotes?: string }) {
+      const response = yield* toGenerator(self.environment.api.createDraft(templateId, params))
 
       if (response.ok) {
         const templateData = response.data.data
@@ -258,6 +312,50 @@ export const RequirementTemplateStoreModel = types
         templateData.isFullyLoaded = true
         self.mergeUpdate(templateData, "requirementTemplateMap")
         return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
+    }),
+
+    validateConfig: flow(function* (templateId: string) {
+      const response = yield* toGenerator(self.environment.api.validateRequirementTemplateConfig(templateId))
+      if (response.ok) {
+        return [] as IRequirementTemplateConfigError[]
+      }
+      return ((response.data as IConfigErrorResponse | undefined)?.meta?.configErrors ??
+        []) as IRequirementTemplateConfigError[]
+    }),
+
+    validateTemplateVersionConfig: flow(function* (templateVersionId: string) {
+      const response = yield* toGenerator(self.environment.api.validateTemplateVersionConfig(templateVersionId))
+      if (response.ok) {
+        return [] as IRequirementTemplateConfigError[]
+      }
+      return ((response.data as IConfigErrorResponse | undefined)?.meta?.configErrors ??
+        []) as IRequirementTemplateConfigError[]
+    }),
+
+    restoreLayout: flow(function* (templateVersionId: string) {
+      const response = yield* toGenerator(self.environment.api.restoreTemplateLayout(templateVersionId))
+
+      if (response.ok) {
+        const templateData = response.data.data
+        templateData.isFullyLoaded = true
+        self.mergeUpdate(templateData, "requirementTemplateMap")
+        return self.requirementTemplateMap.get(templateData.id) as IRequirementTemplate
+      }
+
+      return false
+    }),
+
+    restoreRequirementBlockFromVersion: flow(function* (templateVersionId: string, requirementBlockId: string) {
+      const response = yield* toGenerator(
+        self.environment.api.restoreRequirementBlockFromVersion(templateVersionId, requirementBlockId)
+      )
+
+      if (response.ok) {
+        self.rootStore.requirementBlockStore.mergeUpdate(response.data.data, "requirementBlockMap")
+        return self.rootStore.requirementBlockStore.getRequirementBlockById(requirementBlockId)
       }
 
       return false

@@ -21,7 +21,7 @@ export const CollaboratorInviteModalContent = observer(function CollaboratorCrea
   onInviteSuccess,
   confirmationModalDisclosureProps,
 }: {
-  onInvite: (user: { email: string; firstName: string; lastName: string }) => Promise<IPermitCollaboration>
+  onInvite: (user: { email: string; firstName: string; lastName: string }) => Promise<IPermitCollaboration | false>
   onClose: () => void
   onInviteSuccess: () => void
   confirmationModalDisclosureProps?: ReturnType<typeof useDisclosure>

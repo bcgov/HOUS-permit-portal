@@ -5,18 +5,10 @@ module Api::Concerns::Search::Jurisdictions
     search_params = {
       order: jurisdiction_order,
       match: :word_start,
-      page: jurisdiction_search_params[:page],
+      page: jurisdiction_search_params[:page].presence || 1,
       per_page:
-        (
-          if jurisdiction_search_params[:page]
-            (
-              jurisdiction_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        )
+        jurisdiction_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page
     }
 
     # Conditionally add the `where` clause

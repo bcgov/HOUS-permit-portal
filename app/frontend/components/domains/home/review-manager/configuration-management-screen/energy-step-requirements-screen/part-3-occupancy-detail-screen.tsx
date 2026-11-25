@@ -18,6 +18,7 @@ import {
   VStack,
 } from "@chakra-ui/react"
 import { CaretDown, CaretLeft, Plus, Trash } from "@phosphor-icons/react"
+import { TFunction } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
@@ -33,8 +34,6 @@ import { i18nPrefix } from "./i18n-prefix"
 
 type TDetailPrefix = `${typeof i18nPrefix}.occupancyDetail`
 const d: TDetailPrefix = `${i18nPrefix}.occupancyDetail`
-
-type TFunction = ReturnType<typeof useTranslation>["t"]
 
 function formatStepLabel(t: TFunction, step: number): string {
   // @ts-ignore
@@ -219,6 +218,7 @@ interface ICompliancePathway {
   recordId?: string
   energyStep: number | undefined
   zeroCarbonLevel: number | undefined
+  description: string
 }
 
 interface IFormValues {
@@ -254,6 +254,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
       recordId: s.id,
       energyStep: s.energyStepRequired,
       zeroCarbonLevel: s.zeroCarbonStepRequired ?? undefined,
+      description: s.description ?? "",
     })),
   })
 
@@ -284,6 +285,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
         occupancyKey: occupancy.key,
         energyStepRequired: p.energyStep,
         zeroCarbonStepRequired: p.zeroCarbonLevel,
+        description: p.description?.trim() || null,
       })),
       ...removedRecordIds.map((id) => ({ id, _destroy: true })),
     ]
@@ -300,7 +302,7 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
   }
 
   const onAdd = () => {
-    append({ energyStep: undefined, zeroCarbonLevel: undefined })
+    append({ energyStep: undefined, zeroCarbonLevel: undefined, description: "" })
   }
 
   return (
@@ -356,7 +358,23 @@ function ConfigurableCompliancePathways({ occupancy, jurisdiction }: IConfigurab
                         />
                       </FormControl>
                     </Box>
-                    <Box flex={1} />
+                    <Box flex={1}>
+                      <FormControl>
+                        <FormLabel fontSize="sm">{t(`${d}.pathwayDescriptionLabel`)}</FormLabel>
+                        <Controller
+                          control={control}
+                          name={`pathways.${index}.description`}
+                          render={({ field }) => (
+                            <Input
+                              {...field}
+                              bg="white"
+                              borderColor="gray.200"
+                              placeholder={t(`${d}.pathwayDescriptionPlaceholder`)}
+                            />
+                          )}
+                        />
+                      </FormControl>
+                    </Box>
                     <Button
                       variant="link"
                       size="sm"

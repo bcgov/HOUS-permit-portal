@@ -93,7 +93,7 @@ export const Introduction = observer(function Introduction() {
         </FormControl>
 
         <FormControl isInvalid={!!errors.projectNumber}>
-          <FormLabel>{t("overheatingCode.sections.introduction.projectNumberLabel", "Project #")}</FormLabel>
+          <FormLabel>{t("overheatingCode.sections.introduction.projectNumberLabel", "Project number")}</FormLabel>
           <Input
             {...register("projectNumber", {
               required: t(

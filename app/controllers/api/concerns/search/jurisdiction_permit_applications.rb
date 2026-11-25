@@ -15,18 +15,10 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       match: :word_start,
       fields: jurisdiction_permit_application_search_fields,
       where: jurisdiction_permit_application_where_clause,
-      page: jurisdiction_permit_application_search_params[:page],
+      page: jurisdiction_permit_application_search_params[:page].presence || 1,
       per_page:
-        (
-          if jurisdiction_permit_application_search_params[:page]
-            (
-              jurisdiction_permit_application_search_params[:per_page] ||
-                Kaminari.config.default_per_page
-            )
-          else
-            nil
-          end
-        ),
+        jurisdiction_permit_application_search_params[:per_page].presence ||
+          Kaminari.config.default_per_page,
       includes: PermitApplication::SEARCH_INCLUDES,
       scope_results: ->(relation) { policy_scope(relation) }
     }
@@ -312,12 +304,19 @@ module Api::Concerns::Search::JurisdictionPermitApplications
     and_conditions << { jurisdiction_id: @jurisdiction.id }
     and_conditions << { discarded: jurisdiction_permit_application_discarded }
 
+    permit_project_id =
+      jurisdiction_permit_application_search_params[:permit_project_id]
+
     statuses = search_filters.delete(:status)
 
     if status_filter
       and_conditions << { status: status_filter }
     elsif statuses.present?
       and_conditions << { status: statuses }
+    elsif permit_project_id.blank?
+      # Jurisdiction applications list stays a submitted queue. A project
+      # search includes new drafts so review staff can see they exist.
+      and_conditions << { status: { not: "new_draft" } }
     end
 
     unless current_user.super_admin?
@@ -343,8 +342,6 @@ module Api::Concerns::Search::JurisdictionPermitApplications
       and_conditions << { review_collaborator_user_ids: assigned }
     end
 
-    permit_project_id =
-      jurisdiction_permit_application_search_params[:permit_project_id]
     if permit_project_id.present?
       and_conditions << { permit_project_id: permit_project_id }
     end

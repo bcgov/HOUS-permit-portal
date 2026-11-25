@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { generatePath, matchPath, useLocation, useNavigate, useParams } from "react-router-dom"
+import { IJurisdiction } from "../../models/jurisdiction"
 import { useMst } from "../../setup/root"
 import { isUUID } from "../../utils/utility-functions"
 
-export const useJurisdiction = () => {
+export const useJurisdiction = (): { currentJurisdiction: IJurisdiction | null; error: Error | undefined } => {
   const { jurisdictionId } = useParams()
   const navigate = useNavigate()
   const { pathname } = useLocation()

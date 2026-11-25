@@ -28,7 +28,7 @@ export const SectionsDisplay = observer(function SectionsDisplay(props: IProps) 
 interface ISectionDisplayProps {
   section: IDenormalizedRequirementTemplateSection
   isCollapsedAll?: boolean
-  setSectionRef: (el: HTMLElement, id: string) => void
+  setSectionRef: (el: HTMLElement | null, id: string) => void
   scrollToId?: string
   formScrollToId: (recordId: string) => string
   renderEdit?: (props: { denormalizedRequirementBlock: IDenormalizedRequirementBlock }) => JSX.Element

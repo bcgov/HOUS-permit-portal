@@ -34,6 +34,7 @@ export const FlashMessageModel = types
       isClosable: boolean = true,
       position: ToastPositionWithLogical = "top"
     ) {
+      // Title-only toasts stay hidden; pass the user-facing copy as description.
       self.isVisible = !!description
 
       self.status = status

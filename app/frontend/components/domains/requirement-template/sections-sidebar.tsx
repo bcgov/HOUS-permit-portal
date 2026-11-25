@@ -2,6 +2,7 @@ import { Box, Button, Divider, Heading, HeadingProps, HStack, Stack, Text } from
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
+import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { IDenormalizedRequirementTemplateSection } from "../../../types/types"
 
 interface IProps {
@@ -30,13 +31,13 @@ export const SectionsSidebar = observer(function SectionsSidebar({
       id="sections-sidebar"
       as={"section"}
       w={"sidebar.width"}
-      h="calc(100vh) "
+      h="calc(100vh - var(--app-navbar-offset))"
       bg="greys.white"
       borderRight={"1px solid"}
       borderColor={"border.light"}
       boxShadow={"elevations.elevation01"}
       position="sticky"
-      top="0"
+      {...stickyBelowNavBar()}
       zIndex="1"
       float="left"
     >
@@ -58,7 +59,15 @@ export const SectionsSidebar = observer(function SectionsSidebar({
         )}
       </HStack>
 
-      <Stack w={"full"} h="calc( 100vh - 76px)" overflow={"auto"} spacing={4} pt={2} pb={80} alignItems={"flex-start"}>
+      <Stack
+        w={"full"}
+        h="calc(100vh - 76px - var(--app-navbar-offset))"
+        overflow={"auto"}
+        spacing={4}
+        pt={2}
+        pb={80}
+        alignItems={"flex-start"}
+      >
         {sections?.map((section, index) => {
           const isHighlightedSection = sectionIdToHighlight === section.id
           return (

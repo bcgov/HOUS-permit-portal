@@ -42,6 +42,8 @@ type TProps = {
   isCollapsedAll?: boolean
   renderEdit?: () => JSX.Element
   autoOpenEdit?: boolean
+  autoOpenRequirementCode?: string
+  onAutoOpenConsumed?: () => void
   requirementBlockCustomization?: IRequirementBlockCustomization
   hideElectiveField?: (requirementBlockId: string, requirement: IDenormalizedRequirement) => boolean
   isEditable?: boolean
@@ -54,6 +56,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
   isCollapsedAll,
   renderEdit,
   autoOpenEdit,
+  autoOpenRequirementCode,
+  onAutoOpenConsumed,
   requirementBlockCustomization,
   hideElectiveField,
   ...accordionProps
@@ -114,7 +118,10 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
             pr={3}
             display={"flex"}
             justifyContent={"space-between"}
-            onClick={onToggle}
+            onClick={(e) => {
+              if (!(e.currentTarget as HTMLElement).contains(e.target as Node)) return
+              onToggle()
+            }}
           >
             <HStack spacing={4}>
               <Box fontWeight={700} fontSize={"base"}>
@@ -156,6 +163,8 @@ export const RequirementBlockAccordion = observer(function RequirementBlockAccor
                   isEditable={isEditable}
                   requirementBlock={requirementBlock}
                   autoOpen={autoOpenEdit}
+                  autoOpenRequirementCode={autoOpenRequirementCode}
+                  onAutoOpenConsumed={onAutoOpenConsumed}
                   triggerButtonProps={{
                     color: "text.primary",
                     textDecoration: "none",

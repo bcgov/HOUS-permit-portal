@@ -169,39 +169,38 @@ class Part9StepCode < StepCode
     summary =
       checklist.building_characteristics_summary ||
         checklist.create_building_characteristics_summary
-    update_attrs =
-      merge_building_characteristics_summary_attrs(summary, generated_attrs)
-    summary.update!(update_attrs) if update_attrs.present?
+    # Re-import replaces H2K-mapped fields so a new file overwrites prior values
+    # (including manual edits on those fields). other_lines are not H2K-mapped and
+    # are left alone.
+    summary.update!(
+      replace_building_characteristics_summary_attrs(generated_attrs)
+    )
   end
 
-  def merge_building_characteristics_summary_attrs(summary, generated_attrs)
+  def replace_building_characteristics_summary_attrs(generated_attrs)
     BUILDING_CHARACTERISTICS_LINE_KEYS
-      .each_with_object({}) do |key, attrs|
-        generated_lines = generated_attrs[key]
-        next if generated_lines.blank?
-
-        attrs[key] = merge_characteristic_lines(
-          summary.public_send(key),
-          generated_lines
-        )
+      .index_with do |key|
+        characteristic_array(generated_attrs[key]).reject do |line|
+          blank_characteristic_line?(line)
+        end
       end
       .tap do |attrs|
-        attrs[:windows_glazed_doors] = merge_windows_glazed_doors(
-          summary.windows_glazed_doors,
-          generated_attrs[:windows_glazed_doors]
-        )
-        attrs[:airtightness] = merge_characteristic_hash(
-          summary.airtightness,
+        windows = generated_attrs[:windows_glazed_doors]
+        attrs[:windows_glazed_doors] = if windows.present?
+          characteristic_hash(windows)
+        else
+          { lines: [] }
+        end
+        attrs[:airtightness] = characteristic_hash(
           generated_attrs[:airtightness]
         )
-        attrs[:fossil_fuels] = merge_characteristic_hash(
-          summary.fossil_fuels,
+        attrs[:fossil_fuels] = characteristic_hash(
           generated_attrs[:fossil_fuels]
         )
-        attrs.compact!
       end
   end
 
+  # Still used to combine mappings from multiple H2K data entries before replace.
   def merge_building_characteristics_attrs(existing_attrs, new_attrs)
     merged_attrs = existing_attrs.deep_dup
     BUILDING_CHARACTERISTICS_LINE_KEYS.each do |key|
@@ -259,15 +258,6 @@ class Part9StepCode < StepCode
           generated_attrs["performance_type"],
       lines: lines
     }.compact
-  end
-
-  def merge_characteristic_hash(existing, generated)
-    return if generated.blank?
-
-    existing_attrs = characteristic_hash(existing)
-    return generated if existing_attrs.blank?
-
-    existing_attrs
   end
 
   def characteristic_array(value)

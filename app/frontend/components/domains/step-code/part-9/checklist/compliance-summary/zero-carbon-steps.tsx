@@ -19,15 +19,14 @@ export const ZeroCarbonSteps = function ZeroCarbonSteps({
   offset = 0,
 }: IProps) {
   const { stepCodeStore } = useMst()
-  const steps = stepCodeStore.getZeroCarbonStepOptions()
-  const numSteps = steps.length - offset
+  const steps = stepCodeStore.getZeroCarbonStepOptions().slice(offset)
+  const numSteps = steps.length
 
   return (
     <Flex align="end" w="full">
-      {[...Array(numSteps).keys()].map((stepOffset) => {
-        const step = Number(steps[stepOffset]) + offset
-        const isRequiredStep = step == Number(requiredStep)
-        const isAchievedStep = step == Number(achievedStep)
+      {steps.map((step, stepOffset) => {
+        const isRequiredStep = Number(step) === Number(requiredStep)
+        const isAchievedStep = Number(step) === Number(achievedStep)
         let height = 38
         switch (stepOffset) {
           case 0:

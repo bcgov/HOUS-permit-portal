@@ -31,7 +31,9 @@ class PermitProject < ApplicationRecord
   validates :title, presence: true
   validates :number, presence: true, on: :update
   validate :sandbox_belongs_to_jurisdiction
-  validate :owner_cannot_be_jurisdiction_staff_without_sandbox
+  validate :staff_owned_live_must_be_discarded
+  # Discard#undiscard uses update_attribute and skips validations.
+  before_undiscard :reject_undiscard_if_staff_owned_live
   before_validation :set_default_title
 
   before_validation :assign_unique_number, if: -> { number.blank? }
@@ -41,6 +43,7 @@ class PermitProject < ApplicationRecord
   delegate :name, to: :owner, prefix: true
 
   after_commit :reindex
+  after_commit :send_state_changed_webhook, if: :state_changed_for_external_api?
   after_commit :broadcast_jurisdiction_projects_count_update,
                if: :should_broadcast_projects_count_update?
 
@@ -64,6 +67,10 @@ class PermitProject < ApplicationRecord
 
   def public_record?
     permit_applications.any?(&:public_record?)
+  end
+
+  def staff_owned_live?
+    sandbox_id.blank? && owner&.jurisdiction_staff?
   end
 
   def total_permits_count
@@ -198,6 +205,13 @@ class PermitProject < ApplicationRecord
           .includes(:requirement_template)
           .filter_map { |pa| pa.requirement_template&.id }
           .uniq,
+      inbox_requirement_template_ids:
+        permit_applications
+          .kept
+          .submitted_at_least_once
+          .includes(:requirement_template)
+          .filter_map { |pa| pa.requirement_template&.id }
+          .uniq,
       total_permits_count: permit_applications.kept.count,
       new_draft_count: permit_applications.kept.where(status: :new_draft).count,
       newly_submitted_count:
@@ -232,16 +246,6 @@ class PermitProject < ApplicationRecord
     full_address.split(",").first
   end
 
-  # Reviewer inbox preview: newest visible-to-reviewer applications (not owner-scoped).
-  def recent_inbox_permit_applications(limit: 3)
-    permit_applications
-      .kept
-      .includes(:submitter, :template_version, requirement_template: :taggings)
-      .select(&:visible_to_reviewers?)
-      .sort_by(&:updated_at)
-      .last(limit)
-  end
-
   def recent_permit_applications(user = nil)
     return PermitApplication.none if user.nil?
 
@@ -252,23 +256,15 @@ class PermitProject < ApplicationRecord
           :submission_versions,
           :permit_collaborations,
           :submitter,
+          :created_by,
           :template_version,
           requirement_template: :taggings
         )
         .order(updated_at: :desc)
-    return scope.limit(3) if owner_id == user.id
 
-    scope
-      .joins(permit_collaborations: :collaborator)
-      .where(
-        collaborators: {
-          user_id: user.id
-        },
-        permit_collaborations: {
-          discarded_at: nil
-        }
-      )
-      .distinct
+    PermitApplicationPolicy::Scope
+      .new(UserContext.new(user, sandbox), scope)
+      .resolve
       .limit(3)
   end
 
@@ -370,6 +366,34 @@ class PermitProject < ApplicationRecord
 
   private
 
+  def send_state_changed_webhook
+    payload = {
+      "permit_project_id" => id,
+      "state" => state,
+      "state_label" =>
+        Constants::ExternalApi::PROJECT_STATE_LABELS.fetch(state),
+      "occurred_at" => updated_at.to_i * 1000
+    }
+
+    jurisdiction
+      .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where(api_version: "v2")
+      .where.not(webhook_url: [nil, ""])
+      .each do |external_api_key|
+        PermitWebhookJob.perform_async(
+          external_api_key.id,
+          Constants::Webhooks::Events::PermitProject::STATE_CHANGED,
+          payload
+        )
+      end
+  end
+
+  def state_changed_for_external_api?
+    saved_change_to_state? &&
+      permit_applications.kept.submitted_at_least_once.exists?
+  end
+
   # Recompute the jurisdiction-wide unviewed projects badge whenever a change
   # could affect membership in the set counted by
   # Jurisdiction#unviewed_projects_count:
@@ -394,16 +418,20 @@ class PermitProject < ApplicationRecord
     )
   end
 
-  def owner_cannot_be_jurisdiction_staff_without_sandbox
-    return unless owner&.jurisdiction_staff?
-    return if sandbox_id.present?
+  def staff_owned_live_must_be_discarded
+    return unless staff_owned_live?
+    return if discarded?
 
     errors.add(
-      :owner,
+      :base,
       I18n.t(
-        "activerecord.errors.models.permit_project.attributes.owner.review_staff_requires_sandbox"
+        "activerecord.errors.models.permit_project.staff_owned_live_must_be_discarded"
       )
     )
+  end
+
+  def reject_undiscard_if_staff_owned_live
+    throw :abort if staff_owned_live?
   end
 
   def compute_review_collaborator_user_ids
@@ -449,6 +477,7 @@ class PermitProject < ApplicationRecord
   end
 
   def set_default_title
+    self.title = title&.strip
     self.title = shortened_address if title.blank? && full_address.present?
   end
 

@@ -10,6 +10,7 @@ import {
   Grid,
   GridItem,
   Tag,
+  Text,
 } from "@chakra-ui/react"
 import React from "react"
 import { useTranslation } from "react-i18next"
@@ -62,6 +63,13 @@ export const StepCodeRequirementsTable: React.FC<IStepCodeRequirementsTableProps
                           {currentJurisdiction.zeroCarbonLevelTranslation(ptrs.zeroCarbonStepRequired)}{" "}
                         </Tag>
                       </GridItem>
+                      {ptrs.description?.trim() ? (
+                        <GridItem colSpan={3}>
+                          <Text fontSize="sm" color="text.secondary">
+                            {ptrs.description.trim()}
+                          </Text>
+                        </GridItem>
+                      ) : null}
                       {i !== part9RequiredSteps.length - 1 && (
                         <GridItem
                           colSpan={3}

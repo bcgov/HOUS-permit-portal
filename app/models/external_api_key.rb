@@ -1,6 +1,8 @@
 class ExternalApiKey < ApplicationRecord
   include ValidateUrlAttributes
 
+  API_VERSIONS = %w[v1 v2].freeze
+
   has_many :integration_mapping_notifications,
            as: :notifiable,
            dependent: :destroy
@@ -32,6 +34,8 @@ class ExternalApiKey < ApplicationRecord
   validates :name, presence: true, uniqueness: { scope: :jurisdiction_id }
   validates :connecting_application, presence: true
   validates :expired_at, presence: true
+  validates :api_version, inclusion: { in: API_VERSIONS }
+  validate :api_version_immutable, on: :update
   validates :notification_email,
             format: {
               with: URI::MailTo::EMAIL_REGEXP
@@ -81,6 +85,12 @@ class ExternalApiKey < ApplicationRecord
   end
 
   private
+
+  def api_version_immutable
+    return unless will_save_change_to_api_version?
+
+    errors.add(:api_version, "cannot be changed after the key is created")
+  end
 
   def clear_expiration_notifications_if_expiry_changed
     # If expired_at date is modified, clear out any previously sent notifications

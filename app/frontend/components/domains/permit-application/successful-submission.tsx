@@ -4,6 +4,8 @@ import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
+import { useMst } from "../../../setup/root"
+import { handleScrollToTop } from "../../../utils/utility-functions"
 import { ErrorScreen } from "../../shared/base/error-screen"
 import { LoadingScreen } from "../../shared/base/loading-screen"
 import { ContactCard } from "../../shared/jurisdiction/contact-card"
@@ -13,12 +15,15 @@ import SandboxHeader from "../../shared/sandbox/sandbox-header"
 export const SuccessfulSubmissionScreen = observer(() => {
   const { t } = useTranslation()
   const { currentPermitApplication, error } = usePermitApplication()
+  const { permitProjectStore } = useMst()
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
 
-  const { jurisdiction, number } = currentPermitApplication
+  const { jurisdiction, number, projectId } = currentPermitApplication
   const { qualifiedName, primaryContact } = jurisdiction
+  const returnProjectId = projectId || permitProjectStore.currentPermitProject?.id
+  const returnTo = returnProjectId ? `/projects/${returnProjectId}/applications` : "/"
   return (
     <Container maxW="container.lg">
       <Flex direction="column" align="center" my={24} gap={8}>
@@ -41,9 +46,9 @@ export const SuccessfulSubmissionScreen = observer(() => {
             src="/images/timeline/timeline-graphic-4.png"
             alt="graphic for timeline"
             w="950px"
-            h="425px"
+            h="475px"
             bg="semantic.infoLight"
-            objectFit="cover"
+            objectFit="contain"
           />
           <Divider borderColor="greys.grey02" />
           <Flex direction="column" gap={4}>
@@ -57,8 +62,8 @@ export const SuccessfulSubmissionScreen = observer(() => {
           </Flex>
         </Flex>
 
-        <RouterLinkButton to={`/`} variant="primary">
-          {t("ui.returnHome")}
+        <RouterLinkButton to={returnTo} variant="primary" onClick={handleScrollToTop}>
+          {t("ui.returnToProject")}
         </RouterLinkButton>
       </Flex>
     </Container>

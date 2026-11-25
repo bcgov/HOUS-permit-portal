@@ -1,6 +1,8 @@
 import Uppy, { UppyFile } from "@uppy/core"
 import XHRUpload from "@uppy/xhr-upload"
 import { useEffect, useRef, useState } from "react"
+import { useMst } from "../setup/root"
+import { EFlashMessageStatus } from "../types/enums"
 import { getCsrfToken } from "../utils/utility-functions"
 
 interface UseUppyTransientProps {
@@ -33,6 +35,7 @@ const useUppyTransient = ({
   allowedFileTypes,
   endpoint,
 }: UseUppyTransientProps) => {
+  const { uiStore } = useMst()
   const callbacks = useRef({
     onUploadSuccess,
     onUploadError,
@@ -95,6 +98,20 @@ const useUppyTransient = ({
         callbacks.current.onUploadError?.(file, error, response)
       })
   )
+
+  useEffect(() => {
+    const onRestrictionFailed = (_file: UppyFile<{}, {}> | undefined, error: Error) => {
+      if (error?.message) {
+        uiStore.flashMessage.show(EFlashMessageStatus.error, null, error.message, 5000)
+      }
+    }
+
+    uppy.on("restriction-failed", onRestrictionFailed)
+    return () => {
+      uppy.off("restriction-failed", onRestrictionFailed)
+    }
+  }, [uppy, uiStore])
+
   return uppy
 }
 

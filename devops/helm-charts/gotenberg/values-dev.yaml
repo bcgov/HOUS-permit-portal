@@ -1,0 +1,8 @@
+# Conversion settings inherit from values.yaml; CPU request overridden here.
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 30m
+  limits:
+    memory: 2Gi

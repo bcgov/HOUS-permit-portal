@@ -1,32 +1,15 @@
-import { Box, Flex, GridItem, Text } from "@chakra-ui/react"
+import { Box, Flex, Text } from "@chakra-ui/react"
 import { observer } from "mobx-react-lite"
 import React from "react"
 import { useTranslation } from "react-i18next"
 import { EReportingColumns } from "../../../../types/enums"
 import { GridHeader } from "../../../shared/grid/grid-header"
 
-interface IGridHeadersProps {
-  renderFilterInput: () => React.ReactElement
-}
-
-export const GridHeaders: React.FC<IGridHeadersProps> = observer(function GridHeaders({ renderFilterInput }) {
+export const GridHeaders = observer(function GridHeaders() {
   const { t } = useTranslation()
 
   return (
     <Box display={"contents"} role={"rowgroup"}>
-      <Box display={"contents"} role={"row"}>
-        <GridItem
-          as={Flex}
-          gridColumn={`span 3`}
-          p={6}
-          bg={"greys.grey10"}
-          justifyContent={"space-between"}
-          align="center"
-        >
-          <Text role={"heading"}>{t("reporting.tableHeading")}</Text>
-          {renderFilterInput()}
-        </GridItem>
-      </Box>
       <Box display={"contents"} role={"row"}>
         {[EReportingColumns.name, EReportingColumns.description].map((field) => {
           return (

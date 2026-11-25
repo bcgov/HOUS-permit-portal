@@ -10,12 +10,16 @@ redis:
     sentinel: false
     usePasswordFiles: false # if this is enabeld it will use /opt/bitnami/redis/secrets/redis-password ---> we will instead use /vault/secrets/secrets.env which we have configured to have the password
   image:
-    registry: docker.io
-    repository: bitnami/redis
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: bb18ab-dev/redis
     tag: 7.2.4-debian-12-r9
   sentinel:
     enabled: true
     masterSet: "redisMasterSet"
+    image:
+      registry: image-registry.openshift-image-registry.svc:5000
+      repository: "bb18ab-dev/redis-sentinel"
+      tag: "7.2.4-debian-12-r7"   
     persistence:
       enabled: false
     containerPorts:

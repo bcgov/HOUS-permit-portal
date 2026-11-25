@@ -6,6 +6,8 @@ class ResourceBlueprint < Blueprinter::Base
          :description,
          :resource_type,
          :link_url,
+         :show_on_about,
+         :about_position,
          :updated_at,
          :created_at
 

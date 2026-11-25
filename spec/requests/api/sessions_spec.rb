@@ -33,22 +33,62 @@ RSpec.describe "Api::Sessions", type: :request do
     Warden::JWTAuth::TokenEncoder.new.call(payload)
   end
 
+  def with_local_password_auth(enabled:)
+    original = ENV["ENABLE_LOCAL_PASSWORD_AUTH"]
+    ENV["ENABLE_LOCAL_PASSWORD_AUTH"] = enabled ? "true" : nil
+    yield
+  ensure
+    ENV["ENABLE_LOCAL_PASSWORD_AUTH"] = original
+  end
+
   describe "POST /api/login" do
     before { stub_jwt_auth(user: user) }
 
-    it "sets session and csrf cookies on success" do
-      login_as(user)
+    context "when local password auth is enabled" do
+      around do |example|
+        with_local_password_auth(enabled: true) { example.run }
+      end
 
-      expect(response).to have_http_status(:created)
-      set_cookie = response.headers["Set-Cookie"]
-      expect(set_cookie.join("; ")).to include("access_token=")
-      expect(set_cookie.join("; ")).to include("CSRF-TOKEN=")
+      it "sets session and csrf cookies on success" do
+        login_as(user)
+
+        expect(response).to have_http_status(:created)
+        set_cookie = response.headers["Set-Cookie"]
+        expect(set_cookie.join("; ")).to include("access_token=")
+        expect(set_cookie.join("; ")).to include("CSRF-TOKEN=")
+      end
+
+      it "returns unauthorized on invalid credentials" do
+        login_as(user, password: "wrong-password")
+
+        expect(response).to have_http_status(:unauthorized)
+      end
     end
 
-    it "returns unauthorized on invalid credentials" do
-      login_as(user, password: "wrong-password")
+    context "when local password auth is disabled" do
+      around do |example|
+        with_local_password_auth(enabled: false) { example.run }
+      end
 
-      expect(response).to have_http_status(:unauthorized)
+      it "returns not found" do
+        login_as(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
+    end
+
+    context "when Rails env is production" do
+      around do |example|
+        with_local_password_auth(enabled: true) { example.run }
+      end
+
+      it "returns not found even if the env flag is set" do
+        allow(Rails.env).to receive(:production?).and_return(true)
+
+        login_as(user)
+
+        expect(response).to have_http_status(:not_found)
+      end
     end
   end
 
@@ -70,7 +110,7 @@ RSpec.describe "Api::Sessions", type: :request do
     it "returns current user when authenticated" do
       stub_jwt_auth(user: user)
 
-      login_as(user)
+      with_local_password_auth(enabled: true) { login_as(user) }
 
       get "/api/validate_token", headers: cookie_header_from_response
 
@@ -90,6 +130,41 @@ RSpec.describe "Api::Sessions", type: :request do
           }
 
       expect(response).to have_http_status(:unauthorized)
+    end
+
+    context "with an environment cookie prefix" do
+      around { |example| with_auth_cookie_prefix("hub_test_") { example.run } }
+
+      it "authenticates the current environment despite a foreign cookie appearing first" do
+        token, payload = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
+        user.on_jwt_dispatch(token, payload)
+
+        get "/api/validate_token",
+            headers: {
+              "Cookie" =>
+                "access_token=foreign-environment-token; hub_test_access_token=#{token}"
+            }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response.dig("data", "id")).to eq(user.id)
+      end
+
+      it "clears only the current environment's cookie when validation fails" do
+        get "/api/validate_token",
+            headers: {
+              "Cookie" =>
+                "access_token=foreign-environment-token; hub_test_access_token=invalid-token"
+            }
+
+        expect(response).to have_http_status(:unauthorized)
+        set_cookie = Array(response.headers["Set-Cookie"])
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_access_token=;")
+        )
+        expect(set_cookie).not_to include(
+          a_string_starting_with("access_token=")
+        )
+      end
     end
   end
 
@@ -116,6 +191,55 @@ RSpec.describe "Api::Sessions", type: :request do
           cookie.include?("id_token=")
         end
       ).to be(true)
+    end
+
+    it "returns success with app redirect when id_token is absent" do
+      get "/api/logout"
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("logout_url")).to eq("https://app.example.com")
+    end
+
+    it "revokes and clears the current environment's tokens without touching production cookies" do
+      with_auth_cookie_prefix("hub_test_") do
+        token, payload = Warden::JWTAuth::UserEncoder.new.call(user, :user, nil)
+        user.on_jwt_dispatch(token, payload)
+
+        delete "/api/logout",
+               headers: {
+                 "Cookie" =>
+                   "access_token=production-token; id_token=production-id-token; hub_test_access_token=#{token}; hub_test_id_token=test-id-token"
+               }
+
+        expect(response).to have_http_status(:ok)
+        logout_query =
+          Rack::Utils.parse_query(URI(json_response["logout_url"]).query)
+        expect(logout_query["id_token_hint"]).to eq("test-id-token")
+        expect(user.allowlisted_jwts.exists?(jti: payload["jti"])).to be(false)
+        set_cookie = Array(response.headers["Set-Cookie"])
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_access_token=;")
+        )
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_id_token=;")
+        )
+        expect(set_cookie).not_to include(
+          a_string_starting_with("access_token=")
+        )
+        expect(set_cookie).not_to include(a_string_starting_with("id_token="))
+      end
+    end
+
+    it "does not use another environment's ID token when the current token is absent" do
+      with_auth_cookie_prefix("hub_test_") do
+        get "/api/logout",
+            headers: {
+              "Cookie" => "id_token=production-id-token"
+            }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response["logout_url"]).to eq("https://app.example.com")
+      end
     end
   end
 end

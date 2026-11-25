@@ -3,12 +3,14 @@ import { observer } from "mobx-react-lite"
 import React, { useRef, useState } from "react"
 import { useTemplateVersion } from "../../../../hooks/resources/use-template-version"
 import { useMst } from "../../../../setup/root"
+import { stickyBelowNavBar } from "../../../../styles/nav-bar-offset"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { BackButton } from "../../../shared/buttons/back-button"
 import { FloatingHelpDrawer } from "../../../shared/floating-help-drawer"
 import { PermitApplicationStatusTag } from "../../../shared/permit-applications/permit-application-status-tag"
 import { RequirementForm } from "../../../shared/permit-applications/requirement-form"
+import { FeedbackTab } from "../../../shared/sentry/feedback-tab"
 import { ChecklistSideBar } from "../../permit-application/checklist-sidebar"
 
 export const TemplateVersionPreviewScreen = observer(() => {
@@ -28,7 +30,16 @@ export const TemplateVersionPreviewScreen = observer(() => {
 
   return (
     <Box as="main" id="submitter-view-permit">
-      <Flex id="permitHeader" direction="column" position="sticky" top={0} zIndex={12} ref={permitHeaderRef} h="66px">
+      <FeedbackTab />
+      <Flex
+        id="permitHeader"
+        direction="column"
+        position="sticky"
+        {...stickyBelowNavBar()}
+        zIndex={12}
+        ref={permitHeaderRef}
+        h="66px"
+      >
         <Flex
           w="full"
           px={6}

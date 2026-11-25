@@ -3,6 +3,19 @@ require "rails_helper"
 RSpec.describe SupportingDocument, type: :model do
   it { should belong_to(:permit_application) }
 
+  describe "signature dates" do
+    {
+      "2026-01-15T20:00:00Z" => "2026-01-15 12:00:00 Pacific Time",
+      "2027-01-15T20:00:00Z" => "2027-01-15 13:00:00 Pacific Time"
+    }.each do |timestamp, expected|
+      it "labels #{timestamp} as Pacific Time while preserving its local time" do
+        expect(described_class.new.formatted_signature_date(timestamp)).to eq(
+          expected
+        )
+      end
+    end
+  end
+
   describe "generated document filenames" do
     let(:permit_application) do
       instance_double("PermitApplication", id: "pa1", number: "DSQ-001-000-057")
@@ -11,6 +24,7 @@ RSpec.describe SupportingDocument, type: :model do
       instance_double(
         "SubmissionVersion",
         version_number: 1,
+        report_snapshot: nil,
         created_at: Time.zone.local(2026, 4, 29)
       )
     end

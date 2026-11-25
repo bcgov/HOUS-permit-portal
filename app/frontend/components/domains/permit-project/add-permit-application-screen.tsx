@@ -4,15 +4,19 @@ import {
   Checkbox,
   Container,
   Flex,
+  FormControl,
+  FormHelperText,
+  FormLabel,
   Heading,
   Input,
   InputGroup,
   InputLeftElement,
+  Link,
   ListItem,
   Text,
   UnorderedList,
 } from "@chakra-ui/react"
-import { CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
+import { ArrowSquareOut, CaretLeft, MagnifyingGlass } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import React, { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -21,10 +25,10 @@ import { usePermitProject } from "../../../hooks/resources/use-permit-project"
 import { useTemplateVersions } from "../../../hooks/resources/use-template-versions"
 import { ITemplateVersion } from "../../../models/template-version"
 import { useMst } from "../../../setup/root"
-import { EFlashMessageStatus } from "../../../types/enums"
+import { permitApplicationInfoPath } from "../../../utils/permit-application-info-path"
 import { groupTemplateVersionsByCategory } from "../../../utils/template-version-grouping"
-import { CustomMessageBox } from "../../shared/base/custom-message-box"
 import { ErrorScreen } from "../../shared/base/error-screen"
+import { Editor } from "../../shared/editor/editor"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import ProjectInfoRow from "../../shared/project/project-info-row"
 
@@ -44,19 +48,29 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
   const [selectedTemplateVersionIds, setSelectedTemplateVersionIds] = useState<string[]>([])
   const [query, setQuery] = useState("")
+  const [note, setNote] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const showCreationMessage = !!currentPermitProject && !currentPermitProject.isOwner
 
-  const filteredTemplates = templateVersions.filter((tv) => tv.matchesSearchQuery(query))
+  const availableTemplates = templateVersions.filter((tv) => !tv.disabledByJurisdiction)
+  const filteredTemplates = availableTemplates.filter((tv) => tv.matchesSearchQuery(query))
   const groupedTemplates = groupTemplateVersionsByCategory(filteredTemplates)
   const selectedTemplateVersions = useMemo(
-    () => templateVersions.filter((templateVersion) => selectedTemplateVersionIds.includes(templateVersion.id)),
+    () =>
+      templateVersions.filter(
+        (templateVersion) =>
+          !templateVersion.disabledByJurisdiction && selectedTemplateVersionIds.includes(templateVersion.id)
+      ),
     [selectedTemplateVersionIds, templateVersions]
   )
   const selectedTemplatesRequireProjectMeeting = selectedTemplateVersions.some(
     (templateVersion) => templateVersion.requiresProjectMeeting
   )
+  // Meeting requests are owner-only. Review staff adding permits they do not own skip this step.
   const shouldOfferProjectMeetingAfterAdd =
     selectedTemplatesRequireProjectMeeting &&
+    !!currentPermitProject?.isOwner &&
+    !currentPermitProject?.activeProjectMeeting &&
     siteConfigurationStore.projectMeetingsEnabled &&
     (currentPermitProject?.jurisdiction?.projectMeetingsEnabled ?? false)
 
@@ -71,17 +85,20 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
     try {
       setIsSubmitting(true)
-      const params = selectedTemplateVersionIds.map((templateVersionId) => ({
-        templateVersionId,
+      const params = selectedTemplateVersions.map((templateVersion) => ({
+        templateVersionId: templateVersion.id,
         jurisdictionId: currentPermitProject.jurisdiction?.id,
       }))
-      const response = await (currentPermitProject as any).bulkCreatePermitApplications(params)
+      const response = await (currentPermitProject as any).bulkCreatePermitApplications(
+        params,
+        showCreationMessage ? note : undefined
+      )
       if (response?.ok) {
         currentPermitProject.resetIsFullyLoaded()
         if (shouldOfferProjectMeetingAfterAdd) {
           const params = new URLSearchParams({
             source: "add-permits",
-            count: selectedTemplateVersionIds.length.toString(),
+            count: selectedTemplateVersions.length.toString(),
             requiresMeeting: "true",
           })
           navigate(`/projects/${currentPermitProject.id}/meetings/new?${params.toString()}`)
@@ -170,17 +187,27 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
           </Flex>
         </Box>
 
+        {showCreationMessage && (
+          <Box w={{ base: "full", md: "50%" }}>
+            <Heading as="h2" variant="yellowline">
+              {t("permitProject.addPermits.messageForSubmitter.heading")}
+            </Heading>
+            <FormControl>
+              <FormLabel>{t("permitProject.addPermits.messageForSubmitter.label")}</FormLabel>
+              <Editor
+                htmlValue={note}
+                onChange={setNote}
+                shouldContainRichTextToolbarItem={(item) => item !== "image"}
+              />
+              <FormHelperText>{t("permitProject.addPermits.messageForSubmitter.helper")}</FormHelperText>
+            </FormControl>
+          </Box>
+        )}
+
         <Box>
           <Heading as="h2" variant="yellowline">
             {t("permitProject.addPermits.permits.heading")}
           </Heading>
-
-          <CustomMessageBox
-            status={EFlashMessageStatus.info}
-            title={t("permitProject.addPermits.bcbcPartHeading")}
-            description={t("permitProject.addPermits.bcbcPart")}
-            mb={6}
-          />
 
           {/* Search bar */}
           <InputGroup mb={6} maxW="full">
@@ -192,13 +219,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           {/* Action controls above the template list */}
           <Flex w="full" gap={4} mb={4}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersions.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
               onClick={onSubmit}
-              count={selectedTemplateVersionIds.length}
-              disabled={isSubmitting || selectedTemplateVersionIds.length === 0 || isLoading}
+              count={selectedTemplateVersions.length}
+              disabled={isSubmitting || selectedTemplateVersions.length === 0 || isLoading}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>
@@ -228,8 +255,9 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                           transition="all 0.2s ease-in-out"
                           _hover={{ bg: "hover.blue" }}
                           cursor="pointer"
+                          display="flex"
                         >
-                          <Flex direction="column" justify="space-between" align="start" gap={4}>
+                          <Flex direction="column" justify="space-between" align="start" gap={4} w="full">
                             <Box>
                               <Heading as="h4" fontSize="lg" mb={2}>
                                 {tv.denormalizedTemplateJson?.nickname || tv.label}
@@ -238,23 +266,45 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
                                 {tv.denormalizedTemplateJson?.description}
                               </Text>
                             </Box>
-                            <Flex
-                              align="center"
-                              gap={2}
-                              border="1px solid"
-                              borderColor={checked ? "theme.blueAlt" : "border.light"}
-                              bg="white"
-                              px={4}
-                              py={2}
-                              borderRadius="md"
-                              alignSelf="flex-end"
-                            >
-                              <Checkbox
-                                isChecked={checked}
-                                onChange={() => toggleSelection(tv.id)}
-                                pointerEvents="none"
-                              />
-                              <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+                            <Flex w="full" align="flex-end" justify="space-between" gap={4}>
+                              {tv.explainerPublished ? (
+                                <Link
+                                  href={permitApplicationInfoPath(
+                                    tv.requirementTemplateId,
+                                    currentPermitProject?.jurisdiction?.id
+                                  )}
+                                  isExternal
+                                  onClick={(event) => event.stopPropagation()}
+                                  fontSize="sm"
+                                  color="text.link"
+                                  textDecoration="underline"
+                                  display="inline-flex"
+                                  alignItems="center"
+                                >
+                                  {t("requirementTemplate.explainer.publicPage.viewPermitInformation")}
+                                  <ArrowSquareOut size={16} />
+                                </Link>
+                              ) : (
+                                <Box />
+                              )}
+                              <Flex
+                                align="center"
+                                gap={2}
+                                border="1px solid"
+                                borderColor={checked ? "theme.blueAlt" : "border.light"}
+                                bg="white"
+                                px={4}
+                                py={2}
+                                borderRadius="md"
+                                flexShrink={0}
+                              >
+                                <Checkbox
+                                  isChecked={checked}
+                                  onChange={() => toggleSelection(tv.id)}
+                                  pointerEvents="none"
+                                />
+                                <Text fontWeight="medium">{t("permitProject.addPermits.addToProject")}</Text>
+                              </Flex>
                             </Flex>
                           </Flex>
                         </Box>
@@ -268,13 +318,13 @@ export const AddPermitApplicationToProjectScreen = observer(() => {
 
           {/* Action controls below the template list */}
           <Flex w="full" gap={4} mt={8}>
-            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersionIds.length === 0}>
+            <Button variant="secondary" onClick={clearSelection} isDisabled={selectedTemplateVersions.length === 0}>
               {t("ui.clearSelection")}
             </Button>
             <AddPermitsFAB
               onClick={onSubmit}
-              count={selectedTemplateVersionIds.length}
-              disabled={isSubmitting || selectedTemplateVersionIds.length === 0 || isLoading}
+              count={selectedTemplateVersions.length}
+              disabled={isSubmitting || selectedTemplateVersions.length === 0 || isLoading}
               label={t("permitProject.addPermits.title")}
             />
           </Flex>

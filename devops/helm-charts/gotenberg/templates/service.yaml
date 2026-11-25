@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.appName | quote }}
+  labels:
+    app: {{ .Values.appName | quote }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+  selector:
+    app: {{ .Values.appName | quote }}
+    deployment: {{ .Values.appName | quote }}

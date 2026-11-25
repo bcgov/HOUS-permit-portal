@@ -47,6 +47,13 @@ spec:
           imagePullPolicy: Always
           name: "{{ $.Values.appName }}-{{ .process }}"
           {{- if eq .process "web" }}
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - "sleep {{ $.Values.web.preStopDelaySeconds }}"
           volumeMounts:
             - name: log-volume
               mountPath: /app/log
@@ -90,6 +97,10 @@ spec:
       securityContext: {}
       serviceAccount: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
       serviceAccountName: {{ $.Values.OPENSHIFT_NAMESPACE }}-vault
+      {{- if eq .process "web" }}
+      terminationGracePeriodSeconds: {{ $.Values.web.terminationGracePeriodSeconds }}
+      {{- else }}
       terminationGracePeriodSeconds: 30
+      {{- end }}
 ---
  {{- end }}

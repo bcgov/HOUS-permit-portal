@@ -1,5 +1,6 @@
+import { brand } from "../../brand"
 export const fonts = {
-  body: "BC Sans",
-  heading: "BC Sans",
-  mono: "BC Sans",
+  body: brand.fontFamily,
+  heading: brand.fontFamily,
+  mono: brand.fontFamily,
 }

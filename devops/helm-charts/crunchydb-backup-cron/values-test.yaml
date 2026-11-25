@@ -1,0 +1,9 @@
+cronjob:
+  enabled: true
+  schedule: "0 2 * * *"   # Run every day at 2 AM
+  image: bitnamilegacy/minio-client:2025.7.21-debian-12-r3
+  secretName: s3-creds
+  bucket: "<REDACTED>"
+  basePath: "habackup"
+  endpoint: "https://<REDACTED>"
+  retentionSeconds: 2592000

@@ -241,6 +241,9 @@ class Api::JurisdictionsController < Api::ApplicationController
                    nil,
                    {
                      blueprint: ProjectMeetingBlueprint,
+                     blueprint_opts: {
+                       view: :base
+                     },
                      meta: @jurisdiction_project_meeting_meta
                    }
   end
@@ -302,15 +305,17 @@ class Api::JurisdictionsController < Api::ApplicationController
         department
         title
         phone
+        extension
         cell
         email
       ],
-      submission_contacts_attributes: %i[id email title default type _destroy],
+      submission_contacts_attributes: %i[id email title type _destroy],
       jurisdiction_step_requirements_attributes: %i[
         id
         default
         energy_step_required
         zero_carbon_step_required
+        description
         _destroy
       ],
       part3_occupancy_required_steps_attributes: %i[
@@ -318,6 +323,7 @@ class Api::JurisdictionsController < Api::ApplicationController
         occupancy_key
         energy_step_required
         zero_carbon_step_required
+        description
         _destroy
       ],
       jurisdiction_heating_degree_days_attributes: %i[
@@ -334,6 +340,8 @@ class Api::JurisdictionsController < Api::ApplicationController
         :description,
         :resource_type,
         :link_url,
+        :show_on_about,
+        :about_position,
         :_destroy,
         resource_document_attributes: [
           :id,

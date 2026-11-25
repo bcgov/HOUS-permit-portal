@@ -40,8 +40,8 @@ class Api::StepCodesController < Api::ApplicationController
       # disallow updating Step Code if it's tied to a permit application and the user is not the submitter (for now)
       if step_code_params[:permit_application_id].present?
         target_pa =
-          PermitApplication.find_by(
-            id: step_code_params[:permit_application_id]
+          ensure_in_sandbox!(
+            PermitApplication.find(step_code_params[:permit_application_id])
           )
         unless StepCodePolicy.new(pundit_user, @step_code).reassign_to?(
                  target_pa
@@ -149,10 +149,49 @@ class Api::StepCodesController < Api::ApplicationController
     send_data csv_data, type: "text/csv"
   end
 
+  def download_part_9_step_code_checklists_csv
+    authorize :step_code, :download_part_9_step_code_checklists_csv?
+
+    service =
+      StepCodeChecklistDumpService.new(
+        range: Reports::Range.parse(params[:range])
+      )
+    send_data service.part_9_csv,
+              type: "text/csv",
+              filename: service.csv_filename,
+              disposition: "attachment"
+  end
+
+  def download_part_3_step_code_checklists_csv
+    authorize :step_code, :download_part_3_step_code_checklists_csv?
+
+    service =
+      StepCodeChecklistDumpService.new(
+        range: Reports::Range.parse(params[:range])
+      )
+    send_data service.part_3_csv,
+              type: "text/csv",
+              filename: service.part_3_csv_filename,
+              disposition: "attachment"
+  end
+
+  def download_step_code_file_uploads_zip
+    authorize :step_code, :download_step_code_file_uploads_zip?
+
+    service =
+      StepCodeFileUploadZipService.new(
+        range: Reports::Range.parse(params[:range])
+      )
+    send_data service.zip,
+              type: "application/zip",
+              filename: service.zip_filename,
+              disposition: "attachment"
+  end
+
   private
 
   def set_step_code
-    @step_code = StepCode.find(params[:id])
+    @step_code = ensure_in_sandbox!(StepCode.find(params[:id]))
   end
 
   def step_code_metrics_params

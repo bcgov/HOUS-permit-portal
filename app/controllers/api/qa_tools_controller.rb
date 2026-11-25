@@ -99,6 +99,10 @@ class Api::QaToolsController < Api::ApplicationController
       current_user: current_user
     ).call
 
+    if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
+      AutomatedCompliance::AutopopulateJob.perform_async(@permit_application.id)
+    end
+
     render_success @permit_application,
                    "qa_tools.autofill_permit_application_success",
                    {
@@ -132,15 +136,16 @@ class Api::QaToolsController < Api::ApplicationController
   end
 
   def set_permit_application
-    @permit_application = PermitApplication.find(params[:id])
+    @permit_application =
+      ensure_in_sandbox!(PermitApplication.find(params[:id]))
   end
 
   def set_part_3_step_code
-    @step_code = Part3StepCode.find(params[:id])
+    @step_code = ensure_in_sandbox!(Part3StepCode.find(params[:id]))
   end
 
   def set_part_9_step_code
-    @step_code = Part9StepCode.find(params[:id])
+    @step_code = ensure_in_sandbox!(Part9StepCode.find(params[:id]))
   end
 
   def qa_full_permit_project_params

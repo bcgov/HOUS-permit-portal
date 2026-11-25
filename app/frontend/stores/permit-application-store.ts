@@ -22,9 +22,9 @@ import {
 import {
   IPermitApplicationComplianceUpdate,
   IPermitApplicationSearchFilters,
+  IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
   IUserPushPayload,
-  TCreatePermitApplicationFormData,
   TSearchParams,
 } from "../types/types"
 import { convertResourceArrayToRecord, setQueryParam, startBlobDownload } from "../utils/utility-functions"
@@ -68,7 +68,6 @@ export const PermitApplicationStoreModel = types
     getProjectPermitApplicationSortColumnHeader(field: EProjectPermitApplicationSortFields) {
       const map = {
         [EProjectPermitApplicationSortFields.permit]: t("permitProject.overview.permit"),
-        [EProjectPermitApplicationSortFields.applicationNickname]: t("permitProject.overview.applicationNickname"),
         [EProjectPermitApplicationSortFields.assignedTo]: t("permitProject.overview.assignedTo"),
         [EProjectPermitApplicationSortFields.permitApplicationNumber]: t(
           "permitProject.overview.permitApplicationNumber"
@@ -189,13 +188,12 @@ export const PermitApplicationStoreModel = types
       )
 
       self.rootStore.collaboratorStore.mergeUpdateAll(
-        R.pipe(
-          R.map(R.prop("permitCollaborations")),
-          R.reject(R.isNil),
-          R.flatten,
-          R.map(R.prop("collaborator")),
-          R.uniqBy((c: ICollaborator) => c.id)
-        )(permitApplicationsData),
+        R.uniqBy(
+          (collaborator: ICollaborator) => collaborator.id,
+          permitApplicationsData.flatMap((application: { permitCollaborations?: { collaborator: ICollaborator }[] }) =>
+            (application.permitCollaborations ?? []).map((collaboration) => collaboration.collaborator)
+          )
+        ),
         "collaboratorMap"
       )
 
@@ -307,6 +305,7 @@ export const PermitApplicationStoreModel = types
         submittedAt: overrides.submittedAt || null,
         resubmittedAt: overrides.resubmittedAt || null,
         revisionsRequestedAt: overrides.revisionsRequestedAt || null,
+        issuedAt: overrides.issuedAt || null,
         selectedTabIndex: overrides.selectedTabIndex ?? 0,
         createdAt: overrides.createdAt || new Date(),
         updatedAt: overrides.updatedAt || new Date(),
@@ -317,8 +316,10 @@ export const PermitApplicationStoreModel = types
         zipfileSize: overrides.zipfileSize || null,
         zipfileName: overrides.zipfileName || null,
         zipfileUrl: overrides.zipfileUrl || null,
+        selectiveZipResult: overrides.selectiveZipResult || null,
         referenceNumber: overrides.referenceNumber || null,
         missingPdfs: overrides.missingPdfs || null,
+        reportGenerationIssues: overrides.reportGenerationIssues || [],
         isFullyLoaded: overrides.isFullyLoaded ?? false,
         isDirty: overrides.isDirty ?? false,
         isLoading: overrides.isLoading ?? false,
@@ -347,14 +348,6 @@ export const PermitApplicationStoreModel = types
     },
   }))
   .actions((self) => ({
-    createPermitApplication: flow(function* (formData: TCreatePermitApplicationFormData) {
-      const { ok, data: response } = yield self.environment.api.createPermitApplication(formData)
-      if (ok && response.data) {
-        self.mergeUpdate(response.data, "permitApplicationMap")
-        return response.data
-      }
-      return false
-    }),
     // Action to remove a PermitApplication
     removePermitApplication(id: string) {
       self.permitApplicationMap.delete(id)
@@ -417,12 +410,17 @@ export const PermitApplicationStoreModel = types
           self.permitApplicationMap
             .get(payloadData?.id)
             ?.setFormattedComplianceData(payloadData?.formattedComplianceData)
+          self.permitApplicationMap.get(payloadData?.id)?.setDigitalSealChecks(payloadData?.digitalSealChecks)
           document.dispatchEvent(event)
           break
         case EPermitApplicationSocketEventTypes.updateSupportingDocuments:
           payloadData = payload.data as IPermitApplicationSupportingDocumentsUpdate
 
           self.permitApplicationMap.get(payloadData?.id)?.handleSocketSupportingDocsUpdate(payloadData)
+          break
+        case EPermitApplicationSocketEventTypes.selectiveZipReady:
+          payloadData = payload.data as IPermitApplicationSelectiveZipReady
+          self.permitApplicationMap.get(payloadData?.id)?.handleSocketSelectiveZipReady(payloadData)
           break
         case EPermitApplicationSocketEventTypes.updatePermitBlockStatus:
           payloadData = payload.data as IPermitBlockStatus

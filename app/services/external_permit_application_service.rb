@@ -1,8 +1,9 @@
 class ExternalPermitApplicationService
-  attr_accessor :permit_application
+  attr_accessor :permit_application, :submission_version
 
-  def initialize(permit_application)
+  def initialize(permit_application, submission_version: nil)
     self.permit_application = permit_application
+    self.submission_version = submission_version
   end
 
   # This method will format the submission data for external use, such as by third party integrators.
@@ -21,13 +22,10 @@ class ExternalPermitApplicationService
   #                 }>>
   #   }>
   def formatted_submission_data_for_external_use
-    unless self.permit_application.submission_data.present? &&
-             self.permit_application.submission_data["data"].present?
-      return {}
-    end
+    data = source_submission_data
+    return {} unless data.present? && data["data"].present?
 
-    cloned_submission_data =
-      self.permit_application.submission_data["data"].deep_dup
+    cloned_submission_data = data["data"].deep_dup
 
     # formats single_contact submissions into array of contact objects, similar to the multi_contact submissions
     process_single_contact_submission_data_to_common_format!(
@@ -159,6 +157,10 @@ class ExternalPermitApplicationService
   end
 
   private
+
+  def source_submission_data
+    submission_version&.submission_data || permit_application.submission_data
+  end
 
   # single_contact submissions are not formatted in the same way as multi_contact submissions.
   # The original submission data store's each single_contact properties as separate key value pairs.
@@ -314,12 +316,12 @@ class ExternalPermitApplicationService
   def form_remaining_energy_step_code_submission_data
     return nil unless permit_application.present?
 
-    latest_submission_version = permit_application.latest_submission_version
+    version = submission_version || permit_application.latest_submission_version
 
-    return nil unless latest_submission_version.present?
+    return nil unless version.present?
 
     checklist_document =
-      latest_submission_version.supporting_documents.find_by(
+      version.supporting_documents.find_by(
         data_key: PermitApplication::CHECKLIST_PDF_DATA_KEY
       )
 

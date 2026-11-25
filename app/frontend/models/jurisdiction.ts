@@ -5,7 +5,13 @@ import { withEnvironment } from "../lib/with-environment"
 import { withMerge } from "../lib/with-merge"
 import { withRootStore } from "../lib/with-root-store"
 import { IExternalApiKeyParams } from "../types/api-request"
-import { EEnergyStep, EJurisdictionExternalApiState, EPreCheckServicePartner, EZeroCarbonStep } from "../types/enums"
+import {
+  EEnergyStep,
+  EJurisdictionExternalApiState,
+  EPreCheckServicePartner,
+  ESubmissionContactClass,
+  EZeroCarbonStep,
+} from "../types/enums"
 import {
   IContact,
   IJurisdictionHeatingDegreeDay,
@@ -17,7 +23,7 @@ import {
   ISubmissionContact,
   TLatLngTuple,
 } from "../types/types"
-import { ExternalApiKeyModel } from "./external-api-key"
+import { ExternalApiKeyModel, IExternalApiKey } from "./external-api-key"
 import { PermitApplicationModel } from "./permit-application"
 import { SandboxModel } from "./sandbox"
 
@@ -64,6 +70,8 @@ export const JurisdictionModel = types
     externalApiKeysMap: types.map(ExternalApiKeyModel),
     createdAt: types.maybeNull(types.Date),
     updatedAt: types.maybeNull(types.Date),
+    part9StepRequirementsUpdatedAt: types.maybeNull(types.Date),
+    part3StepRequirementsUpdatedAt: types.maybeNull(types.Date),
     tablePermitApplications: types.array(types.reference(PermitApplicationModel)),
     boundaryPoints: types.optional(types.array(types.frozen<TLatLngTuple>()), []),
     mapPosition: types.frozen<TLatLngTuple>(),
@@ -88,7 +96,7 @@ export const JurisdictionModel = types
   .extend(withRootStore())
   .extend(withMerge())
   .views((self) => ({
-    get externalApiKeys() {
+    get externalApiKeys(): IExternalApiKey[] {
       return Array.from(self.externalApiKeysMap.values()).sort((a, b) => (b.createdAt as any) - (a.createdAt as any))
     },
     get primaryContact() {
@@ -105,16 +113,16 @@ export const JurisdictionModel = types
     getRequiredStep(id: string): IJurisdictionStepRequirement | undefined {
       return self.jurisdictionStepRequirements.find((rs) => rs.id == id)
     },
-    getExternalApiKey(externalApiKeyId: string) {
+    getExternalApiKey(externalApiKeyId: string): IExternalApiKey | undefined {
       return self.externalApiKeysMap.get(externalApiKeyId)
     },
-    energyStepRequiredTranslation(energyStepRequired?: EEnergyStep) {
+    energyStepRequiredTranslation(energyStepRequired?: EEnergyStep): string {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
       return energyStepRequired
         ? t(`${i18nPrefix}.stepRequired.energy.options.${energyStepRequired}`)
         : t(`${i18nPrefix}.notRequired`)
     },
-    zeroCarbonLevelTranslation(zeroCarbonStepRequired?: EZeroCarbonStep) {
+    zeroCarbonLevelTranslation(zeroCarbonStepRequired?: EZeroCarbonStep): string {
       const i18nPrefix = "home.configurationManagement.stepCodeRequirements"
       return zeroCarbonStepRequired
         ? t(`${i18nPrefix}.stepRequired.zeroCarbon.options.${zeroCarbonStepRequired}`)
@@ -176,7 +184,7 @@ export const JurisdictionModel = types
     setUnviewedProjectMeetingsCount: (count: number) => {
       self.unviewedProjectMeetingsCount = count
     },
-    update: flow(function* (params) {
+    update: flow(function* (params): Generator<Promise<unknown>, boolean> {
       const { ok, data: response } = yield* toGenerator(self.environment.api.updateJurisdiction(self.id, params))
       if (ok) {
         self.rootStore.jurisdictionStore.mergeUpdate(response.data, "jurisdictionMap")
@@ -246,6 +254,33 @@ export const JurisdictionModel = types
     }),
   }))
   .actions((self) => ({
+    createSubmissionContact: flow(function* (email: string, type: ESubmissionContactClass) {
+      const response = yield* toGenerator(
+        self.environment.api.createSubmissionContact({ jurisdictionId: self.id, email, type })
+      )
+      if (response.ok && response.data?.data) {
+        self.submissionContacts.push(response.data.data)
+        return true
+      }
+      return false
+    }),
+    destroySubmissionContact: flow(function* (id: string) {
+      const response = yield* toGenerator(self.environment.api.destroySubmissionContact(id))
+      if (response.ok) {
+        const index = self.submissionContacts.findIndex((contact) => contact.id === id)
+        if (index >= 0) self.submissionContacts.splice(index, 1)
+      }
+      return response.ok
+    }),
+    resendSubmissionContactConfirmation: flow(function* (id: string) {
+      const response = yield* toGenerator(self.environment.api.resendSubmissionContactConfirmation(id))
+      if (response.ok && response.data?.data) {
+        const index = self.submissionContacts.findIndex((contact) => contact.id === id)
+        if (index >= 0) self.submissionContacts.splice(index, 1, response.data.data)
+        return true
+      }
+      return false
+    }),
     toggleExternalApiEnabled: flow(function* () {
       const response = yield* toGenerator(
         self.environment.api.updateJurisdictionExternalApiEnabled(self.id, !self.externalApiEnabled)
@@ -259,5 +294,4 @@ export const JurisdictionModel = types
     }),
   }))
 
-//@ts-ignore
-export type IJurisdiction = Instance<typeof JurisdictionModel>
+export interface IJurisdiction extends Instance<typeof JurisdictionModel> {}

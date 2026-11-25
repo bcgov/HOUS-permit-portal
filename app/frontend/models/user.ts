@@ -96,21 +96,17 @@ export const UserModel = types
     get initials() {
       return self.firstName && self.lastName && `${self.firstName[0]}${self.lastName[0]}`.toUpperCase()
     },
-    get jurisdiction() {
+    get jurisdiction(): IJurisdiction | undefined {
       return (
         self.jurisdictions.find((j) => j.id == self.rootStore.uiStore.currentlySelectedJurisdictionId) ||
         self.jurisdictions[0]
       )
     },
-    get omniauthProviderLabel() {
-      const keys = {
-        idir: "idir",
-        bceidbasic: "bceidbasic",
-        bceidbusiness: "bceidbusiness",
-        "digital-building-permit-5120": "bcsc",
-      }
-      // @ts-ignore
-      return t(`user.omniauthProviders.${keys[self.omniauthProvider]}`)
+    get omniauthProviderLabel(): string | undefined {
+      if (!self.omniauthProvider) return
+      // Stored BCSC id is digital-building-permit-5120; the copy key is bcsc.
+      const labelKey = self.omniauthProvider === OMNIAUTH_PROVIDERS.bcsc ? "bcsc" : self.omniauthProvider
+      return t(`user.omniauthProviders.${labelKey}`)
     },
   }))
   .actions((self) => ({
@@ -122,17 +118,17 @@ export const UserModel = types
     },
   }))
   .actions((self) => ({
-    destroy: flow(function* () {
+    destroy: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.destroyUser(self.id)
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
-    restore: flow(function* () {
+    restore: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.restoreUser(self.id)
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
-    changeRole: flow(function* () {
+    changeRole: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       let newRole = null
       if (self.role === EUserRoles.reviewManager) {
         newRole = EUserRoles.reviewer
@@ -148,14 +144,14 @@ export const UserModel = types
       if (response.ok) applySnapshot(self, response.data.data)
       return response.ok
     }),
-    acceptEULA: flow(function* () {
+    acceptEULA: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.acceptEULA(self.id)
       if (response.ok) {
         self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
       }
       return response.ok
     }),
-    fetchAcceptedEulas: flow(function* () {
+    fetchAcceptedEulas: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.fetchCurrentUserAcceptedEulas()
 
       if (response.ok) {
@@ -166,21 +162,21 @@ export const UserModel = types
 
       return response.ok
     }),
-    acceptInvitation: flow(function* (invitationToken: string) {
+    acceptInvitation: flow(function* (invitationToken: string): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.acceptInvitation(self.id, { invitationToken })
       if (response.ok) {
         self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
       }
       return response.ok
     }),
-    resendConfirmation: flow(function* () {
+    resendConfirmation: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.resendConfirmation(self.id)
       if (response.ok) {
         self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
       }
       return response.ok
     }),
-    reinvite: flow(function* () {
+    reinvite: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       const response = yield self.environment.api.reinviteUser(self.id)
       if (response.ok) {
         self.rootStore.userStore.mergeUpdate(response.data.data, "usersMap")
@@ -202,6 +198,8 @@ export interface IPreference {
   enableEmailApplicationViewNotification: boolean
   enableInAppApplicationRevisionsRequestNotification: boolean
   enableEmailApplicationRevisionsRequestNotification: boolean
+  enableInAppApplicationsAddedNotification: boolean
+  enableEmailApplicationsAddedNotification: boolean
 
   enableInAppCollaborationNotification: boolean
   enableEmailCollaborationNotification: boolean
@@ -214,4 +212,16 @@ export interface IPreference {
 
   enableInAppProjectMeetingSubmittedNotification: boolean
   enableEmailProjectMeetingSubmittedNotification: boolean
+
+  enableInAppProjectMeetingScheduledNotification: boolean
+  enableEmailProjectMeetingScheduledNotification: boolean
+  enableInAppProjectMeetingRescheduledNotification: boolean
+  enableEmailProjectMeetingRescheduledNotification: boolean
+  enableInAppPreCheckSubmittedNotification: boolean
+  enableEmailPreCheckSubmittedNotification: boolean
+  enableInAppPreCheckCompletedNotification: boolean
+  enableEmailPreCheckCompletedNotification: boolean
+  enableInAppStepCodeReportNotification: boolean
+  enableInAppFileUploadFailedNotification: boolean
+  enableInAppReleaseNotePublishNotification: boolean
 }

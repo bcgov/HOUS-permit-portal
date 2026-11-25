@@ -49,6 +49,6 @@ class Api::Part9Building::StepCodesController < Api::ApplicationController
   private
 
   def set_step_code
-    @step_code = Part9StepCode.find(params[:id])
+    @step_code = ensure_in_sandbox!(Part9StepCode.find(params[:id]))
   end
 end

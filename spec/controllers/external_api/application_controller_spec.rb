@@ -3,6 +3,10 @@
 require "rails_helper"
 
 class MockExternalApiController < ExternalApi::ApplicationController
+  def expected_api_version
+    "v1"
+  end
+
   def protected_action
     render json: { message: "mock protected action" }, status: 200
   end

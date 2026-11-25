@@ -63,6 +63,7 @@ class Api::ReportDocumentsController < Api::ApplicationController
 
   def set_report_document
     @report_document = ReportDocument.find(params[:id])
+    ensure_in_sandbox!(@report_document.step_code)
   rescue ActiveRecord::RecordNotFound
     render_error(
       "report_document.not_found",

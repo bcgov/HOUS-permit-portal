@@ -1,5 +1,7 @@
-import { Grid, GridProps } from "@chakra-ui/react"
+import { Grid, GridProps, VStack } from "@chakra-ui/react"
 import React, { ReactNode } from "react"
+import { ISearch } from "../../../lib/create-search-model"
+import { ModelSearchInput } from "../base/model-search-input"
 import { EmptyResultsBox } from "./empty-results-box"
 
 interface ISearchGridProps extends Partial<Omit<GridProps, "templateColumns">> {
@@ -11,6 +13,9 @@ interface ISearchGridProps extends Partial<Omit<GridProps, "templateColumns">> {
   emptyDescription?: React.ReactNode
   emptyIcon?: React.ReactNode
   emptyState?: React.ReactNode
+  searchModel?: ISearch
+  searchLabel?: string
+  toolbar?: ReactNode
 }
 
 export const SearchGrid = ({
@@ -23,15 +28,25 @@ export const SearchGrid = ({
   emptyDescription,
   emptyIcon,
   emptyState,
+  searchModel,
+  searchLabel,
+  toolbar,
+  flex,
+  minH,
+  h,
   ...containerProps
 }: ISearchGridProps) => {
-  return (
+  const header =
+    toolbar ?? (searchModel && searchLabel ? <ModelSearchInput searchModel={searchModel} label={searchLabel} /> : null)
+
+  const grid = (
     <Grid
       role={"table"}
       templateColumns={templateColumns}
       w="full"
       maxW={"full"}
       overflow={"auto"}
+      {...(header && flex != null ? { flex: 1, minH: 0 } : { flex, minH, h })}
       sx={{
         borderCollapse: "separate",
         ...(gridRowClassName
@@ -63,5 +78,22 @@ export const SearchGrid = ({
           />
         ))}
     </Grid>
+  )
+
+  if (!header) return grid
+
+  return (
+    <VStack
+      align="flex-start"
+      spacing={5}
+      w="full"
+      flex={flex}
+      minH={minH}
+      h={h}
+      overflow={flex != null ? "hidden" : undefined}
+    >
+      {header}
+      {grid}
+    </VStack>
   )
 }

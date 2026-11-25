@@ -6,6 +6,8 @@ class StepCode::Part9::ChecklistBlueprint < Blueprinter::Base
   # explicit checklist id instead of hard-coding pre-construction.
   fields :stage, :status, :section_completion_status, :updated_at
 
+  association :report_document, blueprint: ReportDocumentBlueprint
+
   view :extended do
     include_view :project_info
     include_view :compliance_summary

@@ -1,5 +1,12 @@
 class ReportDocument < FileUploadAttachment
   belongs_to :step_code, inverse_of: :report_documents
+  belongs_to :checklist, polymorphic: true, optional: true
+
+  validates :checklist_id,
+            uniqueness: {
+              scope: :checklist_type
+            },
+            allow_nil: true
 
   include FileUploader.Attachment(:file)
   prepend FilenamePreservingFileUrl
@@ -21,7 +28,9 @@ class ReportDocument < FileUploadAttachment
       "object_data" => {
         "step_code_id" => step_code_id,
         "step_code_type" => step_code.type,
+        "sandbox_id" => step_code.sandbox_id,
         "report_document_id" => id,
+        "checklist_id" => checklist_id,
         "filename" => file&.metadata&.dig("filename"),
         "download_url" => file_url
       }

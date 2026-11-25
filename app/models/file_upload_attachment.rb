@@ -118,10 +118,10 @@ class FileUploadAttachment < ApplicationRecord
   end
 
   # Safe file_url that returns nil instead of erroring when file is unavailable
-  def file_url_safe
+  def file_url_safe(disposition: "attachment", **options)
     return nil unless file_available?
 
-    file_url
+    file_url(disposition: disposition, **options)
   rescue StandardError
     nil
   end
@@ -149,6 +149,8 @@ class FileUploadAttachment < ApplicationRecord
       data["object_data"][
         "permit_application_id"
       ] = attached_to.permit_application.id
+    elsif attached_to.is_a?(PreCheck)
+      data["object_data"]["pre_check_id"] = attached_to.id
     end
 
     data

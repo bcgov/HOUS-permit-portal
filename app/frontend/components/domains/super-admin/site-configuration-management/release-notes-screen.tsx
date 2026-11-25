@@ -15,10 +15,12 @@ import { PerPageSelect } from "../../../shared/base/inputs/per-page-select"
 import { SharedSpinner } from "../../../shared/base/shared-spinner"
 import { SearchGrid } from "../../../shared/grid/search-grid"
 import { RouterLinkButton } from "../../../shared/navigation/router-link-button"
+import { ReleaseNoteTypeBadge } from "../../release-notes/release-note-type-badge"
+import { ReleaseNoteTypeFilter } from "../../release-notes/release-note-type-filter"
 import { ReleaseNotesGridCell } from "./release-notes-grid-cell"
 import { ReleaseNotesGridHeaders } from "./release-notes-grid-header"
 
-const TABLE_TEMPLATE = ["6fr", "14fr", "10fr", "20fr", "5fr"].join(" ")
+const TABLE_TEMPLATE = ["6fr", "10fr", "10fr", "8fr", "12fr", "5fr"].join(" ")
 
 const ReleaseNoteStatusBadge = observer(function ReleaseNoteStatusBadge({ status }: { status: EReleaseNoteStatus }) {
   const isPublished = status === EReleaseNoteStatus.published
@@ -56,15 +58,20 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     resetCurrentReleaseNote,
     setApplyYearFilterInSearch,
     setPublishedOnlyInSearch,
+    selectedReleaseType,
+    selectReleaseTypeFilter,
+    setSelectedReleaseType,
   } = releaseNoteStore
 
   useEffect(() => {
     resetCurrentReleaseNote()
     setApplyYearFilterInSearch(false)
     setPublishedOnlyInSearch(false)
-  }, [resetCurrentReleaseNote, setApplyYearFilterInSearch, setPublishedOnlyInSearch])
+    setSelectedReleaseType(null)
+  }, [resetCurrentReleaseNote, setApplyYearFilterInSearch, setPublishedOnlyInSearch, setSelectedReleaseType])
 
-  useSearch(releaseNoteStore, [])
+  // selectedReleaseType ?? "all": useSearch skips any null dep, so "all types" needs a sentinel
+  useSearch(releaseNoteStore, [selectedReleaseType ?? "all"])
 
   const releaseNotesContent =
     tableReleaseNotes.length === 0 ? (
@@ -74,7 +81,10 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
     ) : (
       tableReleaseNotes.map((note: IReleaseNote) => (
         <Box key={note.id} display="contents" role="row">
-          <ReleaseNotesGridCell>{note.version}</ReleaseNotesGridCell>
+          <ReleaseNotesGridCell>{note.displayLabel}</ReleaseNotesGridCell>
+          <ReleaseNotesGridCell py={0}>
+            <ReleaseNoteTypeBadge releaseType={note.releaseType} />
+          </ReleaseNotesGridCell>
           <ReleaseNotesGridCell color="text.secondary">{format(note.releaseDate, "MMMM d, yyyy")}</ReleaseNotesGridCell>
           <ReleaseNotesGridCell py={0}>
             <ReleaseNoteStatusBadge status={note.status as EReleaseNoteStatus} />
@@ -115,10 +125,13 @@ export const ReleaseNotesScreen = observer(function ReleaseNotesScreen() {
               borderColor="#EBEEEF"
               px={6}
               py={4}
-              justify="flex-end"
-              h="72px"
+              justify="space-between"
+              gap={4}
+              flexWrap="wrap"
+              minH="72px"
               align="center"
             >
+              <ReleaseNoteTypeFilter value={selectedReleaseType} onChange={selectReleaseTypeFilter} />
               <RouterLinkButton
                 to="/configuration-management/release-notes/new"
                 variant="primary"

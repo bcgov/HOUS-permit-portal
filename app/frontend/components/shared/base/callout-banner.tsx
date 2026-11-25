@@ -2,7 +2,7 @@ import { HStack, Stack, StackProps, Text } from "@chakra-ui/react"
 import { CheckCircle, Info, Warning, WarningCircle } from "@phosphor-icons/react"
 import React from "react"
 
-interface IProps extends Partial<StackProps> {
+interface IProps extends Omit<Partial<StackProps>, "title"> {
   type: "warning" | "error" | "success" | "info"
   title: string | JSX.Element
   body?: string | JSX.Element
@@ -10,11 +10,11 @@ interface IProps extends Partial<StackProps> {
 
 const iconProps = {
   size: 16,
-  flexShrink: 0,
   style: {
     marginTop: "var(--chakra-space-1)",
     minWidth: "16px",
-    minH: "16px",
+    minHeight: "16px",
+    flexShrink: 0,
   },
 }
 

@@ -1,4 +1,8 @@
 class SubmissionContact < ApplicationRecord
+  def self.policy_class
+    SubmissionContactPolicy
+  end
+
   belongs_to :jurisdiction
 
   before_destroy :ensure_enabled_feature_remains_configured
@@ -10,7 +14,6 @@ class SubmissionContact < ApplicationRecord
             }
 
   scope :confirmed, -> { where.not(confirmed_at: nil) }
-  scope :default_contact, -> { where(default: true) }
 
   after_commit :send_confirmation, on: :create, unless: :confirmed?
 

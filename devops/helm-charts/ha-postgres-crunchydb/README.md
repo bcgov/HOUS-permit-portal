@@ -195,7 +195,6 @@ dataRestore:
 
 ### Important Notes
 
-- secrete `s3-pgbackrest` will be created manually
 - The restore uses `--delta` mode, which only restores changed files for efficiency
 - Reuses existing S3 secrets from `dataSource` or `pgBackRest.s3` configuration
 - The job runs with the specified S3 repository as the source
@@ -203,7 +202,5 @@ dataRestore:
 - The target cluster must be accessible and have proper credentials
 - Monitor CronJob logs for restore status and any errors
 - Configuration follows the same patterns as `dataSource` for consistency
-- when restore from backup `dataSource-enabled = true` ensure `s3-enabled = false` and `standby-enabled = false`
-- To enable s3 with `s3-enabled = true `ensure `dataSource-enabled = false`
 
 ---

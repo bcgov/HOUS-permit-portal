@@ -40,9 +40,12 @@ export const LimitedJurisdictionIndexScreen = observer(function JurisdictionInde
           </Box>
         </Flex>
 
-        <SearchGrid templateColumns="4fr 4fr 2fr">
+        <SearchGrid
+          templateColumns="4fr 4fr 2fr"
+          searchModel={jurisdictionStore}
+          searchLabel={t("jurisdiction.index.searchLabel")}
+        >
           <GridHeaders
-            span={3}
             columns={[
               EJurisdictionSortFields.reverseQualifiedName,
               EJurisdictionSortFields.regionalDistrict,

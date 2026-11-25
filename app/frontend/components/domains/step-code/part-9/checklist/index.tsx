@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from "react"
 import { FormProvider, useForm } from "react-hook-form"
 import { useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../../hooks/resources/use-part-9-step-code"
+import { readNavBarHeight } from "../../../../../hooks/use-scroll-aware-nav-bar"
 import { EFileUploadAttachmentType, EFlashMessageStatus, EStepCodeChecklistStatus } from "../../../../../types/enums"
 import { FileDownloadButton } from "../../../../shared/base/file-download-button"
 import { SharedSpinner } from "../../../../shared/base/shared-spinner"
@@ -37,7 +38,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
         await checklist.load()
       })()
     }
-  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id, currentStepCode?.reportDocuments?.length])
+  }, [checklist?.id, checklist?.isLoaded, currentStepCode?.id])
 
   useEffect(() => {
     checklist?.isLoaded && reset(checklist.defaultFormValues)
@@ -80,7 +81,7 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
 
     // timeout to allow for accordion transition to complete so scroll position can be determined accurately
     setTimeout(() => {
-      const yOffset = (document.getElementById("mainNav")?.offsetHeight || 0) + 20
+      const yOffset = readNavBarHeight() + 20
       const scrollParent = document.getElementById("stepCodeScroll")
 
       if (scrollParent) {
@@ -170,11 +171,11 @@ export const StepCodeChecklistForm = observer(function StepCodeChecklistForm() {
             </Accordion>
           </form>
         </FormProvider>
-        {checklist.isMarkedComplete && !isSubmitting && currentStepCode?.latestReportDocument && (
+        {checklist.isMarkedComplete && !isSubmitting && checklist.freshReportDocument && (
           <FileDownloadButton
             variant="link"
             modelType={EFileUploadAttachmentType.ReportDocument}
-            document={currentStepCode.latestReportDocument as any}
+            document={checklist.freshReportDocument as any}
             simpleLabel
           />
         )}

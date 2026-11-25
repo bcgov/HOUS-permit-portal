@@ -1,0 +1,15 @@
+{{- if .Values.clamav.persistentVolume.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "clamav.fullname" . }}-signatures
+  labels:
+    {{- include "clamav.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteMany  # Changed from ReadWriteOnce to allow multiple pods (deployment + cronjob)
+  resources:
+    requests:
+      storage: {{ .Values.clamav.persistentVolume.size | quote }}
+  storageClassName: netapp-file-backup  # NFS backend supports RWX
+{{- end }}

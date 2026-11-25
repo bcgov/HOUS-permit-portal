@@ -40,6 +40,9 @@ export const CollaboratorAssignmentModal = observer(function AssignmentModal({
   const contentRef = React.useRef<HTMLDivElement>(null)
 
   const canManage = permitApplication.canUserManageCollaborators(currentUser, collaborationType)
+  // Submission block assignment is draft-only (mirrors StatusSelect / create_permit_collaboration?).
+  // Review-side rules are intentionally unchanged.
+  const showAssignTrigger = collaborationType !== ECollaborationType.submission || permitApplication.isDraft
 
   const changeScreen = (screen: EAssignmentModalScreen) => {
     // review does have the ability to invite new collaborators. They should already be present for a jurisdiction
@@ -95,6 +98,8 @@ export const CollaboratorAssignmentModal = observer(function AssignmentModal({
 
   const onInviteCollaborator = (user: { email: string; firstName: string; lastName: string }) =>
     permitApplication.inviteNewCollaborator(ECollaboratorType.assignee, user, requirementBlockId)
+
+  if (!showAssignTrigger) return null
 
   return (
     <>

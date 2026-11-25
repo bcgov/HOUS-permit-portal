@@ -4,7 +4,7 @@ class JurisdictionSeeder
   def self.seed
     @current_regional_district = nil
     CSV.foreach(
-      "docs/csv/jurisdictions.csv",
+      "db/seeds/jurisdictions.csv",
       headers: true,
       header_converters: :symbol
     ) do |row|

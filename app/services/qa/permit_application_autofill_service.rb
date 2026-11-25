@@ -296,6 +296,15 @@ class Qa::PermitApplicationAutofillService
 
   def select_value(component)
     values = component.dig("data", "values") || component["values"] || []
+
+    # Autofill uploads files for every file field (including energy step code report).
+    # Prefer "file" method so section completion matches what we actually filled.
+    if component["key"].to_s.include?("energy_step_code_method")
+      file_option =
+        values.find { |value| value.is_a?(Hash) && value["value"] == "file" }
+      return file_option["value"] if file_option
+    end
+
     first_value = values.first
 
     return "qa" unless first_value.is_a?(Hash)

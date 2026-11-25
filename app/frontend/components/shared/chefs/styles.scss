@@ -583,12 +583,19 @@
           font-size: var(--chakra-fontSizes-xs);
           color: $bcgov-font;
           font-style: italic;
+          line-height: 1.4;
         }
 
         .compliance-file-error-message {
           margin-left: 16px;
           font-size: var(--chakra-fontSizes-xs);
           color: $bcgov-font;
+          line-height: 1.4;
+
+          a {
+            color: $bcgov-link;
+            text-decoration: underline;
+          }
         }
 
         &.compliance-file-error {
@@ -1011,13 +1018,7 @@
 
     &:disabled,
     &[disabled="disabled"] {
-      cursor: not-allowed;
-
-      &::before {
-        background: var(--chakra-colors-greys-grey03) !important;
-        color: var(--chakra-colors-greys-grey01);
-        text-decoration: none;
-      }
+      opacity: 1;
     }
 
     &::before {
@@ -1033,7 +1034,7 @@
       padding-right: 4px;
       padding-top: 4px;
       padding-bottom: 4px;
-      transform: translateY(-50%);
+      transform: translateY(20%);
       font-size: 14px;
       width: "fit-content";
       white-space: nowrap;
@@ -1243,7 +1244,8 @@
 
 .added-in-diff,
 .changed-in-diff,
-.removed-in-diff {
+.removed-in-diff,
+.recently-published-elective {
   @include diff-styles;
 }
 

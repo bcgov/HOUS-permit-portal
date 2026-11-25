@@ -39,12 +39,83 @@ RSpec.describe StepCode, type: :model do
     end
   end
 
+  describe "sandbox" do
+    let(:jurisdiction) { create(:sub_district) }
+    let(:project_sandbox) { jurisdiction.sandboxes.published.first }
+    let(:permit_project) do
+      create(
+        :permit_project,
+        jurisdiction: jurisdiction,
+        sandbox: project_sandbox
+      )
+    end
+    let(:permit_application) do
+      create(
+        :permit_application,
+        permit_project: permit_project,
+        jurisdiction: jurisdiction
+      )
+    end
+
+    it "uses the parent project sandbox when attached, even if the column differs" do
+      step_code =
+        Part3StepCode.create!(
+          permit_application: permit_application,
+          creator: create(:user, :submitter)
+        )
+      step_code.update_column(
+        :sandbox_id,
+        jurisdiction.sandboxes.scheduled.first.id
+      )
+
+      expect(step_code.reload.sandbox_id).to eq(project_sandbox.id)
+      expect(step_code.search_data[:sandbox_id]).to eq(project_sandbox.id)
+    end
+
+    it "copies the parent sandbox onto the row when detached" do
+      step_code =
+        Part3StepCode.create!(
+          permit_application: permit_application,
+          creator: create(:user, :submitter)
+        )
+
+      step_code.update!(permit_application_id: nil)
+
+      expect(step_code.reload.read_attribute(:sandbox_id)).to eq(
+        project_sandbox.id
+      )
+      expect(step_code.sandbox_id).to eq(project_sandbox.id)
+    end
+  end
+
+  describe "#permit_date" do
+    it "uses the attached permit application's issued_at, not the step code column" do
+      permit_application =
+        create(:permit_application, issued_at: Time.zone.parse("2026-08-19"))
+      step_code =
+        Part3StepCode.create!(
+          permit_application: permit_application,
+          creator: create(:user),
+          permit_date: Date.new(2020, 1, 1)
+        )
+
+      expect(step_code.permit_date).to eq(Date.new(2026, 8, 19))
+    end
+
+    it "uses the step code column when detached" do
+      step_code = create(:part_9_step_code, permit_date: Date.new(2020, 1, 1))
+
+      expect(step_code.permit_date).to eq(Date.new(2020, 1, 1))
+    end
+  end
+
   describe "#generate_report_document" do
     it "enqueues a report generation job" do
       step_code = create(:part_9_step_code)
 
       expect(StepCodeReportGenerationJob).to receive(:perform_async).with(
-        step_code.id
+        step_code.id,
+        { "checklist_id" => step_code.current_checklist.id }
       )
 
       step_code.generate_report_document

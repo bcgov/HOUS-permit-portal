@@ -21,10 +21,10 @@ export interface IConfirmationModalProps {
   triggerButtonProps?: Partial<ButtonProps>
   confirmButtonProps?: Partial<ButtonProps>
   triggerText?: string
-  renderTriggerButton?: (props: ButtonProps) => JSX.Element
+  renderTriggerButton?: (props: ButtonProps) => JSX.Element | null
   renderConfirmationButton?: (props: ButtonProps) => JSX.Element
   title?: string
-  body?: string
+  body?: React.ReactNode
   onConfirm?: (closeModal: () => void) => void | Promise<void>
   modalProps?: Partial<ModalProps>
   modalContentProps?: Partial<ModalContentProps>

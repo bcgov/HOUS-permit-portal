@@ -15,7 +15,6 @@ class PermitApplication < ApplicationRecord
   include FormSupportingDocuments
   include AutomatedComplianceUtils
   include StepCodeFieldExtraction
-  include ZipfileUploader.Attachment(:zipfile)
   include PermitApplicationStatus
   include ProjectItem
   include Discard::Model
@@ -26,12 +25,17 @@ class PermitApplication < ApplicationRecord
     :submission_versions,
     :step_code,
     :submitter,
+    :created_by,
     { permit_collaborations: :collaborator }
   ]
 
   belongs_to :submitter, class_name: "User", optional: true
+  belongs_to :created_by, polymorphic: true, optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
+  belongs_to :acknowledged_customization_change,
+             class_name: "CustomizationChange",
+             optional: true
   belongs_to :permit_project, optional: true, touch: true
 
   has_one :requirement_template, through: :template_version
@@ -44,6 +48,7 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
+  has_many :notes, as: :noteable, dependent: :destroy
   has_many :permit_collaborations,
            -> { where(discarded_at: nil) },
            dependent: :destroy
@@ -89,12 +94,16 @@ class PermitApplication < ApplicationRecord
 
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
-  before_validation :assign_default_nickname, on: :create
   before_validation :populate_base_form_data, on: :create
+  before_validation :assign_created_by_from_submitter, on: :create
+  before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
   after_commit :reindex_jurisdiction_permit_application_size
-  after_commit :send_submitted_webhook, if: :saved_change_to_status?
+  after_commit :send_status_changed_webhook,
+               if: :status_changed_for_external_api?
+  after_commit :zip_and_upload_supporting_documents,
+               if: :should_enqueue_package_build?
   after_commit :reindex_permit_project, if: :saved_change_to_status?
   after_commit :broadcast_jurisdiction_count_update,
                if: :status_changed_to_intake?
@@ -106,7 +115,7 @@ class PermitApplication < ApplicationRecord
   scope :unviewed,
         -> do
           where(status: submitted_statuses, viewed_at: nil).order(
-            submitted_at: :asc
+            created_at: :asc
           )
         end
 
@@ -223,6 +232,14 @@ class PermitApplication < ApplicationRecord
   def latest_submission_version
     submission_versions.order(created_at: :desc).first
   end
+
+  delegate :zipfile,
+           :zipfile_data,
+           :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
+           to: :latest_submission_version,
+           allow_nil: true
 
   def earliest_submission_version
     submission_versions.order(created_at: :desc).last
@@ -394,6 +411,36 @@ class PermitApplication < ApplicationRecord
     end
   end
 
+  def unseen_elective_field_ids
+    return [] unless draft?
+
+    current_enabled, = current_elective_field_sets
+    ids =
+      unacknowledged_customization_changes.flat_map(
+        &:highlight_component_ids
+      ).uniq
+    ids & current_enabled
+  end
+
+  def unseen_customization_change_id
+    return if unseen_elective_field_ids.empty?
+
+    unacknowledged_customization_changes.order(
+      created_at: :desc,
+      id: :desc
+    ).pick(:id)
+  end
+
+  def acknowledge_published_electives!(change_id)
+    change = customization_changes_for_application.find_by(id: change_id)
+    return unless change
+
+    acknowledged = acknowledged_customization_change
+    return if acknowledged && !customization_change_after?(change, acknowledged)
+
+    update_column(:acknowledged_customization_change_id, change.id)
+  end
+
   def update_viewed_at
     version = latest_submission_version
     return unless version.present?
@@ -452,6 +499,8 @@ class PermitApplication < ApplicationRecord
   end
 
   def populate_base_form_data
+    return if submission_data.present?
+
     self.submission_data = { data: {} }
   end
 
@@ -501,7 +550,7 @@ class PermitApplication < ApplicationRecord
          customization.submission_contact.confirmed?
       [customization.submission_contact]
     else
-      jurisdiction.confirmed_submission_contacts.default_contact
+      jurisdiction.confirmed_submission_contacts
     end
   end
 
@@ -509,9 +558,10 @@ class PermitApplication < ApplicationRecord
     NotificationService.publish_application_submission_event(self)
   end
 
-  def formatted_submission_data_for_external_use
+  def formatted_submission_data_for_external_use(submission_version: nil)
     ExternalPermitApplicationService.new(
-      self
+      self,
+      submission_version: submission_version
     ).formatted_submission_data_for_external_use
   end
 
@@ -522,22 +572,53 @@ class PermitApplication < ApplicationRecord
   def send_submitted_webhook
     return unless submitted?
 
+    send_status_changed_webhook(resend_submission: true)
+  end
+
+  def mark_submission_packages_ready!
+    newly_ready = []
+    submission_versions
+      .order(:created_at)
+      .each do |submission_version|
+        next if submission_version.package_ready_at.present?
+        next if submission_version.zipfile_data.blank?
+        next if submission_version.missing_pdfs?
+
+        submission_version.update!(package_ready_at: Time.current)
+        newly_ready << submission_version
+      end
+    newly_ready
+  end
+
+  def enqueue_package_ready_webhooks(submission_version)
     jurisdiction
       .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where(api_version: "v2")
       .where.not(webhook_url: [nil, ""])
       .each do |external_api_key|
-        PermitWebhookJob.perform_async(
-          external_api_key.id,
-          (
-            if newly_submitted?
-              Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
-            else
-              Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
-            end
-          ),
-          id
-        )
+        enqueue_v2_package_ready_webhook(external_api_key, submission_version)
       end
+  end
+
+  def send_status_changed_webhook(resend_submission: false)
+    jurisdiction
+      .active_external_api_keys
+      .where(sandbox_id: sandbox_id)
+      .where.not(webhook_url: [nil, ""])
+      .each do |external_api_key|
+        if external_api_key.api_version == "v1"
+          next unless resend_submission || intake?
+
+          enqueue_v1_submission_webhook(external_api_key)
+        else
+          enqueue_v2_status_webhook(external_api_key)
+        end
+      end
+  end
+
+  def report_generation_issues
+    submission_versions.flat_map(&:report_generation_issues)
   end
 
   def missing_pdfs
@@ -558,6 +639,10 @@ class PermitApplication < ApplicationRecord
 
   def viewed_at
     latest_submission_version&.viewed_at
+  end
+
+  def permit_date
+    issued_at&.to_date
   end
 
   def submitted_at
@@ -663,6 +748,31 @@ class PermitApplication < ApplicationRecord
       end
   end
 
+  # Value of the Energy Step Code method radio: "tool" | "file" | nil
+  def energy_step_code_method
+    data = submission_data&.dig("data") || {}
+    data.each_value do |section|
+      next unless section.is_a?(Hash)
+
+      section.each do |key, value|
+        unless key.to_s.end_with?(
+                 "|#{Requirement::ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE}"
+               ) ||
+                 key.to_s ==
+                   Requirement::ENERGY_STEP_CODE_SELECT_REQUIREMENT_CODE
+          next
+        end
+
+        return value if value == "tool" || value == "file"
+      end
+    end
+    nil
+  end
+
+  def using_digital_energy_step_code_tool?
+    energy_step_code_method == "tool"
+  end
+
   def self.stats_by_template_jurisdiction_and_status
     sv_min =
       SubmissionVersion.select(
@@ -691,6 +801,7 @@ class PermitApplication < ApplicationRecord
           "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
         )
         .where(users: { role: "submitter" })
+        .where(permit_projects: { sandbox_id: nil })
         .group(
           "jurisdictions.id",
           "requirement_templates.id",
@@ -779,14 +890,30 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  def assign_creation_actors(user)
+    project = permit_project
+    return unless project && user
+
+    if project.owner_id == user.id
+      self.created_by = user
+      self.submitter = user
+    else
+      self.created_by = project.jurisdiction
+      self.submitter = project.owner
+    end
+  end
+
   private
+
+  # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
+  # the draft. Anything else is created by the submitter.
+  # association reader skips PublicRecordable's unsaved readonly snapshot user.
+  def assign_created_by_from_submitter
+    self.created_by ||= association(:submitter).reader
+  end
 
   def update_collaboration_assignments
     # TODO: Implement this method to remove collaborations for missing requirement block when a new template is published
-  end
-
-  def assign_default_nickname
-    self.nickname = requirement_template.nickname if nickname.blank?
   end
 
   def assign_unique_number
@@ -835,6 +962,60 @@ class PermitApplication < ApplicationRecord
     return new_number
   end
 
+  def acknowledge_current_customization_change
+    self.acknowledged_customization_change = latest_customization_change
+  end
+
+  def latest_customization_change
+    customization_changes_for_application.order(
+      created_at: :desc,
+      id: :desc
+    ).first
+  end
+
+  def unacknowledged_customization_changes
+    scope = customization_changes_for_application
+    acknowledged = acknowledged_customization_change
+    return scope unless acknowledged
+
+    scope.where(
+      "customization_changes.created_at > :created_at OR " \
+        "(customization_changes.created_at = :created_at AND customization_changes.id > :id)",
+      created_at: acknowledged.created_at,
+      id: acknowledged.id
+    )
+  end
+
+  def customization_change_after?(change, earlier)
+    change.created_at > earlier.created_at ||
+      (
+        change.created_at == earlier.created_at &&
+          change.id.to_s > earlier.id.to_s
+      )
+  end
+
+  def customization_changes_for_application
+    if jurisdiction.blank? || template_version_id.blank?
+      return CustomizationChange.none
+    end
+
+    CustomizationChange.joins(
+      :jurisdiction_template_version_customization
+    ).where(
+      jurisdiction_template_version_customizations: {
+        jurisdiction_id: jurisdiction.id,
+        template_version_id: template_version_id,
+        sandbox_id: sandbox_id
+      }
+    )
+  end
+
+  def current_elective_field_sets
+    JurisdictionTemplateVersionCustomization.elective_field_sets(
+      form_customizations
+    )
+  end
+
   def take_form_customizations_snapshot_if_submitted
     return unless status_changed? && submitted?
 
@@ -851,6 +1032,62 @@ class PermitApplication < ApplicationRecord
 
   def status_changed_to_intake?
     saved_change_to_status? && intake?
+  end
+
+  def should_enqueue_package_build?
+    status_changed_to_intake? && submission_versions.exists?
+  end
+
+  def status_changed_for_external_api?
+    saved_change_to_status? && submitted_at_least_once?
+  end
+
+  def enqueue_v1_submission_webhook(external_api_key)
+    event =
+      if resubmitted_at.present?
+        Constants::Webhooks::Events::PermitApplication::PERMIT_RESUBMITTED
+      else
+        Constants::Webhooks::Events::PermitApplication::PERMIT_SUBMITTED
+      end
+    payload = { "permit_id" => id, "submitted_at" => submitted_at&.as_json }
+
+    PermitWebhookJob.perform_async(external_api_key.id, event, payload)
+  end
+
+  def enqueue_v2_status_webhook(external_api_key)
+    payload = {
+      "permit_application_id" => id,
+      "permit_project_id" => permit_project_id,
+      "submission_version_id" => latest_submission_version&.id,
+      "status" => status,
+      "status_label" =>
+        Constants::ExternalApi::APPLICATION_STATUS_LABELS.fetch(status),
+      "occurred_at" => updated_at.to_i * 1000
+    }
+
+    PermitWebhookJob.perform_async(
+      external_api_key.id,
+      Constants::Webhooks::Events::PermitApplication::STATUS_CHANGED,
+      payload
+    )
+  end
+
+  def enqueue_v2_package_ready_webhook(external_api_key, submission_version)
+    occurred_at = submission_version.package_ready_at || Time.current
+    payload = {
+      "permit_application_id" => id,
+      "permit_project_id" => permit_project_id,
+      "submission_version_id" => submission_version.id,
+      "number" => number,
+      "reference_number" => reference_number,
+      "occurred_at" => occurred_at.to_i * 1000
+    }
+
+    PermitWebhookJob.perform_async(
+      external_api_key.id,
+      Constants::Webhooks::Events::PermitApplication::PACKAGE_READY,
+      payload
+    )
   end
 
   def reindex_jurisdiction_permit_application_size
@@ -916,7 +1153,7 @@ class PermitApplication < ApplicationRecord
   def submission_versions_match_status
     return if new_record?
 
-    sv_count = submission_versions.size
+    sv_count = submission_versions.count
 
     if new_draft? && sv_count > 0
       errors.add(:base, "Draft applications must not have submission versions")
@@ -933,10 +1170,10 @@ class PermitApplication < ApplicationRecord
           :base,
           "Revisions-requested applications must have at least one submission version"
         )
-      elsif latest_submission_version.revision_requests.empty?
+      elsif !latest_submission_version.has_request_package_items?
         errors.add(
           :base,
-          "Revisions-requested applications must have at least one revision request"
+          "Revisions-requested applications must have at least one request"
         )
       end
     elsif resubmitted? && sv_count < 2

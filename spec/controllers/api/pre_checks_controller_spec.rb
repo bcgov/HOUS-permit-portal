@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe Api::PreChecksController, type: :controller, search: true do
+RSpec.describe Api::PreChecksController, type: :controller do
   render_views
 
   let(:user) { create(:user) }
@@ -10,37 +10,12 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
     request.headers["ACCEPT"] = "application/json"
   end
 
-  describe "POST #index" do
+  describe "POST #index", search: true do
     it "returns the current user's pre-checks" do
-      permit_project_mine = create(:permit_project, title: "Mine", owner: user)
-      permit_application_mine =
-        create(
-          :permit_application,
-          permit_project: permit_project_mine,
-          submitter: user
-        )
-      mine =
-        create(
-          :pre_check,
-          creator: user,
-          permit_application: permit_application_mine
-        )
+      mine = create(:pre_check, creator: user, full_address: "Mine Street")
+      create(:pre_check, creator: create(:user), full_address: "Theirs Street")
 
-      permit_project_theirs = create(:permit_project, title: "Theirs")
-      permit_application_theirs =
-        create(
-          :permit_application,
-          permit_project: permit_project_theirs,
-          submitter: create(:user)
-        )
-      create(
-        :pre_check,
-        creator: permit_application_theirs.submitter,
-        permit_application: permit_application_theirs
-      )
-
-      PreCheck.reindex
-      PreCheck.search_index.refresh
+      reindex_search(PreCheck)
 
       post :index, params: { query: "Mine" }, format: :json
 
@@ -67,14 +42,13 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
     end
   end
 
-  describe "POST #index with unviewed_count" do
+  describe "POST #index with unviewed_count", search: true do
     it "returns unviewed_count in meta" do
       create(:pre_check, :complete, creator: user, viewed_at: nil)
       create(:pre_check, :complete, creator: user, viewed_at: nil)
       create(:pre_check, :complete, creator: user, viewed_at: 1.hour.ago)
 
-      PreCheck.reindex
-      PreCheck.search_index.refresh
+      reindex_search(PreCheck)
 
       post :index, params: {}, format: :json
 
@@ -87,8 +61,7 @@ RSpec.describe Api::PreChecksController, type: :controller, search: true do
       create(:pre_check, :complete, creator: user, viewed_at: nil)
       create(:pre_check, :complete, creator: other_user, viewed_at: nil)
 
-      PreCheck.reindex
-      PreCheck.search_index.refresh
+      reindex_search(PreCheck)
 
       post :index, params: {}, format: :json
 

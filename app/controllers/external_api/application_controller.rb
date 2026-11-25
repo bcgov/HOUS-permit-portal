@@ -4,7 +4,9 @@ class ExternalApi::ApplicationController < ActionController::API
   include Pundit::Authorization
 
   before_action :authenticate_with_token
+  before_action :authorize_api_version
   before_action :store_currents
+  around_action :audit_as_partner_system
 
   attr_reader :current_external_api_key
 
@@ -25,14 +27,16 @@ class ExternalApi::ApplicationController < ActionController::API
 
   protected
 
-  def apply_search_authorization(results, policy_action = action_name)
-    results.select do |result|
-      policy([:external_api, result]).send("#{policy_action}?".to_sym)
-    end
-  end
-
   def store_currents
     Current.external_api_key = current_external_api_key
+  end
+
+  # Audited's sweeper looks for current_user, which these requests do not have.
+  # audited_user wins over that lookup, so every partner write is attributed once.
+  def audit_as_partner_system
+    Audited
+      .audit_class
+      .as_user(Constants::ExternalApi::PARTNER_SYSTEM_ACTOR) { yield }
   end
 
   def external_api_key_not_authorized(exception)
@@ -46,6 +50,17 @@ class ExternalApi::ApplicationController < ActionController::API
     authenticate_or_request_with_http_token do |token, options|
       @current_external_api_key = ExternalApiKey.active.find_by_token(token)
     end
+  end
+
+  def authorize_api_version
+    return if current_external_api_key.api_version == expected_api_version
+
+    raise Pundit::NotAuthorizedError,
+          "This API key is for #{current_external_api_key.api_version}, not #{expected_api_version}."
+  end
+
+  def expected_api_version
+    raise NotImplementedError, "#{self.class} must define expected_api_version"
   end
 
   def current_sandbox

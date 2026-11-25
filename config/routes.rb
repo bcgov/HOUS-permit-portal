@@ -45,6 +45,7 @@ Rails.application.routes.draw do
       delete "/invitation/remove" => "invitations#remove"
       get "/invitations/:invitation_token" => "invitations#show"
       get "/logout" => "sessions#destroy"
+      get "/auth/failure" => "omniauth_callbacks#failure"
     end
 
     get "/submission_contacts/confirm",
@@ -57,6 +58,11 @@ Rails.application.routes.draw do
       get "auto_compliance_module_configurations",
           on: :collection,
           to: "requirement_blocks#auto_compliance_module_configurations"
+    end
+
+    resources :requirement_questions, only: %i[create show update destroy] do
+      post "restore", on: :member, to: "requirement_questions#restore"
+      post "search", on: :collection, to: "requirement_questions#index"
     end
 
     resources :notifications, only: %i[index] do
@@ -85,10 +91,18 @@ Rails.application.routes.draw do
       post "copy", on: :collection
 
       # Draft workflow endpoints
-      member { post "create_draft", to: "requirement_templates#create_draft" }
+      member do
+        post "create_draft", to: "requirement_templates#create_draft"
+        post "validate_config", to: "requirement_templates#validate_config"
+      end
       post "jurisdiction_availabilities",
            on: :member,
            to: "requirement_templates#update_jurisdiction_availabilities"
+
+      resource :explainer, only: %i[show update]
+      resources :jurisdiction_explainers,
+                only: %i[show update],
+                param: :jurisdiction_id
     end
 
     # Draft version-specific endpoints (feedback and previews)
@@ -96,6 +110,10 @@ Rails.application.routes.draw do
       member do
         delete "discard_draft", to: "template_versions#discard_draft"
         post "promote_draft", to: "template_versions#promote_draft"
+        post "validate_config", to: "template_versions#validate_config"
+        post "restore_layout", to: "template_versions#restore_layout"
+        post "restore_requirement_block",
+             to: "template_versions#restore_requirement_block"
         post "invite_draft_previewers",
              to: "template_versions#invite_draft_previewers"
         post "share_draft", to: "template_versions#share_draft"
@@ -122,8 +140,8 @@ Rails.application.routes.draw do
     end
 
     resources :template_versions, only: %i[index show] do
-      get "publicly_previewable",
-          to: "template_versions#publicly_previewable",
+      get "standardization_preview",
+          to: "template_versions#standardization_preview",
           on: :collection
       get "compare_requirements",
           to: "template_versions#compare_requirements",
@@ -181,7 +199,9 @@ Rails.application.routes.draw do
       get "contact_options", on: :collection
     end
 
-    resources :submission_contacts, only: %i[index create update destroy]
+    resources :submission_contacts, only: %i[index create update destroy] do
+      post :resend_confirmation, on: :member
+    end
 
     resources :geocoder, only: %i[] do
       get "site_options", on: :collection
@@ -201,12 +221,15 @@ Rails.application.routes.draw do
       end
     end
 
-    resources :permit_applications, only: %i[create update show destroy] do
+    resources :permit_applications, only: %i[update show destroy] do
       collection { patch :reorder }
       post "restore", on: :member
       post "generate_missing_pdfs",
            on: :member,
            to: "permit_applications#generate_missing_pdfs"
+      post "download_supporting_documents_zip",
+           on: :member,
+           to: "permit_applications#download_supporting_documents_zip"
       post "permit_collaborations",
            on: :member,
            to: "permit_applications#create_permit_collaboration"
@@ -221,6 +244,7 @@ Rails.application.routes.draw do
            to: "permit_applications#invite_new_collaborator"
       post "submit", on: :member
       post "mark_as_viewed", on: :member
+      post "acknowledge_published_electives", on: :member
       post "mark_as_unviewed", on: :member
       post "transition_status", on: :member
       post "retrigger_submission_webhook", on: :member
@@ -229,6 +253,9 @@ Rails.application.routes.draw do
       patch "revision_requests",
             on: :member,
             to: "permit_applications#update_revision_requests"
+      patch "submitter_note",
+            on: :member,
+            to: "permit_applications#update_submitter_note"
       post "revision_requests/finalize",
            on: :member,
            to: "permit_applications#finalize_revision_requests"
@@ -333,6 +360,15 @@ Rails.application.routes.draw do
       get "download_step_code_metrics_csv",
           on: :collection,
           to: "step_codes#download_step_code_metrics_csv"
+      get "download_part_9_step_code_checklists_csv",
+          on: :collection,
+          to: "step_codes#download_part_9_step_code_checklists_csv"
+      get "download_part_3_step_code_checklists_csv",
+          on: :collection,
+          to: "step_codes#download_part_3_step_code_checklists_csv"
+      get "download_step_code_file_uploads_zip",
+          on: :collection,
+          to: "step_codes#download_step_code_file_uploads_zip"
       post "search", on: :collection, to: "step_codes#index"
       patch "update", on: :member, to: "step_codes#update"
       patch "restore", on: :member, to: "step_codes#restore"
@@ -359,6 +395,11 @@ Rails.application.routes.draw do
            to: "report_documents#share_with_jurisdiction"
     end
 
+    get "reports", to: "reports#index"
+    get "reports/:key", to: "reports#show"
+    post "reports/:key/refresh", to: "reports#refresh"
+    get "reports/:key/export", to: "reports#export"
+
     resources :help_video_sections,
               only: %i[index show create update destroy] do
       post "reorder", on: :collection
@@ -367,6 +408,11 @@ Rails.application.routes.draw do
     resources :help_videos, only: %i[index show create update destroy] do
       post "publish", on: :member
       post "unpublish", on: :member
+    end
+    resources :info_documents, only: %i[index show create update destroy] do
+      post "publish", on: :member
+      post "unpublish", on: :member
+      post "reorder", on: :collection
     end
     resources :template_categories, only: %i[index create update destroy] do
       post "reorder", on: :collection
@@ -429,6 +475,7 @@ Rails.application.routes.draw do
     resources :digital_seal_validator, only: [:create]
 
     resources :release_notes, only: %i[index show create update] do
+      get "years", on: :collection, to: "release_notes#years"
       get "viewer_context", on: :member, to: "release_notes#viewer_context"
       patch "publish", on: :member, to: "release_notes#publish"
       post "search", on: :collection, to: "release_notes#index"
@@ -447,11 +494,42 @@ Rails.application.routes.draw do
         end
       end
     end
+    namespace :v2 do
+      resources :project_meetings, only: %i[show update]
+      resources :permit_projects, only: %i[show] do
+        post "search", on: :collection, to: "permit_projects#index"
+        patch "state", on: :member, to: "permit_projects#update_state"
+        post "permit_applications",
+             on: :member,
+             to: "permit_projects#create_permit_applications"
+      end
+      resources :files, only: %i[create]
+      resources :revision_reasons, only: %i[index]
+      resources :requirement_templates, only: %i[index]
+      resources :permit_applications, only: %i[show] do
+        post "search", on: :collection, to: "permit_applications#index"
+        patch "status", on: :member, to: "permit_applications#update_status"
+        get "submission_versions/:submission_version_id",
+            on: :member,
+            to: "permit_applications#show_submission_version"
+        collection do
+          resources :versions, as: "template_versions", only: [] do
+            get "integration_mapping",
+                to: "permit_applications#show_integration_mapping"
+          end
+        end
+      end
+    end
   end
 
   # Webhook routes (outside API scope for external webhook access)
   namespace :webhooks do
     post "archistar", to: "archistar#receive"
+
+    if Rails.env.development?
+      get "dev", to: "dev#index"
+      post "dev", to: "dev#receive"
+    end
   end
 
   root to: "home#index"

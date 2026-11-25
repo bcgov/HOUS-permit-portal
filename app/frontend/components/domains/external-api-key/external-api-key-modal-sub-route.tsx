@@ -18,7 +18,7 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react"
-import { Info, Key, Prohibit } from "@phosphor-icons/react"
+import { ArrowSquareOut, Info, Key, Prohibit } from "@phosphor-icons/react"
 import { addYears } from "date-fns"
 import { observer } from "mobx-react-lite"
 import React, { useEffect, useState } from "react"
@@ -28,8 +28,14 @@ import { useNavigate, useParams } from "react-router-dom"
 import { IExternalApiKey } from "../../../models/external-api-key"
 import { useMst } from "../../../setup/root"
 import { IExternalApiKeyParams } from "../../../types/api-request"
+import { EExternalApiVersion } from "../../../types/enums"
 import { CopyableValue } from "../../shared/base/copyable-value"
-import { DatePickerFormControl, TextFormControl, UrlFormControl } from "../../shared/form/input-form-control"
+import {
+  DatePickerFormControl,
+  SelectFormControl,
+  TextFormControl,
+  UrlFormControl,
+} from "../../shared/form/input-form-control"
 import { RemoveConfirmationModal } from "../../shared/modals/remove-confirmation-modal"
 import { SandboxSelect } from "../../shared/select/selectors/sandbox-select"
 
@@ -43,6 +49,7 @@ const formFormDefaultValues = (externalApiKey?: IExternalApiKey): IExternalApiKe
   return {
     name: externalApiKey?.name || "",
     connectingApplication: externalApiKey?.connectingApplication || "",
+    apiVersion: externalApiKey?.apiVersion,
     expiredAt: externalApiKey?.expiredAt ?? addYears(new Date(), 2),
     webhookUrl: externalApiKey?.webhookUrl,
     revokedAt: externalApiKey?.revokedAt,
@@ -161,6 +168,34 @@ export const ExternalApiKeyModalSubRoute = observer(function ExternalApiKeyModal
                   fieldName={"connectingApplication"}
                   required
                 />
+              </GridItem>
+              <GridItem colSpan={2}>
+                <SelectFormControl
+                  label={t("externalApiKey.fieldLabels.apiVersion")}
+                  fieldName={"apiVersion"}
+                  required
+                  inputProps={{
+                    isDisabled: !!externalApiKey,
+                    placeholder: t("ui.pleaseSelect"),
+                  }}
+                  options={Object.values(EExternalApiVersion).map((apiVersion) => ({
+                    label: t(`externalApiKey.apiVersion.${apiVersion}`),
+                    value: apiVersion,
+                  }))}
+                  hint={t("externalApiKey.apiVersionHint")}
+                />
+                <Link
+                  href={"/integrations/api_docs"}
+                  target={"_blank"}
+                  rel={"noopener noreferrer"}
+                  fontSize={"sm"}
+                  display={"inline-flex"}
+                  alignItems={"center"}
+                  gap={1}
+                  mt={2}
+                >
+                  {t("externalApiKey.index.accessDocs")} <ArrowSquareOut />
+                </Link>
               </GridItem>
 
               <GridItem>

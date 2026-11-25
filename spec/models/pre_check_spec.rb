@@ -3,82 +3,29 @@ require "rails_helper"
 RSpec.describe PreCheck, type: :model do
   describe "associations" do
     it { is_expected.to belong_to(:creator).class_name("User").optional }
-    it { is_expected.to belong_to(:permit_application).optional }
-    it { is_expected.to have_one(:permit_project).through(:permit_application) }
+    it { is_expected.to belong_to(:jurisdiction).optional }
+    it { is_expected.to belong_to(:sandbox).optional }
   end
 
   describe "validations" do
-    it "ensures checklist defaults to sections array when blank" do
-      pre_check = build(:pre_check)
-
-      expect(pre_check).to be_valid
-    end
-
-    it "does not allow linking to a permit application the creator does not own" do
-      permit_application = create(:permit_application)
-      other_user = create(:user)
-
-      pre_check =
-        build(
-          :pre_check,
-          creator: other_user,
-          permit_application: permit_application
-        )
-
-      expect(pre_check).not_to be_valid
-      expect(pre_check.errors[:permit_application]).to include("is invalid")
+    it "is valid with factory defaults" do
+      expect(build(:pre_check)).to be_valid
     end
   end
 
   describe "search_data" do
     it "includes searchable attributes" do
-      creator = create(:user)
-      permit_project = create(:permit_project, title: "Delegated Title")
-      permit_application =
-        create(
-          :permit_application,
-          permit_project: permit_project,
-          submitter: creator
-        )
-      pre_check =
-        create(
-          :pre_check,
-          creator: creator,
-          permit_application: permit_application
-        )
+      pre_check = create(:pre_check)
 
       expect(pre_check.search_data).to include(
         id: pre_check.id,
-        title: pre_check.title,
         external_id: pre_check.external_id,
         full_address: pre_check.full_address,
         status: pre_check.status,
         creator_id: pre_check.creator_id,
-        permit_project_id: pre_check.permit_project&.id,
-        jurisdiction_id: pre_check.jurisdiction&.id,
-        permit_application_id: pre_check.permit_application_id
+        jurisdiction_id: pre_check.jurisdiction_id,
+        sandbox_id: pre_check.sandbox_id
       )
-    end
-  end
-
-  describe "ProjectItem behavior" do
-    it "delegates project fields from permit application" do
-      creator = create(:user)
-      permit_project = create(:permit_project, title: "My permit")
-      permit_application =
-        create(
-          :permit_application,
-          permit_project: permit_project,
-          submitter: creator
-        )
-      pre_check =
-        create(
-          :pre_check,
-          creator: creator,
-          permit_application: permit_application
-        )
-
-      expect(pre_check.title).to eq("My permit")
     end
   end
 
@@ -148,6 +95,27 @@ RSpec.describe PreCheck, type: :model do
 
     it "returns 0 when user has no unviewed completed pre-checks" do
       expect(PreCheck.unviewed_count_for_user(user.id)).to eq(0)
+    end
+  end
+
+  describe "#completed_event_notification_data" do
+    it "tags the sandbox and counts unviewed pre-checks in that sandbox only" do
+      user = create(:user)
+      sandbox = published_sandbox
+      create(:pre_check, :complete, creator: user, viewed_at: nil)
+      sandboxed =
+        create(
+          :pre_check,
+          :complete,
+          creator: user,
+          viewed_at: nil,
+          sandbox: sandbox
+        )
+
+      object_data = sandboxed.completed_event_notification_data["object_data"]
+
+      expect(object_data["sandbox_id"]).to eq(sandbox.id)
+      expect(object_data["unviewed_count"]).to eq(1)
     end
   end
 

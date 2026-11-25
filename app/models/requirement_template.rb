@@ -1,10 +1,13 @@
 class RequirementTemplate < ApplicationRecord
-  SEARCH_INCLUDES = %i[
-    published_template_version
-    draft_template_versions
-    last_three_deprecated_template_versions
-    scheduled_template_versions
-    template_category
+  SEARCH_INCLUDES = [
+    :published_template_version,
+    :draft_template_versions,
+    :last_three_deprecated_template_versions,
+    :scheduled_template_versions,
+    :template_category,
+    :jurisdiction_requirement_templates,
+    :enabled_jurisdictions,
+    { taggings: :tag }
   ]
 
   searchkick searchable: %i[description current_version nickname tags],
@@ -19,6 +22,8 @@ class RequirementTemplate < ApplicationRecord
            dependent: :destroy
   has_many :requirement_blocks, through: :requirement_template_sections
   has_many :requirements, through: :requirement_blocks
+  has_one :explainer, dependent: :destroy
+  has_many :jurisdiction_explainers, dependent: :destroy
   has_many :template_versions,
            -> { order(version_date: :desc) },
            dependent: :destroy
@@ -37,6 +42,7 @@ class RequirementTemplate < ApplicationRecord
            end,
            class_name: "TemplateVersion"
   has_many :jurisdiction_requirement_templates, dependent: :destroy
+  has_many :explainer_related_templates, dependent: :destroy
   has_many :enabled_jurisdictions,
            through: :jurisdiction_requirement_templates,
            source: :jurisdiction
@@ -139,7 +145,8 @@ class RequirementTemplate < ApplicationRecord
       # All jurisdictions minus those explicitly disabled
       Jurisdiction.count - disabled_count
     else
-      # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled
+      # Jurisdictions with access (via JurisdictionRequirementTemplate) minus disabled.
+      # count, not size: size caches an empty collection, so later inserts are missed.
       access_count = jurisdiction_requirement_templates.count
       # Only count disabled ones that actually have access
       disabled_with_access_count =
@@ -290,7 +297,7 @@ class RequirementTemplate < ApplicationRecord
           if available_globally
             Jurisdiction.count
           else
-            jurisdiction_requirement_templates.count
+            jurisdiction_requirement_templates.size
           end
         ),
       template_category_id: template_category_id,

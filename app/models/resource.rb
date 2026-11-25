@@ -2,7 +2,8 @@ class Resource < ApplicationRecord
   belongs_to :jurisdiction, inverse_of: :resources
   has_one :resource_document, dependent: :destroy
 
-  enum category: {
+  enum :category,
+       {
          planning_zoning: "planning_zoning",
          bylaws_requirements: "bylaws_requirements",
          gis_mapping: "gis_mapping",
@@ -10,7 +11,9 @@ class Resource < ApplicationRecord
          project_meeting_authorization: "project_meeting_authorization"
        }
 
-  enum resource_type: { file: "file", link: "link" }
+  enum :resource_type, { file: "file", link: "link" }
+
+  attribute :show_on_about, :boolean, default: true
 
   validates :jurisdiction, presence: true
   validates :category, presence: true
@@ -21,7 +24,10 @@ class Resource < ApplicationRecord
 
   accepts_nested_attributes_for :resource_document, allow_destroy: true
 
+  before_validation :assign_about_position, on: :create
+
   scope :by_category, ->(category) { where(category: category) }
+  scope :on_about, -> { where(show_on_about: true).order(:about_position) }
 
   def self.resource_reminder_notification_data(jurisdiction_id, resource_ids)
     {
@@ -36,6 +42,14 @@ class Resource < ApplicationRecord
   end
 
   private
+
+  def assign_about_position
+    return unless about_position.nil?
+    return unless jurisdiction
+
+    self.about_position =
+      (jurisdiction.resources.maximum(:about_position) || -1) + 1
+  end
 
   def resource_document_must_exist_for_file_type
     return unless resource_type == "file"

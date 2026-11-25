@@ -1,0 +1,218 @@
+name,locality_type,incorporation_date,postal_address,regional_district
+Alberni-Clayoquot,regional district,"April 21, 1966","3008 Fifth Ave, Port Alberni, V9Y2E3",
+Port Alberni,city,"October 28, 1967","4850 Argyle St, Port Alberni, V9Y1V8",Alberni-Clayoquot
+Tofino,district,"February 05, 1932","PO Box 9 121 - 3rd St, Tofino, V0R2Z0",Alberni-Clayoquot
+Ucluelet,district,"February 26, 1952","PO Box 999 200 Main St, Ucluelet, V0R3A0",Alberni-Clayoquot
+
+Bulkley-Nechako,regional district,"February 01, 1966","PO Box 820 37 - 3rd Ave, Burns Lake, V0J1E0",
+Burns Lake,corporation of the village,"December 06, 1923","Box 570 15 - 3rd Ave, Burns Lake, V0J1E0",Bulkley-Nechako
+Fort St. James,district,"December 19, 1952","PO Box 640 477 Stuart Dr West, Fort St. James, V0J1P0",Bulkley-Nechako
+Fraser Lake,village,"September 27, 1966","Box 430 210 Carrier Cres, Fraser Lake, V0J1S0",Bulkley-Nechako
+Granisle,village,"June 29, 1971","Box 128 1 McDonald Ave, Granisle, V0J1W0",Bulkley-Nechako
+Houston,district,"March 04, 1957","Box 370 3367 - 12th St, Houston, V0J1Z0",Bulkley-Nechako
+Smithers,town,"October 06, 1921","Box 879 1027 Aldous St, Smithers, V0J2N0",Bulkley-Nechako
+Telkwa,corporation of the village,"July 18, 1952","PO Box 220 1415 Hankin Ave, Telkwa, V0J2X0",Bulkley-Nechako
+Vanderhoof,district,"January 22, 1926","PO Box 900 160 Connaught St, Vanderhoof, V0J3A0",Bulkley-Nechako
+
+The Capital,regional district,"February 01, 1966","PO Box 1000 625 Fisgard St, Victoria, V8W2S6",
+Central Saanich,corporation of the district,"December 12, 1950","1903 Mt. Newton Cross Rd, Saanichton, V8M2A9",The Capital
+Colwood,city,"June 24, 1985","3300 Wishart Rd, Victoria, V9C1R1",The Capital
+Esquimalt,corporation of the township,"September 01, 1912","1229 Esquimalt Rd, Victoria, V9A3P1",The Capital
+Highlands,district,"December 07, 1993","1980 Millstream Rd, Victoria, V9B6H1",The Capital
+Langford,city,"December 08, 1992","877 Goldstream Ave 2nd Fl 2nd Floor, Victoria, V9B2X8",The Capital
+Metchosin,district,"December 03, 1984","4450 Happy Valley Rd, Victoria, V9C3Z3",The Capital
+North Saanich,district,"August 19, 1965","1620 Mills Rd, North Saanich, V8L5S9",The Capital
+Oak Bay,corporation of the district,"July 02, 1906","2167 Oak Bay Ave, Victoria, V8R1G2",The Capital
+Saanich,corporation of the district,"March 01, 1906","770 Vernon Ave, Victoria, V8X2W7",The Capital
+Sidney,town,"September 30, 1952","2440 Sidney Ave, Sidney, V8L1Y7",The Capital
+Sooke,district,"December 07, 1999","2205 Otter Point Rd, Sooke, V9Z1J2",The Capital
+Victoria,corporation of the city,"August 02, 1862","1 Centennial Square, Victoria, V8W1P6",The Capital
+View Royal,town,"December 05, 1988","45 View Royal Ave, Victoria, V9B1A6",The Capital
+
+Cariboo,regional district,"July 09, 1968","180 North 3rd Ave Suite D Suite D, Williams Lake, V2G2A4",
+100 Mile House,district,"July 27, 1965","Box 340 385 Birch Ave, 100 Mile House, V0K2E0",Cariboo
+Quesnel,city,"March 21, 1928","410 Kinchant St, Quesnel, V2J7J5",Cariboo
+Wells,district,"June 29, 1998","Box 219 4243 Sanders Ave, Wells, V0K2R0",Cariboo
+Williams Lake,city,"March 15, 1929","450 Mart St, Williams Lake, V2G1N3",Cariboo
+
+Central Coast,regional district,"July 16, 1968","PO Box 186 626 Cliff St, Bella Coola, V0T1C0",
+
+Central Kootenay,regional district,"November 30, 1965","Box 590 202 Lakeside Dr, Nelson, V1L5R4",
+Castlegar,city,"January 01, 1974","460 Columbia Ave, Castlegar, V1N1G7",Central Kootenay
+Creston,town,"May 14, 1924","PO Box 1339 238 - 10th Ave North, Creston, V0B1G0",Central Kootenay
+Kaslo,village,"August 14, 1893","Box 576 312 Fourth St, Kaslo, V0G1M0",Central Kootenay
+Nakusp,village,"November 24, 1964","PO Box 280 91 - 1st St NW, Nakusp, V0G1R0",Central Kootenay
+Nelson,corporation of the city,"March 18, 1897","101 - 310 Ward St, Nelson, V1L5S4",Central Kootenay
+New Denver,corporation of the village,"January 12, 1929","Box 40 115 Slocan Ave, New Denver, V0G1S0",Central Kootenay
+Salmo,corporation of the village,"October 30, 1946","PO Box 1000 423 Davies Ave, Salmo, V0G1Z0",Central Kootenay
+Silverton,corporation of the village,"May 06, 1930","421 Lake Ave 421 Lake Ave, Silverton, V0G2B0",Central Kootenay
+Slocan,village,"June 01, 1901","Box 50 503 Slocan St, Slocan, V0G2C0",Central Kootenay
+
+Central Okanagan,regional district,"August 24, 1967","1450 KLO Rd, Kelowna, V1W3Z4",
+Kelowna,city,"May 04, 1905","1435 Water St, Kelowna, V1Y1J4",Central Okanagan
+Lake Country,district,"May 02, 1995","10150 Bottom Wood Lake Rd, Lake Country, V4V2M1",Central Okanagan
+Peachland,corporation of the district,"January 01, 1909","5806 Beach Ave, Peachland, V0H1X7",Central Okanagan
+West Kelowna,city,"December 06, 2007","2760 Cameron Rd, West Kelowna, V1Z2T6",Central Okanagan
+
+Columbia Shuswap,regional district,"November 30, 1965","PO Box 978 781 Marine Park Dr NE, Salmon Arm, V1E4P1",
+Golden,town,"June 26, 1957","Box 350 810 South 9th Ave, Golden, V0A1H0",Columbia Shuswap
+Revelstoke,city,"March 01, 1899","Box 170 216 Mackenzie Ave, Revelstoke, V0E2S0",Columbia Shuswap
+Salmon Arm,city,"May 15, 1905","Box 40 500 - 2 Ave NE, Salmon Arm, V1E4N2",Columbia Shuswap
+Sicamous,district,"December 04, 1989","Box 219 PO BOX 219, Sicamous, V0E2V0",Columbia Shuswap
+
+Comox Valley,regional district,"February 15, 2008","770 Harmston Ave, Courtenay, V9N0G8",
+Comox,town,"January 14, 1946","1809 Beaufort Ave, Comox, V9M1R9",Comox Valley
+Courtenay,corporation of the city,"January 01, 1915","830 Cliffe Ave, Courtenay, V9N2J7",Comox Valley
+Cumberland,corporation of the village,"January 01, 1898","Box 340 2673 Dunsmuir Ave, Cumberland, V0R1S0",Comox Valley
+
+Cowichan Valley,regional district,"September 26, 1967","175 Ingram St, Duncan, V9L1N8",
+Duncan,corporation of the city,"March 04, 1912","200 Craig St 200 Craig St, Duncan, V9L1W3",Cowichan Valley
+Ladysmith,town,"June 03, 1904","PO Box 220 410 Esplanade, Ladysmith, V9G1A2",Cowichan Valley
+Lake Cowichan,town,"August 19, 1944","PO Box 860 39 South Shore Rd, Lake Cowichan, V0R2G0",Cowichan Valley
+North Cowichan,corporation of the district,"June 18, 1873","Box 278 7030 Trans Canada Hwy, North Cowichan, V9L3X4",Cowichan Valley
+
+East Kootenay,regional district,"November 30, 1965","19 - 24th Ave South, Cranbrook, V1C3H8",
+Canal Flats,village,"June 29, 2004","PO Box 159 8853 Grainger Rd, Canal Flats, V0B1B0",East Kootenay
+Cranbrook,corporation of the city,"November 01, 1905","40 - 10th Ave South, Cranbrook, V1C2M8",East Kootenay
+Elkford,district,"July 16, 1971","Box 340 816 Michel Rd, Elkford, V0B1H0",East Kootenay
+Fernie,corporation of the city,"July 28, 1904","Box 190 501 - 3rd Ave, Fernie, V0B1M0",East Kootenay
+Invermere,district,"May 22, 1951","Box 339 914 - 8th Ave, Invermere, V0A1K0",East Kootenay
+Kimberley,city,"March 29, 1944","340 Spokane St, Kimberley, V1A2E8",East Kootenay
+Radium Hot Springs,village,"December 10, 1990","PO Box 340 4836A Radium Blvd, Radium Hot Springs, V0A1M0",East Kootenay
+Sparwood,district,"October 06, 1964","Box 520 136 Spruce Ave, Sparwood, V0B2G0",East Kootenay
+
+Fraser Valley,regional district,"December 12, 1995","1 - 45950 Cheam Ave, Chilliwack, V2P1N6",
+Abbotsford,city,"December 12, 1995","32315 South Fraser Way, Abbotsford, V2T1W7",Fraser Valley
+Chilliwack,city,"April 26, 1873","8550 Young Rd, Chilliwack, V2P8A4",Fraser Valley
+Harrison Hot Springs,village,"May 27, 1949","Box 160 495 Hot Springs Rd, Harrison Hot Springs, V0M1K0",Fraser Valley
+Hope,district,"April 06, 1929","Box 609 325 Wallace St, Hope, V0X1L0",Fraser Valley
+Kent,corporation of the district,"January 01, 1895","Box 70 7170 Cheam Ave, Agassiz, V0M1A0",Fraser Valley
+Mission,city,"June 02, 1892","Box 20 8645 Stave Lake St, Mission, V2V4L9",Fraser Valley
+
+Fraser-Fort George,regional district,"March 08, 1967","155 George St, Prince George, V2L1P8",
+Mackenzie,district,"May 19, 1966","Bag 340 1 Mackenzie Blvd, Mackenzie, V0J2C0",Fraser-Fort George
+McBride,corporation of the village,"April 07, 1932","Box 519 100 Robson Centre, McBride, V0J2E0",Fraser-Fort George
+Prince George,city,"March 06, 1915","1100 Patricia Blvd, Prince George, V2L3V9",Fraser-Fort George
+Valemount,village,"December 13, 1962","PO Box 168 735 Cranberry Lake Rd, Valemount, V0E2Z0",Fraser-Fort George
+
+Kitimat-Stikine,regional district,"September 14, 1967","300 - 4545 Lazelle Ave, Terrace, V8G4E1",
+Hazelton,corporation of the village,"February 15, 1956","Box 40 4310 Field St, Hazelton, V0J1Y0",Kitimat-Stikine
+Kitimat,district,"March 31, 1953","270 City Centre, Kitimat, V8C2H7",Kitimat-Stikine
+New Hazelton,district,"December 15, 1980","Box 340 3026 Bowser St, New Hazelton, V0J2J0",Kitimat-Stikine
+Stewart,district,"May 16, 1930","Box 460 705 Brightwell St, Stewart, V0T1W0",Kitimat-Stikine
+Terrace,city,"December 31, 1927","3215 Eby St, Terrace, V8G2X8",Kitimat-Stikine
+
+Kootenay Boundary,regional district,"February 22, 1966","202 - 843 Rossland Ave, Trail, V1R4S8",
+Fruitvale,corporation of the village,"November 04, 1952","Box 370 1947 Beaver St, Fruitvale, V0G1L0",Kootenay Boundary
+Grand Forks,corporation of the city,"April 15, 1897","Box 220 7217 - 4th St, Grand Forks, V0H1H0",Kootenay Boundary
+Greenwood,corporation of the city,"July 12, 1897","PO Box 129 202 Government Ave, Greenwood, V0H1J0",Kootenay Boundary
+Midway,village,"May 25, 1967","Box 160 661 Eighth Ave, Midway, V0H1M0",Kootenay Boundary
+Montrose,corporation of the village,"June 22, 1956","Box 510 565 - 11th Ave, Montrose, V0G1P0",Kootenay Boundary
+Rossland,corporation of the city,"March 18, 1897","Box 1179 1899 Columbia Ave, Rossland, V0G1Y0",Kootenay Boundary
+Trail,city,"June 14, 1901","1394 Pine Ave, Trail, V1R4E6",Kootenay Boundary
+Warfield,corporation of the village,"December 08, 1952","555 Schofield Hwy, Trail, V1R2G7",Kootenay Boundary
+
+Metro Vancouver,regional district,"June 29, 1967","4515 Central Blvd, Burnaby, V5H0C6",
+Anmore,village,"December 07, 1987","2697 Sunnyside Rd, Anmore, V3H5G9",Metro Vancouver
+Belcarra,village,"August 22, 1979","4084 Bedwell Bay Rd, Belcarra, V3H4P8",Metro Vancouver
+Bowen Island,municipality,"December 04, 1999","981 Artisan Lane, Bowen Island, V0N1G2",Metro Vancouver
+Burnaby,city,"September 22, 1892","4949 Canada Way, Burnaby, V5G1M2",Metro Vancouver
+Coquitlam,city,"July 25, 1891","3000 Guildford Way, Coquitlam, V3B7N2",Metro Vancouver
+Delta,city,"November 10, 1879","4500 Clarence Taylor Cres, Delta, V4K3E2",Metro Vancouver
+Langley,city,"March 15, 1955","20399 Douglas Cres, Langley, V3A4B3",Metro Vancouver
+Langley,corporation of the township,"April 26, 1873","20338 - 65 Ave, Langley, V2Y3J1",Metro Vancouver
+Lions Bay,village,"December 17, 1970","Box 141 400 Centre Rd, Lions Bay, V0N2E0",Metro Vancouver
+Maple Ridge,city,"September 12, 1874","11995 Haney Pl, Maple Ridge, V2X6A9",Metro Vancouver
+New Westminster,corporation of the city,"July 16, 1860","511 Royal Ave, New Westminster, V3L1H9",Metro Vancouver
+North Vancouver,corporation of the city,"May 13, 1907","141 West 14th St, North Vancouver, V7M1H9",Metro Vancouver
+North Vancouver,corporation of the district,"August 10, 1891","355 West Queens Rd, North Vancouver, V7N4N5",Metro Vancouver
+Pitt Meadows,city,"April 25, 1914","12007 Harris Rd, Pitt Meadows, V3Y2B5",Metro Vancouver
+Port Coquitlam,corporation of the city,"March 07, 1913","2580 Shaughnessy St, Port Coquitlam, V3C2A8",Metro Vancouver
+Port Moody,city,"March 11, 1913","100 Newport Dr 100 Newport Dr, Port Moody, V3H5C3",Metro Vancouver
+Richmond,city,"November 10, 1879","6911 No. 3 Rd, Richmond, V6Y2C1",Metro Vancouver
+Surrey,city,"November 10, 1879","13450 - 104 Ave, Surrey, V3T1V8",Metro Vancouver
+Vancouver,city,"April 06, 1886","453 West 12th Ave, Vancouver, V5Y1V4",Metro Vancouver
+West Vancouver,corporation of the district,"March 15, 1912","750 - 17th St, West Vancouver, V7V3T3",Metro Vancouver
+White Rock,corporation of the city,"April 15, 1957","15322 Buena Vista Ave, White Rock, V4B1Y6",Metro Vancouver
+Tsleil-Waututh Nation,first nation,,"3075 Takaya Drive, North Vancouver, V7H3A8",Metro Vancouver
+Musqueam Indian Band (X’Muzk’I’Um),first nation,,"6735 Salish Drive, Vancouver, V6N4C4",Metro Vancouver
+
+Mount Waddington,regional district,"June 13, 1966","Box 729 2044 McNeill, Port McNeill, V0N2R0",
+Alert Bay,corporation of the village,"January 14, 1946","Bag Service 2800 15 Maple Rd, Alert Bay, V0N1A0",Mount Waddington
+Port Alice,village,"June 16, 1965","Box 130 1061 Marine Dr, Port Alice, V0N2N0",Mount Waddington
+Port Hardy,district,"May 05, 1966","PO Box 68 7360 Columbia St, Port Hardy, V0N2P0",Mount Waddington
+Port McNeill,town,"February 18, 1966","Box 728 1775 Grenville Pl, Port McNeill, V0N2R0",Mount Waddington
+
+Nanaimo,regional district,"August 24, 1967","6300 Hammond Bay Rd, Nanaimo, V9T6N2",
+Lantzville,district,"June 25, 2003","PO Box 100 7192 Lantzville Rd, Lantzville, V0R2H0",Nanaimo
+Nanaimo,city,"December 24, 1874","455 Wallace St, Nanaimo, V9R5J6",Nanaimo
+Parksville,city,"June 19, 1945","PO Box 1390 100 Jensen Ave East, Parksville, V9P2H3",Nanaimo
+Qualicum Beach,town,"May 05, 1942","PO Box 130 201 - 660 Primrose St, Qualicum Beach, V9K1S7",Nanaimo
+
+North Coast,regional district,"August 17, 1967","14 - 342 3rd Ave W, Prince Rupert, V8J1L5",
+Daajing Giids,village,"December 05, 2005","PO Box 580 903 A Oceanview Dr, Daajing Giids, V0T1S0",North Coast
+Masset,village,"May 11, 1961","Box 68 1686 Main St, Masset, V0T1M0",North Coast
+Port Clements,village,"December 31, 1975","PO Box 198 36 Cedar Ave West, Port Clements, V0T1R0",North Coast
+Port Edward,district,"June 29, 1966","PO Box 1100 770 Pacific Ave, Port Edward, V0V1G0",North Coast
+Prince Rupert,city,"March 10, 1910","424 West Third Ave, Prince Rupert, V8J1L7",North Coast
+
+North Okanagan,regional district,"November 09, 1965","9848 Aberdeen Rd, Coldstream, V1B2K9",
+Armstrong,city,"March 31, 1913","Box 40 3570 Bridge St, Armstrong, V0E1B0",North Okanagan
+Coldstream,corporation of the district,"December 21, 1906","9901 Kalamalka Rd, Coldstream, V1B1L6",North Okanagan
+Enderby,corporation of the city,"March 01, 1905","PO Box 400 619 Cliffe Ave, Enderby, V0E1V0",North Okanagan
+Lumby,corporation of the village,"December 20, 1955","Box 430 1775 Glencaird St, Lumby, V0E2G0",North Okanagan
+Spallumcheen,corporation of the township,"July 21, 1892","4144 Spallumcheen Way, Spallumcheen, V0E1B6",North Okanagan
+Vernon,corporation of the city,"December 30, 1892","3400 - 30th St, Vernon, V1T5E6",North Okanagan
+
+Northern Rockies,regional municipality,"February 06, 2009","Bag Service 399 5319 - 50th Ave South, Fort Nelson, V0C1R0",
+
+Okanagan-Similkameen,regional district,"March 04, 1966","101 Martin St, Penticton, V2A5J9",
+Keremeos,corporation of the village,"October 30, 1956","Box 160 702 - 4th St, Keremeos, V0X1N0",Okanagan-Similkameen
+Oliver,town,"December 31, 1945","PO Box 638 35016 - 97th St, Oliver, V0H1T0",Okanagan-Similkameen
+Osoyoos,town,"January 14, 1946","Box 3010 8707 Main St, Osoyoos, V0H1V0",Okanagan-Similkameen
+Penticton,corporation of the city,"January 01, 1909","171 Main St, Penticton, V2A5A9",Okanagan-Similkameen
+Princeton,town,"September 11, 1951","PO Box 670 169 Bridge St, Princeton, V0X1W0",Okanagan-Similkameen
+Summerland,corporation of the district,"December 21, 1906","Box 159 13211 Henry Ave, Summerland, V0H1Z0",Okanagan-Similkameen
+
+Peace River,regional district,"October 31, 1967","Box 810 1981 Alaska Ave, Dawson Creek, V1G4H8",
+Chetwynd,district,"September 25, 1962","Box 357 5400 North Access Rd, Chetwynd, V0C1J0",Peace River
+Dawson Creek,corporation of the city,"May 26, 1936","Box 150 Stn Main 10105 - 12A St, Dawson Creek, V1G4G4",Peace River
+Fort St. John,city,"December 31, 1947","10631 - 100th St, Fort St. John, V1J3Z5",Peace River
+Hudson's Hope,district,"November 16, 1965","Box 330 9904 Dudley Dr, Hudson's Hope, V0C1V0",Peace River
+Pouce Coupe,corporation of the village,"January 06, 1932","Box 190 5011 - 49 Ave, Pouce Coupe, V0C2C0",Peace River
+Taylor,district,"August 23, 1958","PO Box 300 10007 - 100th A St, Taylor, V0C2K0",Peace River
+Tumbler Ridge,district,"April 09, 1981","Box 100 305 Founders St, Tumbler Ridge, V0C2W0",Peace River
+
+qathet,regional district,"December 19, 1967","202 - 4675 Marine Ave, Powell River, V8A2L2",
+Powell River,city,"October 15, 1955","6910 Duncan St, Powell River, V8A1V4",qathet
+
+Squamish-Lillooet,regional district,"October 03, 1968","Box 219 1350 Aster St, Pemberton, V0N2L0",
+Lillooet,district,"December 31, 1946","Box 610 615 Main St, Lillooet, V0K1V0",Squamish-Lillooet
+Pemberton,village,"July 20, 1956","Box 100 7400 Prospect St, Pemberton, V0N2L0",Squamish-Lillooet
+Squamish,district,"May 18, 1948","Box 310 37955 Second Ave, Squamish, V8B0A3",Squamish-Lillooet
+Whistler,resort municipality,"September 06, 1975","4325 Blackcomb Way, Whistler, V8E0X5",Squamish-Lillooet
+
+Strathcona,regional district,"February 15, 2008","301 - 990 Cedar St, Campbell River, V9W7Z8",
+Campbell River,city,"June 24, 1947","301 St Ann's Rd, Campbell River, V9W4C7",Strathcona
+Gold River,village,"August 26, 1965","Box 610 499 Muchalat Dr, Gold River, V0P1G0",Strathcona
+Sayward,village,"June 27, 1968","PO Box 29 652 K'Husam Way, Sayward, V0P1R0",Strathcona
+Tahsis,village,"June 17, 1970","PO Box 219 977 South Maquinna Dr, Tahsis, V0P1X0",Strathcona
+Zeballos,corporation of the village,"June 27, 1952","Box 127 157 Maquinna Ave, Zeballos, V0P2A0",Strathcona
+
+Sunshine Coast,regional district,"January 04, 1967","1975 Field Rd, Sechelt, V0N3A1",
+Gibsons,town,"March 04, 1929","Box 340 474 South Fletcher Rd, Gibsons, V0N1V0",Sunshine Coast
+Sechelt,district,"February 15, 1956","PO Box 129 5797 Cowrie St, 2nd Floor, Sechelt, V0N3A0",Sunshine Coast
+Sechelt Indian Government,district,"March 17, 1988","PO Box 740 5555 Sunshine Coast Hwy, Sechelt, V0N3A0",Sunshine Coast
+
+Thompson-Nicola,regional district,"November 24, 1967","300 - 465 Victoria St, Kamloops, V2C2A9",
+Ashcroft,corporation of the village,"June 27, 1952","Box 129 601 Bancroft St, Ashcroft, V0K1A0",Thompson-Nicola
+Barriere,district,"December 04, 2007","PO Box 219 4936 Barriere Town Rd, Barriere, V0E1E0",Thompson-Nicola
+Cache Creek,village,"November 28, 1967","Box 7 1389 Quartz Rd, Cache Creek, V0K1H0",Thompson-Nicola
+Chase,village,"April 22, 1969","Box 440 826 Okanagan Ave, Chase, V0E1M0",Thompson-Nicola
+Clearwater,district,"December 03, 2007","PO Box 157 132 Station Rd, Clearwater, V0E1N0",Thompson-Nicola
+Clinton,village,"July 16, 1963","Box 309 1423 Cariboo Hwy, Clinton, V0K1K0",Thompson-Nicola
+Kamloops,city,"October 17, 1967","7 Victoria St West, Kamloops, V2C1A2",Thompson-Nicola
+Logan Lake,district,"November 10, 1970","Box 190 No. 1 Opal Dr, Logan Lake, V0K1W0",Thompson-Nicola
+Lytton,corporation of the village,"May 03, 1945","Box 100 380 Main St, Lytton, V0K1Z0",Thompson-Nicola
+Merritt,city,"April 01, 1911","Box 189 2185 Voght St, Merritt, V1K1B8",Thompson-Nicola
+Sun Peaks Mountain,resort municipality,"June 03, 2010","PO Box 1002 106 - 3270 Village Way, Sun Peaks, V0E5N0",Thompson-Nicola

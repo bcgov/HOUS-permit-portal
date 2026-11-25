@@ -16,9 +16,11 @@ import {
 } from "@chakra-ui/react"
 import { List, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { LinkProps, useLocation } from "react-router-dom"
+import { APP_NAV_CHROME_ID } from "../../../hooks/use-scroll-aware-nav-bar"
+import { feedbackController } from "../../../services/observability"
 import { useMst } from "../../../setup/root"
 import { EUserRoles } from "../../../types/enums"
 import { RouterLink } from "../../shared/navigation/router-link"
@@ -73,11 +75,32 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const { currentUser } = userStore
   const { loggedIn } = sessionStore
   const { isOpen, onOpen, onClose, onToggle } = useDisclosure()
+  const afterMenuClose = useRef<() => void>()
+  const drawerPresent = useRef(false)
+  useEffect(() => {
+    if (isOpen) drawerPresent.current = true
+  }, [isOpen])
+  useEffect(() => {
+    const beforeOpen = () =>
+      new Promise<void>((resolve) => {
+        if (!drawerPresent.current) resolve()
+        else {
+          afterMenuClose.current = resolve
+          onClose()
+        }
+      })
+    feedbackController.beforeOpen = beforeOpen
+    return () => {
+      if (feedbackController.beforeOpen === beforeOpen) feedbackController.beforeOpen = undefined
+      afterMenuClose.current?.()
+      afterMenuClose.current = undefined
+    }
+  }, [onClose])
   const [menuOffset, setMenuOffset] = useState<string>("var(--app-navbar-height)")
 
   const handleToggle = () => {
     if (!isOpen) {
-      const nav = document.getElementById("mainNav")
+      const nav = document.getElementById(APP_NAV_CHROME_ID)
       if (nav) {
         setMenuOffset(`${nav.getBoundingClientRect().bottom}px`)
       }
@@ -89,6 +112,10 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   useEffect(() => {
     onClose()
   }, [location.pathname])
+
+  const closeOnLinkClick = (event: React.MouseEvent) => {
+    if ((event.target as HTMLElement).closest("a[href]")) onClose()
+  }
 
   // Close menu when clicking outside (including the navbar above the drawer)
   useEffect(() => {
@@ -124,13 +151,13 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         />
         <StaticLinkItem
           label={t("site.navMenu.projectReadiness.stepCodes.label")}
-          to="/project-readiness-tools/look-up-step-codes-requirements-for-your-project"
+          to="/project-readiness-tools/look-up-step-codes-requirements"
           description={t("site.navMenu.projectReadiness.stepCodes.description")}
         />
         {siteConfigurationStore.codeComplianceEnabled && (
           <StaticLinkItem
             label={t("site.navMenu.projectReadiness.bcBuildingCode.label")}
-            to="/pre-checks"
+            to="/project-readiness-tools/pre-check"
             description={t("site.navMenu.projectReadiness.bcBuildingCode.description")}
           />
         )}
@@ -142,7 +169,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
   const aboutColumn = (
     <VStack align="flex-start" spacing={4} w="full">
       <MenuSection title={t("site.navMenu.sections.about")}>
-        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/welcome" />
+        <StaticLinkItem label={t("site.navMenu.about.aboutHub.label")} to="/about" />
         <StaticLinkItem
           label={t("site.navMenu.about.participatingCommunities.label")}
           to="/jurisdictions"
@@ -162,6 +189,11 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           label={t("site.navMenu.about.videos.label")}
           to="/videos"
           description={t("site.navMenu.about.videos.description")}
+        />
+        <StaticLinkItem
+          label={t("site.navMenu.about.infoDocuments.label")}
+          to="/info-documents"
+          description={t("site.navMenu.about.infoDocuments.description")}
         />
       </MenuSection>
     </VStack>
@@ -225,7 +257,17 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
         </Button>
       </Show>
 
-      <Drawer isOpen={isOpen} placement="top" onClose={onClose} size="full">
+      <Drawer
+        isOpen={isOpen}
+        placement="top"
+        onClose={onClose}
+        size="full"
+        onCloseComplete={() => {
+          drawerPresent.current = false
+          afterMenuClose.current?.()
+          afterMenuClose.current = undefined
+        }}
+      >
         <DrawerOverlay mt={menuOffset} zIndex={1400} />
         <DrawerContent
           mt={menuOffset}
@@ -235,7 +277,7 @@ export const NavBarMenu = observer(function NavBarMenu({}: INavBarMenuProps) {
           flexDirection="column"
           h="auto"
         >
-          <DrawerBody flex="1" minH={0} overflow="auto">
+          <DrawerBody flex="1" minH={0} overflow="auto" onClick={closeOnLinkClick}>
             <MenuCloseProvider value={onClose}>
               <Container maxW="container.lg" px={8}>
                 <Grid templateColumns={{ base: "1fr", md: "3fr 3fr 2fr" }} gap={8} py={5}>

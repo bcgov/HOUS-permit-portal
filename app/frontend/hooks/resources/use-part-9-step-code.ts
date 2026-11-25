@@ -47,10 +47,12 @@ export const usePart9StepCode = () => {
   const currentStepCode = stepCodeStore.currentStepCode as IPart9StepCode
 
   useEffect(() => {
-    if (currentStepCode && Object.values(EStepCodeChecklistStage).includes(stage as EStepCodeChecklistStage)) {
-      currentStepCode.setCurrentStage(stage as EStepCodeChecklistStage)
-    }
-  }, [currentStepCode, stage])
+    if (!currentStepCode) return
+    if (!Object.values(EStepCodeChecklistStage).includes(stage as EStepCodeChecklistStage)) return
+    // Re-apply when a StepCode merge resets currentStage away from the route stage.
+    if (currentStepCode.currentStage === stage) return
+    currentStepCode.setCurrentStage(stage as EStepCodeChecklistStage)
+  }, [currentStepCode, stage, currentStepCode?.currentStage])
 
   const checklist = currentStepCode?.currentChecklist
 

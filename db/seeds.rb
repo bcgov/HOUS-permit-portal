@@ -43,7 +43,7 @@ User.find_or_create_by(omniauth_username: "super_admin") do |user|
   user.password = "P@ssword1"
   user.confirmed_at = Time.now
   user.omniauth_uid = "A41927C69D6549B8A396FCA748F53502"
-  user.omniauth_provider = "bceidbasic"
+  user.omniauth_provider = "idir"
   user.omniauth_email = "super_admin@example.com"
   user.omniauth_username = "super_admin"
 end
@@ -87,6 +87,20 @@ User.find_or_create_by(omniauth_username: "reviewer") do |user|
   user.omniauth_uid = "8505910FBD594495AC899BC6653F3544"
   user.omniauth_provider = "bceidbasic"
   user.omniauth_email = "reviewer@example.com"
+end
+
+User.find_or_create_by(omniauth_username: "technical_support") do |user|
+  user.role = :technical_support
+  user.first_name = "TechnicalSupport"
+  user.last_name = "McUser"
+  user.email = "technical_support@example.com"
+  user.password = "P@ssword1"
+  user.jurisdictions = [north_van]
+  user.confirmed_at = Time.now
+  user.omniauth_uid = "B7F3C2A19E8D4F6A9C1E5B0D8472A3F1"
+  user.omniauth_provider = "bceidbasic"
+  user.omniauth_email = "technical_support@example.com"
+  user.omniauth_username = "techsupport1"
 end
 
 User.find_or_create_by(omniauth_username: "submitter") do |user|
@@ -133,8 +147,7 @@ Jurisdiction.all.each do |j|
     .where(email: "#{j.name.parameterize}@laterolabs.com")
     .first_or_create!(
       email: "#{j.name.parameterize}@laterolabs.com",
-      confirmed_at: Time.now,
-      default: true
+      confirmed_at: Time.now
     )
   j.update!(inbox_enabled: true, show_about_page: true)
 end
@@ -144,20 +157,20 @@ if north_van
     north_van.meeting_submission_contacts.find_or_initialize_by(
       email: "north-van-project-meetings@laterolabs.com"
     )
-  meeting_contact.update!(confirmed_at: Time.now, default: false)
+  meeting_contact.update!(confirmed_at: Time.now)
 
   property_information_contact =
     north_van.property_information_submission_contacts.find_or_initialize_by(
       email: "north-van-property-information@laterolabs.com"
     )
-  property_information_contact.update!(confirmed_at: Time.now, default: false)
+  property_information_contact.update!(confirmed_at: Time.now)
 
   unless north_van.resources.project_meeting_authorization.exists?
     north_van.resources.create!(
       category: :project_meeting_authorization,
-      resource_type: :link,
       title: "Project meeting authorization",
-      link_url: "https://example.com/north-van-project-meeting-authorization"
+      resource_type: :link,
+      link_url: "https://example.com/project-meeting-authorization"
     )
   end
 
@@ -187,8 +200,7 @@ if PermitApplication.first.blank?
         if jurisdiction.submission_contacts.blank?
           jurisdiction.submission_contacts.create!(
             email: jurisdiction.contacts.first.email,
-            confirmed_at: Time.now,
-            default: true
+            confirmed_at: Time.now
           )
         end
       end
@@ -370,6 +382,9 @@ if PermitApplication.first.blank?
 end
 PermitApplication.reindex
 
+puts "Seeding template categories..."
+TemplateCategorySeeder.seed!
+
 puts "Seeding jurisdiction customizations..."
 TemplateVersion
   .limit(3)
@@ -419,7 +434,7 @@ reason_codes = RevisionReason.pluck(:reason_code)
 #   new_draft           → 0 submission versions
 #   newly_submitted     → 1 submission version
 #   revisions_requested → 1+ submission versions, latest has revision request(s)
-#   resubmitted         → 2+ submission versions, earlier one has revision request(s)
+#   resubmitted         → 2+ submission versions
 #   in_review / approved / issued / withdrawn → 1 submission version (progressed from submitted)
 seed_pa_status =
   lambda do |pa, target_status|
@@ -446,10 +461,13 @@ seed_pa_status =
         updated_at: base_time
       )
 
+    requirement_json = { "id" => "requirement", "key" => "field" }
+
     case target
     when :revisions_requested
       sv1.revision_requests.create!(
         reason_code: reason_codes.sample || "other",
+        requirement_json: requirement_json,
         comment: "Please address the highlighted items.",
         user: reviewer_user
       )
@@ -458,11 +476,6 @@ seed_pa_status =
         revisions_requested_at: [base_time + 1.day, Time.current].min
       )
     when :resubmitted
-      sv1.revision_requests.create!(
-        reason_code: reason_codes.sample || "other",
-        comment: "Initial review comment.",
-        user: reviewer_user
-      )
       resub_time = base_time + rand(72..240).hours
       resub_time = [resub_time, Time.current].min
       if resub_time <= base_time
@@ -520,7 +533,7 @@ if north_van.present?
 
     idx = 0
     while inbox_test_project.reload.permit_applications.kept.count(
-            &:visible_to_reviewers?
+            &:submitted_at_least_once?
           ) < inbox_test_visible_app_target
       break if idx >= 100 # safety: avoid infinite loop if statuses fail to seed
 
@@ -539,7 +552,7 @@ if north_van.present?
       idx += 1
     end
 
-    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:visible_to_reviewers?)} reviewer-visible permit applications"
+    puts "  ✓ #{inbox_test_project_title}: #{inbox_test_project.permit_applications.kept.count(&:submitted_at_least_once?)} reviewer-visible permit applications"
   else
     puts "  (skipped Inbox test project: need submitter, reviewer, and published template versions)"
   end
@@ -770,8 +783,134 @@ if north_van_projects.size >= 10
   puts "  ✓ Seeded #{seeded_meeting_count} project meeting requests for submitter (#{submitter&.omniauth_username || "n/a"})"
 end
 
+# Charts omit themselves below Reports::Base::SMALL_N. After db:reset the rest of
+# this file leaves one submitter, one submitting jurisdiction, and no Part 9
+# step codes — which is why Super Admin reporting shows "Too few records (1)".
+puts "Seeding reporting chart sample data..."
+reporting_chart_min = Reports::Base::SMALL_N
+reporting_templates = TemplateVersion.published_on_kept_templates
+reporting_submitter = User.find_by(omniauth_username: "submitter")
+
+if reporting_templates.none? || reporting_submitter.blank? || north_van.blank?
+  puts "  (skipped reporting samples: need published templates, submitter, and North Vancouver)"
+else
+  seed_reporting_application =
+    lambda do |owner, jurisdiction|
+      project =
+        PermitProject.create!(
+          owner: owner,
+          jurisdiction: jurisdiction,
+          title: "Reporting sample — #{jurisdiction.name}",
+          full_address: "100 Seed St, #{jurisdiction.name}, BC, V0A 1A1",
+          pid: format("%09d", rand(1..999_999_999)),
+          pin: "RPT#{SecureRandom.hex(4)}"
+        )
+      application =
+        PermitApplication.create!(
+          nickname: "Reporting sample",
+          submitter: owner,
+          permit_project: project,
+          template_version: reporting_templates.sample
+        )
+      seed_pa_status.call(application, :newly_submitted)
+      application
+    end
+
+  submitter_ids_with_apps =
+    PermitApplication.kept.live.distinct.pluck(:submitter_id)
+  jurisdiction_ids_with_submissions =
+    SubmissionVersion
+      .joins(permit_application: :permit_project)
+      .merge(PermitApplication.kept)
+      .merge(PermitProject.live)
+      .distinct
+      .pluck("permit_projects.jurisdiction_id")
+
+  needed_submitters = [
+    reporting_chart_min - submitter_ids_with_apps.length,
+    0
+  ].max
+  needed_jurisdictions = [
+    reporting_chart_min - jurisdiction_ids_with_submissions.length,
+    0
+  ].max
+  extra_pairs = [needed_submitters, needed_jurisdictions].max
+
+  unused_submitters =
+    if submitter_ids_with_apps.empty?
+      User.kept.submitter.to_a
+    else
+      User.kept.submitter.where.not(id: submitter_ids_with_apps).to_a
+    end
+  unused_jurisdictions =
+    if jurisdiction_ids_with_submissions.empty?
+      Jurisdiction.order(:name).to_a
+    else
+      Jurisdiction
+        .where.not(id: jurisdiction_ids_with_submissions)
+        .order(:name)
+        .to_a
+    end
+
+  extra_pairs.times do |index|
+    owner =
+      unused_submitters[index] ||
+        User.find_or_create_by!(
+          email: "reporting_submitter_#{index + 1}@example.com"
+        ) do |user|
+          user.role = :submitter
+          user.first_name = "Reporting"
+          user.last_name = "Submitter#{index + 1}"
+          user.password = "P@ssword1"
+          user.confirmed_at = Time.current
+        end
+    jurisdiction = unused_jurisdictions[index] || north_van
+    seed_reporting_application.call(owner, jurisdiction)
+  end
+
+  existing_part_9 =
+    Part9StepCode
+      .kept
+      .joins(permit_application: :permit_project)
+      .merge(PermitApplication.kept)
+      .where(permit_projects: { sandbox_id: nil })
+      .where(
+        "EXISTS (SELECT 1 FROM submission_versions sv WHERE sv.permit_application_id = permit_applications.id)"
+      )
+      .count
+  needed_part_9 = [reporting_chart_min - existing_part_9, 0].max
+
+  needed_part_9.times do
+    host =
+      PermitApplication
+        .kept
+        .live
+        .joins(:submission_versions)
+        .where
+        .missing(:step_code)
+        .first
+    host ||= seed_reporting_application.call(reporting_submitter, north_van)
+
+    # ponytail: reporting only needs a live submitted Part 9 row. Plan-document
+    # validation requires a supporting doc the rest of seeds never attach.
+    step_code =
+      Part9StepCode.new(creator: host.submitter, permit_application: host)
+    step_code.save!(validate: false)
+  end
+
+  puts "  ✓ Reporting samples at or above #{reporting_chart_min} records for charted reports"
+end
+
+Reports::Registry.keys.each do |key|
+  %w[3_months 6_months 12_months all_time].each do |preset|
+    Rails.cache.delete("reports/#{key}/#{preset}")
+  end
+end
+
+User.reindex
 PermitApplication.reindex
 PermitProject.reindex
+StepCode.reindex
 ProjectMeeting.reindex
 
 puts "Running pending data migrations..."

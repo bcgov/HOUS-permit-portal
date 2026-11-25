@@ -16,21 +16,20 @@ export const UIStoreModel = types
   .views((self) => ({}))
   .actions((self) => ({
     showQueryParamFlash() {
-      // check if there are any messages to show in the URL params
       const query = queryString.parse(location.search)
+      const strippedLoginReason = self.rootStore.sessionStore.consumeLoginReason(query)
 
+      let strippedFlash = false
       if (query.flash) {
         const { type, title, message } = JSON.parse(query.flash as any)
         self.flashMessage.show(type, title, message, 5000) // show flash messages from the query param for longer
-        // Remove the "flash" parameter
         delete query.flash
+        strippedFlash = true
+      }
 
-        // Reconstruct the query string without the "flash" parameter
+      if (strippedLoginReason || strippedFlash) {
         const newQueryString = queryString.stringify(query)
-
-        // Update the URL
-        const newUrl = `${location.pathname}${newQueryString ? "?" + newQueryString : ""}`
-        window.history.replaceState({}, "", newUrl)
+        window.history.replaceState({}, "", `${location.pathname}${newQueryString ? "?" + newQueryString : ""}`)
       }
     },
   }))
@@ -43,9 +42,6 @@ export const UIStoreModel = types
     },
     updateRmJurisdictionSelectKey() {
       self.rmJurisdictionSelectKey = uuidv4()
-    },
-    afterCreate() {
-      self.showQueryParamFlash()
     },
   }))
 

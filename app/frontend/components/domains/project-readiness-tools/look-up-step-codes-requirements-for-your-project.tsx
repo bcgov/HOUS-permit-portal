@@ -17,14 +17,14 @@ export const LookUpStepCodesRequirementsForYourProjectScreen = () => {
       <Text fontSize="lg" color="text.primary" mb="8">
         {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.enterYourProjectAddress")}
       </Text>
-      <StepCodeLookupTool showJurisdictionOnPage={true} />
+      <StepCodeLookupTool />
       <Box>
         <Heading as="h2" size="lg" mb={5}>
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.generateAStepCodesReport")}
         </Heading>
         <Text fontSize="lg">
           {t("home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.ifYoureReadyToCreateA")}{" "}
-          <Link href="/project-readiness-tools/check-step-code-requirements/" color="text.link">
+          <Link href="/project-readiness-tools/create-a-step-codes-compliance-report/" color="text.link">
             {t(
               "home.projectReadinessTools.lookUpStepCodesRequirementsForYourProjectScreen.checkIfYourProjectMeetsBCsStepCodesRequirements"
             )}

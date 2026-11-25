@@ -106,6 +106,12 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
       `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`
     ),
 
+  [ENotificationActionType.applicationsAdded]: (notification) => {
+    const projectId = (notification.objectData as { permitProjectId?: string })?.permitProjectId
+    if (!projectId) return []
+    return showLink(`/projects/${projectId}`)
+  },
+
   [ENotificationActionType.reviewStarted]: (notification) =>
     showLink(
       `/permit-applications/${(notification.objectData as IPermitNotificationObjectData).permitApplicationId}/edit`
@@ -129,14 +135,22 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
   },
 
   [ENotificationActionType.fileUploadFailed]: (notification) => {
-    const permitApplicationId = (notification.objectData as any)?.permitApplicationId
-    if (!permitApplicationId) return []
-    return [
-      {
-        text: t("permitApplication.goToApplication"),
-        href: `/permit-applications/${permitApplicationId}/edit`,
-      },
-    ]
+    const objectData = notification.objectData as {
+      permitApplicationId?: string
+      preCheckId?: string
+    }
+    if (objectData?.permitApplicationId) {
+      return [
+        {
+          text: t("permitApplication.goToApplication"),
+          href: `/permit-applications/${objectData.permitApplicationId}/edit`,
+        },
+      ]
+    }
+    if (objectData?.preCheckId) {
+      return showLink(`/pre-checks/${objectData.preCheckId}/edit/upload-drawings`)
+    }
+    return []
   },
 
   [ENotificationActionType.resourceReminder]: (notification) => {
@@ -163,7 +177,12 @@ const linkGenerators: Partial<Record<ENotificationActionType, LinkGenerator>> = 
   [ENotificationActionType.releaseNotePublish]: (notification) => {
     const releaseNoteId = (notification.objectData as { releaseNoteId?: string })?.releaseNoteId
     if (!releaseNoteId) return []
-    return showLink(`/release-notes#release-note-${releaseNoteId}`)
+    return [
+      {
+        text: t("notification.releaseNotePublish.viewReleaseNotes"),
+        href: `/release-notes#release-note-${releaseNoteId}`,
+      },
+    ]
   },
 }
 
@@ -261,9 +280,11 @@ export const NotificationStoreModel = types
       self.fetchNotifications()
     }),
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
-      const existing = self.notifications.find((n) => n.id === payload.data.id)
+      if (!("actionType" in payload.data)) return
+      const notification = payload.data
+      const existing = self.notifications.find((n) => n.id === notification.id)
       if (!existing) {
-        self.notifications.unshift(self.convertNotificationToUseDate(payload.data))
+        self.notifications.unshift(self.convertNotificationToUseDate(notification))
       }
       self.unreadNotificationsCount = self.popoverOpen ? 0 : payload.meta.unreadCount
       self.totalPages = payload.meta.totalPages

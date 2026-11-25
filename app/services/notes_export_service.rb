@@ -5,11 +5,13 @@ class NotesExportService
     "Related item type",
     "Related item id",
     "Project number",
-    "Body"
+    "Body",
+    "Attachments"
   ].freeze
 
-  def initialize(notes)
+  def initialize(notes, viewer: nil)
     @notes = notes
+    @viewer = viewer
   end
 
   def to_csv
@@ -21,17 +23,22 @@ class NotesExportService
 
   private
 
-  attr_reader :notes
+  attr_reader :notes, :viewer
 
   def row_for(note)
     [
-      note.user&.name,
+      note.author_name_for(viewer),
       note.created_at&.iso8601,
       related_item_type(note),
       note.noteable_id,
       project_number(note),
-      plain_body(note)
+      plain_body(note),
+      attachment_names(note)
     ]
+  end
+
+  def attachment_names(note)
+    note.note_attachment_documents.filter_map(&:file_name).join(", ")
   end
 
   def related_item_type(note)

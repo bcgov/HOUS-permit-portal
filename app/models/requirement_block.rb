@@ -14,12 +14,15 @@ class RequirementBlock < ApplicationRecord
   sanitizable :display_description
 
   has_many :requirements, -> { order(position: :asc) }, dependent: :destroy
+  has_many :requirement_questions, through: :requirements
   has_many :requirement_documents,
            dependent: :destroy,
            inverse_of: :requirement_block
 
   has_many :template_section_blocks, dependent: :destroy
   has_many :requirement_template_sections, through: :template_section_blocks
+  # Used by question-bank "where used" (block → templates that include it).
+  has_many :requirement_templates, through: :requirement_template_sections
 
   accepts_nested_attributes_for :requirements, allow_destroy: true
   accepts_nested_attributes_for :requirement_documents, allow_destroy: true
@@ -38,7 +41,10 @@ class RequirementBlock < ApplicationRecord
   before_validation :set_sku, on: :create
   before_validation :ensure_unique_name, on: :create
 
-  after_commit :refresh_search_index, if: :saved_change_to_discarded_at?
+  after_commit :refresh_search_index,
+               if: -> do
+                 previously_new_record? || saved_change_to_discarded_at?
+               end
 
   acts_as_taggable_on :associations
 
@@ -52,7 +58,8 @@ class RequirementBlock < ApplicationRecord
     {
       updated_at: updated_at,
       name: name,
-      requirement_labels: requirements.pluck(:label),
+      requirement_labels:
+        requirements.includes(:requirement_question).map(&:effective_label),
       associations: association_list,
       configurations: configurations_search_list,
       discarded: discarded_at.present?,

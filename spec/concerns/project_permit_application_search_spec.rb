@@ -57,8 +57,8 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
     )
     controller.instance_variable_set(:@permit_project, project)
 
-    User.reindex
-    PermitApplication.reindex
+    reindex_search(User)
+    reindex_search(PermitApplication)
   end
 
   it "as project owner returns all project applications" do
@@ -73,6 +73,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
   end
 
   it "as submission collaborator returns only collaborated apps" do
+    silence_policy_filtered_search_warning(p2_sub, p3_resub)
     # add collaborator_user as submission collaborator on p2_sub
     collaborator =
       create(
@@ -99,6 +100,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
   end
 
   it "as unrelated submitter sees nothing under someone else's project" do
+    silence_policy_filtered_search_warning(p1_draft, p2_sub, p3_resub)
     unrelated = create(:user, :submitter)
     allow(controller).to receive(:current_user).and_return(unrelated)
     controller.perform_permit_application_search
@@ -110,7 +112,7 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
     expect(ids).to be_empty
   end
 
-  it "as reviewer does not see draft apps under project list (only submitted within jurisdiction)" do
+  it "as reviewer sees drafts and submitted apps on a project in their jurisdiction" do
     allow(controller).to receive(:current_user).and_return(reviewer)
     controller.perform_permit_application_search
     ids =
@@ -118,11 +120,11 @@ RSpec.describe Api::Concerns::Search::ProjectPermitApplications,
         .instance_variable_get(:@permit_application_search)
         .results
         .map(&:id)
-    expect(ids).to match_array([p2_sub.id, p3_resub.id])
-    expect(ids).not_to include(p1_draft.id)
+    expect(ids).to match_array([p1_draft.id, p2_sub.id, p3_resub.id])
   end
 
   it "as unrelated non-review user sees only their own submissions (none here)" do
+    silence_policy_filtered_search_warning(p1_draft, p2_sub, p3_resub)
     allow(controller).to receive(:current_user).and_return(
       unrelated_nonreview_user
     )

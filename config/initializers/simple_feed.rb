@@ -6,12 +6,7 @@ def redis_sentinel_config
     url:
       "redis://#{ENV["REDIS_SENTINEL_MASTER_SET_NAME"]}/#{ENV["SIMPLE_FEED_REDIS_DB"]&.to_i || 3}",
     driver: :ruby,
-    sentinels:
-      Resolv
-        .getaddresses(ENV["REDIS_SENTINEL_HEADLESS"])
-        .map do |address|
-          { host: address, port: (ENV["REDIS_SENTINEL_PORT"]&.to_i || 26_379) }
-        end,
+    sentinels: RedisSentinelConfiguration.sentinels,
     role: :master
   }
 end

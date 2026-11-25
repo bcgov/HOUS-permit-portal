@@ -1,8 +1,8 @@
 import { Flex, IconButton, SimpleGrid } from "@chakra-ui/react"
 import { Plus, X } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
-import React from "react"
-import { useFieldArray, useFormContext } from "react-hook-form"
+import React, { useEffect } from "react"
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useMst } from "../../../../setup/root"
 import { EFlashMessageStatus } from "../../../../types/enums"
@@ -105,6 +105,13 @@ export type TContactFieldsValues = {
 
 const ContactFields = ({ index, remove }: IContactFieldsProps) => {
   const { t } = useTranslation()
+  const { control, setValue } = useFormContext()
+  const phone = useWatch({ control, name: `contactsAttributes.${index}.phone` })
+  const hasPhone = String(phone ?? "").trim().length > 0
+
+  useEffect(() => {
+    if (!hasPhone) setValue(`contactsAttributes.${index}.extension`, "")
+  }, [hasPhone, index, setValue])
 
   return (
     <Flex direction="column" gap={2} border="1px solid" borderColor="border.light" p={4} bgColor="greys.grey10">
@@ -129,7 +136,11 @@ const ContactFields = ({ index, remove }: IContactFieldsProps) => {
       />
       <EmailFormControl validate fieldName={`contactsAttributes.${index}.email`} />
       <TextFormControl label={t("contact.fields.phone")} fieldName={`contactsAttributes.${index}.phone`} />
-      <TextFormControl label={t("contact.fields.extension")} fieldName={`contactsAttributes.${index}.extension`} />
+      <TextFormControl
+        label={t("contact.fields.extension")}
+        fieldName={`contactsAttributes.${index}.extension`}
+        isDisabled={!hasPhone}
+      />
     </Flex>
   )
 }

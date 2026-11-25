@@ -12,7 +12,7 @@ import {
 import { Archive } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useEffect } from "react"
+import React, { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { useAutoComplianceModuleConfigurations } from "../../../../hooks/resources/use-auto-compliance-module-configurations"
@@ -42,6 +42,8 @@ interface IRequirementsBlockProps {
   withOptionsMenu?: boolean
   isEditable?: boolean
   autoOpen?: boolean
+  autoOpenRequirementCode?: string
+  onAutoOpenConsumed?: () => void
 }
 
 export const RequirementsBlockModal = observer(function RequirementsBlockModal({
@@ -50,6 +52,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   withOptionsMenu,
   isEditable,
   autoOpen,
+  autoOpenRequirementCode,
+  onAutoOpenConsumed,
 }: IRequirementsBlockProps) {
   const { requirementBlockStore } = useMst()
   const searchModel = requirementBlockStore
@@ -58,6 +62,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   const { createRequirementBlock } = requirementBlockStore
   const { isOpen, onOpen, onClose } = useDisclosure()
   const hasAutoOpenedRef = React.useRef(false)
+  const autoOpenRequirementCodeRef = React.useRef(autoOpenRequirementCode)
+  const [isUploadingDocuments, setIsUploadingDocuments] = useState(false)
 
   const { autoComplianceModuleConfigurations, error } = useAutoComplianceModuleConfigurations()
 
@@ -67,11 +73,18 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       return
     }
 
+    autoOpenRequirementCodeRef.current = autoOpenRequirementCode
     if (!hasAutoOpenedRef.current) {
       hasAutoOpenedRef.current = true
       onOpen()
+      onAutoOpenConsumed?.()
     }
-  }, [autoOpen, onOpen])
+  }, [autoOpen, autoOpenRequirementCode, onAutoOpenConsumed, onOpen])
+
+  const closeModal = () => {
+    autoOpenRequirementCodeRef.current = undefined
+    onClose()
+  }
 
   const getDefaultValues = (): Partial<IRequirementBlockForm> => {
     return requirementBlock
@@ -101,6 +114,8 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
   } = formProps
 
   const onSubmit = async (data: IRequirementBlockForm) => {
+    if (isUploadingDocuments) return
+
     let isSuccess = false
 
     const mappedRequirementAttributes = data.requirementsAttributes.map((ra, index) => {
@@ -172,7 +187,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
     }
     if (isSuccess) {
       fetchData()
-      onClose()
+      closeModal()
     }
   }
 
@@ -201,7 +216,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
       {/*this is so that the modal children unmount on close to reset their states*/}
       {isOpen && (
         <FormModal
-          onClose={onClose}
+          onClose={closeModal}
           isOpen
           formProps={formProps}
           confirmCloseTitle={t("requirementsLibrary.modals.unsavedChanges.title")}
@@ -240,6 +255,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   <Button
                     variant={"primary"}
                     isLoading={isSubmitting}
+                    isDisabled={isUploadingDocuments}
                     onClick={(e) => {
                       e.stopPropagation()
                       handleSubmit(onSubmit)()
@@ -252,7 +268,7 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                   </Button>
                 </HStack>
               </ModalHeader>
-              <ModalBody px={"2.75rem"}>
+              <ModalBody px={"2.75rem"} pb={4}>
                 <HStack spacing={9} w={"full"} h={"full"} alignItems={"flex-start"}>
                   <BlockSetup
                     requirementBlock={
@@ -261,9 +277,14 @@ export const RequirementsBlockModal = observer(function RequirementsBlockModal({
                         : undefined
                     }
                     withOptionsMenu={withOptionsMenu}
+                    onIsUploadingChange={setIsUploadingDocuments}
                   />
 
-                  <FieldsSetup requirementBlock={requirementBlock} isEditable={isEditable} />
+                  <FieldsSetup
+                    requirementBlock={requirementBlock}
+                    isEditable={isEditable}
+                    autoOpenRequirementCode={autoOpenRequirementCodeRef.current}
+                  />
                 </HStack>
               </ModalBody>
             </>

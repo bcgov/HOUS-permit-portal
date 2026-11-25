@@ -31,11 +31,11 @@ import {
   IPart3ComplianceReport,
   IPart3NavLink,
   IPart3SectionCompletionStatus,
+  IReportDocument,
   IStepCodeOccupancy,
   TPart3NavLinkKey,
 } from "../types/types"
 import { canMarkChecklistComplete } from "../utils/can-mark-checklist-complete"
-import { markParentStepCodeReportsStale } from "./step-code-base"
 
 export const Part3StepCodeChecklistModel = types
   .model("Part3StepCodeChecklistModel", {
@@ -49,6 +49,7 @@ export const Part3StepCodeChecklistModel = types
       types.enumeration<EStepCodeChecklistStatus[]>(Object.values(EStepCodeChecklistStatus)),
       EStepCodeChecklistStatus.draf
     ),
+    reportDocument: types.maybeNull(types.frozen<IReportDocument>()),
     sectionCompletionStatus: types.maybeNull(types.frozen<IPart3SectionCompletionStatus>()),
     // HUB-5145: This appears to be stale permit-status terminology. Part 3
     // should gain checklist.stage and use StepCode.currentStage for selection
@@ -206,6 +207,10 @@ export const Part3StepCodeChecklistModel = types
     get totalMFA(): number {
       return self.baselineMFA + self.stepCodeMFA
     },
+    get freshReportDocument(): IReportDocument | null {
+      if (!self.reportDocument || self.reportDocument.stale) return null
+      return self.reportDocument
+    },
   }))
   .views((self) => ({
     get canShowResults() {
@@ -220,6 +225,20 @@ export const Part3StepCodeChecklistModel = types
         (self.isComplete("stepCodePerformanceRequirements") || !self.isRelevant("stepCodePerformanceRequirements"))
 
       return hasComplianceReport && baselineIsComplete && stepCodeIsComplete //&& self.isComplete("modelledOutputs")
+    },
+  }))
+  // Not in the API snapshot, so a websocket checklist reload does not clear it.
+  .volatile(() => ({
+    reportGenerationPending: false,
+  }))
+  .actions((self) => ({
+    markReportDocumentStale() {
+      if (!self.reportDocument || self.reportDocument.stale) return
+      self.reportDocument = { ...self.reportDocument, stale: true }
+      self.reportGenerationPending = false
+    },
+    clearReportGenerationPending() {
+      self.reportGenerationPending = false
     },
   }))
   .actions((self) => ({
@@ -251,7 +270,10 @@ export const Part3StepCodeChecklistModel = types
           self.status = EStepCodeChecklistStatus.complete
         }
         if (key !== "report") {
-          markParentStepCodeReportsStale(self)
+          self.markReportDocumentStale()
+        }
+        if (requestOptions?.reportGenerationRequested) {
+          self.reportGenerationPending = true
         }
         return true
       }
@@ -264,7 +286,8 @@ export const Part3StepCodeChecklistModel = types
         { reportGenerationRequested: true }
       )
       if (response.ok) {
-        markParentStepCodeReportsStale(self)
+        self.markReportDocumentStale()
+        self.reportGenerationPending = true
         return true
       }
       return false
@@ -277,7 +300,7 @@ export const Part3StepCodeChecklistModel = types
       })
       if (response.ok) {
         self.sectionCompletionStatus = updatedStatus
-        markParentStepCodeReportsStale(self)
+        self.markReportDocumentStale()
         return true
       }
     }),
@@ -285,7 +308,7 @@ export const Part3StepCodeChecklistModel = types
       const response = yield self.environment.api.updatePart3Checklist(self.id, values)
       if (response.ok) {
         applySnapshot(self, response.data.data)
-        markParentStepCodeReportsStale(self)
+        self.markReportDocumentStale()
         return true
       }
     }),

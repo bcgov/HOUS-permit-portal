@@ -1,6 +1,7 @@
 import * as R from "ramda"
 import { useLocation, useNavigate, useParams } from "react-router-dom"
 import { usePart9StepCode } from "../../../../hooks/resources/use-part-9-step-code"
+import { useMst } from "../../../../setup/root"
 import { IPart9NavLink } from "../../../../types/types"
 import { navLinks } from "./sidebar/nav-sections"
 
@@ -15,6 +16,7 @@ export const usePart9Navigation = () => {
   const { pathname } = useLocation()
   const { permitApplicationId, stepCodeId } = useParams()
   const { checklist, currentStepCode } = usePart9StepCode()
+  const { stepCodeStore } = useMst()
 
   const getNavigationNavLinks = () => allNavLinks.filter((link) => checklist?.isRelevant(link.key) !== false)
 
@@ -65,9 +67,10 @@ export const usePart9Navigation = () => {
     }
   }
 
-  const isPermitLinked = !!permitApplicationId
+  const indexExitPath = stepCodeStore.indexExitPath
+  const isPermitLinked = !!permitApplicationId && !indexExitPath
   const goBackPath = isPermitLinked ? `/permit-applications/${permitApplicationId}/edit` : "/step-codes"
-  const exitLinkPath = isPermitLinked ? goBackPath : "/step-codes?currentPage=1"
+  const exitLinkPath = indexExitPath ?? (isPermitLinked ? goBackPath : "/step-codes?currentPage=1")
 
   return {
     navigateToNext,

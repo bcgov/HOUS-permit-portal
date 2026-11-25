@@ -64,8 +64,12 @@ export const TextFormControl = (props: IInputFormControlProps) => {
       ...inputProps,
     },
     validate: {
-      satisfiesLength: (str) =>
-        (!props.required && !str) || (str?.length >= 1 && str?.length <= effectiveMax) || t("ui.invalidInput"),
+      // Values may arrive as numbers (e.g. H2K-populated building characteristics).
+      satisfiesLength: (value) => {
+        if (!props.required && (value === null || value === undefined || value === "")) return true
+        const str = String(value)
+        return (str.length >= 1 && str.length <= effectiveMax) || t("ui.invalidInput")
+      },
       ...validate,
     },
   }
@@ -115,9 +119,10 @@ export const UrlFormControl = (props: IInputFormControlProps) => {
 }
 
 export const NumberFormControl = (props: IInputFormControlProps) => {
+  // step "any" accepts H2K-sourced values with >2 decimal places (e.g. 34.9241 L/s).
   return (
     <InputFormControl
-      {...(R.mergeDeepRight({ inputProps: { type: "number", step: 0.01 } }, props) as IInputFormControlProps)}
+      {...(R.mergeDeepRight({ inputProps: { type: "number", step: "any" } }, props) as IInputFormControlProps)}
     />
   )
 }
@@ -125,7 +130,8 @@ export const NumberFormControl = (props: IInputFormControlProps) => {
 export const PhoneFormControl = (props: IInputFormControlProps) => {
   return (
     <InputFormControl
-      {...R.mergeDeepRight({ inputProps: { type: "text", maxLength: 14 } }, props)}
+      {...props}
+      inputProps={{ type: "text", maxLength: 14, ...props.inputProps }}
       leftElement={<Phone />}
     />
   )
@@ -174,19 +180,15 @@ export const DatePickerFormControl = ({
                 *
               </Text>
             )}
+            {!required && showOptional && ` ${t("ui.optional")}`}
           </FormLabel>
-          {!required && showOptional && (
-            <Text ml={-2} mb={2}>
-              {t("ui.optional")}
-            </Text>
-          )}
           {LabelInfo && <LabelInfo />}
         </HStack>
       )}
 
       <InputGroup w="full" display="flex" flexDirection="column" zIndex={1}>
         <DatePicker
-          selected={value}
+          selected={value || null}
           onChange={onChange}
           containerProps={{
             zIndex: "dropdown",
@@ -271,12 +273,8 @@ export const InputFormControl = ({
                 *
               </Text>
             )}
+            {!required && showOptional && ` ${t("ui.optional")}`}
           </FormLabel>
-          {!required && showOptional && (
-            <Text ml={-2} mb={2}>
-              {t("ui.optional")}
-            </Text>
-          )}
           {LabelInfo && <LabelInfo />}
         </HStack>
       )}
@@ -327,12 +325,8 @@ export const SelectFormControl = ({
                 *
               </Text>
             )}
+            {!required && showOptional && ` ${t("ui.optional")}`}
           </FormLabel>
-          {!required && showOptional && (
-            <Text ml={-2} mb={2}>
-              {t("ui.optional")}
-            </Text>
-          )}
         </HStack>
       )}
       <Select bg="greys.white" {...registerProps} {...inputProps}>

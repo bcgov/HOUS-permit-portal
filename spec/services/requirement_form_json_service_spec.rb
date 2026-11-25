@@ -17,32 +17,72 @@ RSpec.describe RequirementFormJsonService do
       input_options: {
       },
       requirement_block: requirement_block,
-      computed_compliance?: false,
-      input_type_general_contact?: false,
-      input_type_professional_contact?: false,
-      input_type_pid_info?: false,
-      input_type_multiply_sum_grid?: false,
-      input_type_select?: false,
-      input_type_multi_option_select?: false,
-      input_type_radio?: false
+      computed_compliance?: false
     }
 
     attrs = defaults.merge(overrides)
 
+    # Form JSON reads effective_* only; input_type/label/etc. are test knobs
+    # that mirror placement columns when no linked question exists.
     instance_double(
       "Requirement",
-      **attrs,
-      key: "req_key",
-      key: ->(block_key) { "req_key" },
-      input_type: attrs[:input_type],
-      input_options: attrs[:input_options]
+      id: attrs[:id],
+      required: attrs[:required],
+      elective: attrs[:elective],
+      requirement_block: attrs[:requirement_block],
+      computed_compliance?: attrs[:computed_compliance?],
+      key: ->(_block_key) { "req_key" },
+      effective_label: attrs[:label],
+      effective_hint: attrs[:hint],
+      effective_instructions: attrs[:instructions],
+      effective_input_type: attrs[:input_type],
+      effective_input_options: attrs[:input_options]
     )
   end
 
   describe "#to_form_json" do
+    it "does not carry date constraints or compliance tooltips into later requirements" do
+      constrained_date =
+        build_requirement(
+          input_type: "date",
+          input_options: {
+            "data_validation" => {
+              "operation" => "after",
+              "value" => "2026-01-01"
+            }
+          }
+        )
+      compliant_select =
+        build_requirement(
+          input_type: "select",
+          computed_compliance?: true,
+          input_options: {
+            "computed_compliance" => {
+              "op" => "eq",
+              "value" => 1
+            }
+          }
+        )
+      defaults = described_class::DEFAULT_FORMIO_TYPE_TO_OPTIONS.deep_dup
+      described_class.new(constrained_date).to_form_json("block_key")
+      described_class.new(compliant_select).to_form_json("block_key")
+
+      date_json =
+        described_class.new(build_requirement(input_type: "date")).to_form_json(
+          "block_key"
+        )
+      select_json =
+        described_class.new(
+          build_requirement(input_type: "select")
+        ).to_form_json("block_key")
+      expect(date_json.dig(:widget, :minDate)).to be_nil
+      expect(date_json[:datePicker]).not_to have_key(:minDate)
+      expect(select_json).not_to have_key(:tooltip)
+      expect(described_class::DEFAULT_FORMIO_TYPE_TO_OPTIONS).to eq(defaults)
+    end
+
     it "returns nil when requirement has no input_type" do
       requirement = build_requirement(input_type: nil)
-      allow(requirement).to receive(:input_type).and_return(nil)
       service = described_class.new(requirement)
 
       expect(service.to_form_json).to be_nil
@@ -92,7 +132,6 @@ RSpec.describe RequirementFormJsonService do
       requirement =
         build_requirement(
           input_type: "select",
-          input_type_select?: true,
           input_options: {
             "value_options" => [{ "label" => "A", "value" => "a" }]
           }
@@ -109,7 +148,6 @@ RSpec.describe RequirementFormJsonService do
       requirement =
         build_requirement(
           input_type: "select",
-          input_type_select?: true,
           input_options: {
             "value_options" => [
               { "label" => "A", "value" => "a" },
@@ -209,7 +247,6 @@ RSpec.describe RequirementFormJsonService do
       requirement =
         build_requirement(
           input_type: "multi_option_select",
-          input_type_multi_option_select?: true,
           input_options: {
             "value_options" => [{ "label" => "L", "value" => "v" }]
           }
@@ -220,11 +257,10 @@ RSpec.describe RequirementFormJsonService do
       expect(json[:values]).to eq([{ "label" => "L", "value" => "v" }])
     end
 
-    it "builds pid info datagrid when input_type_pid_info? is true" do
+    it "builds pid info datagrid when input type is pid_info" do
       requirement =
         build_requirement(
           input_type: "pid_info",
-          input_type_pid_info?: true,
           required: true,
           input_options: {
             "computed_compliance" => {
@@ -248,7 +284,6 @@ RSpec.describe RequirementFormJsonService do
       requirement =
         build_requirement(
           input_type: "multiply_sum_grid",
-          input_type_multiply_sum_grid?: true,
           input_options: {
             "rows" => [{ "name" => "Row1", "a" => 1.5 }],
             "headers" => {
@@ -290,7 +325,6 @@ RSpec.describe RequirementFormJsonService do
       requirement =
         build_requirement(
           input_type: "general_contact",
-          input_type_general_contact?: true,
           required: true,
           input_options: {
           }
@@ -335,7 +369,6 @@ RSpec.describe RequirementFormJsonService do
       requirement =
         build_requirement(
           input_type: "professional_contact",
-          input_type_professional_contact?: true,
           required: true,
           input_options: {
             "can_add_multiple_contacts" => true

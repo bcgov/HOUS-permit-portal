@@ -185,7 +185,7 @@ export const PermitProjectStoreModel = types
       }
       return response.ok
     }),
-    fetchPinnedProjects: flow(function* () {
+    fetchPinnedProjects: flow(function* (): Generator<Promise<unknown>, boolean | undefined> {
       self.isFetchingPinnedProjects = true
       try {
         const response = yield* toGenerator(self.environment.api.fetchPinnedProjects())
@@ -272,6 +272,8 @@ export const PermitProjectStoreModel = types
       pid?: string
       jurisdictionId?: string
       pin?: string
+      latitude?: number
+      longitude?: number
     }) {
       const response = yield self.environment.api.createPermitProject(projectData)
       if (response.ok && response.data?.data) {

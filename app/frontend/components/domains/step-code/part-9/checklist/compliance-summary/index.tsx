@@ -73,13 +73,13 @@ export const ComplianceSummary = observer(function ComplianceSummary({
             </FormHelperText>
           </FormControl>
           {R.isNil(report.energy.proposedStep) && (
-            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="xs" />
+            <StepNotMetWarning i18nKey="energyStepNotMet" scrollToSection={scrollToEnergyCompliance} fontSize="md" />
           )}
           {R.isNil(report.zeroCarbon.proposedStep) && (
             <StepNotMetWarning
               i18nKey="zeroCarbonStepNotMet"
               scrollToSection={scrollToZeroCarbonCompliance}
-              fontSize="xs"
+              fontSize="md"
             />
           )}
         </VStack>
@@ -138,7 +138,7 @@ export const ComplianceSummary = observer(function ComplianceSummary({
           </VStack>
 
           <VStack flex={1} justify="end" w="full">
-            <ZeroCarbonSteps requiredStep={report.zeroCarbon.requiredStep?.slice(-1)} />
+            <ZeroCarbonSteps requiredStep={report.zeroCarbon.requiredStep} />
 
             <VStack>
               <Text fontSize="md">{t(`${i18nPrefix}.zeroCarbonStepCode.stepProposed`) + ": "}</Text>

@@ -57,14 +57,15 @@ spec:
             failureThreshold: 30
             periodSeconds: 10
             initialDelaySeconds: 60
+            timeoutSeconds: 10
           livenessProbe:
             exec:
               command:
                 - /opt/app-root/clamdcheck.sh
-            failureThreshold: 2
+            failureThreshold: 3
             periodSeconds: 30
             successThreshold: 1
-            timeoutSeconds: 3
+            timeoutSeconds: 10
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
@@ -76,7 +77,12 @@ spec:
           configMap:
             name: {{ include "clamav.fullname" . }}
         - name: signatures
+          {{- if .Values.clamav.persistentVolume.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "clamav.fullname" . }}-signatures
+          {{- else }}
           emptyDir: {}
+          {{- end }}
         - name: run
           emptyDir: {}
       {{- with .Values.clamav.nodeSelector }}

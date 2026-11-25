@@ -4,6 +4,8 @@ class Jurisdiction < ApplicationRecord
   include JurisdictionExternalApiState
   include ValidateUrlAttributes
 
+  audited on: %i[update], only: %i[inbox_enabled]
+
   BASE_INCLUDES = %i[
     submission_contacts
     contacts
@@ -58,6 +60,7 @@ class Jurisdiction < ApplicationRecord
   has_many :project_meetings, through: :permit_projects
   has_many :contacts, as: :contactable, dependent: :destroy
   has_many :jurisdiction_memberships, dependent: :destroy
+  has_many :jurisdiction_explainers, dependent: :destroy
   has_many :users, through: :jurisdiction_memberships
   has_many :submitters, through: :permit_applications, source: :submitter
   has_many :jurisdiction_requirement_templates, dependent: :destroy
@@ -218,6 +221,27 @@ class Jurisdiction < ApplicationRecord
     is_regional_district ? regional_district : municipality
   end
 
+  def self.normalize_ltsa_matcher(value)
+    value.to_s.downcase.gsub(/\bthe\b/, "").gsub(/[^a-z0-9]+/, " ").squish
+  end
+
+  def self.find_by_normalized_ltsa_matcher(scope, ltsa_matcher)
+    # ponytail: O(n) scan of jurisdictions (~200). Upgrade to a generated
+    # normalized column or Searchkick analyzer if this path is hot.
+    target = normalize_ltsa_matcher(ltsa_matcher)
+    return if target.blank?
+
+    scope.find do |jurisdiction|
+      [
+        jurisdiction.ltsa_matcher,
+        jurisdiction.reverse_qualified_name,
+        jurisdiction.qualified_name
+      ].any? do |candidate|
+        candidate.present? && normalize_ltsa_matcher(candidate) == target
+      end
+    end
+  end
+
   def self.fuzzy_find_by_ltsa_feature_attributes(attributes)
     ltsa_matcher = ltsa_matcher_from_ltsa_attributes(attributes)
 
@@ -228,14 +252,11 @@ class Jurisdiction < ApplicationRecord
       }
     }
     is_regional_district = attributes["MUNICIPALITY"] == "Rural"
+    scope = is_regional_district ? RegionalDistrict : SubDistrict
 
-    return(
-      if is_regional_district
-        RegionalDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
-      else
-        SubDistrict.search(ltsa_matcher, **ltsa_matcher_params).first
-      end
-    )
+    scope.find_by(ltsa_matcher: ltsa_matcher) ||
+      scope.search(ltsa_matcher, **ltsa_matcher_params).first ||
+      find_by_normalized_ltsa_matcher(scope, ltsa_matcher)
   end
 
   def search_data
@@ -406,6 +427,21 @@ class Jurisdiction < ApplicationRecord
 
   def active_step_requirements
     jurisdiction_step_requirements
+  end
+
+  # Last time Part 9 Step Code config was modified. Untouched auto-created
+  # defaults do not count — applicants should see "Not available" until an admin save.
+  def part_9_step_requirements_updated_at
+    steps = jurisdiction_step_requirements
+    return nil if steps.empty?
+
+    meaningful =
+      steps.reject { |s| s.default? && s.updated_at.to_i == s.created_at.to_i }
+    meaningful.map(&:updated_at).max
+  end
+
+  def part_3_step_requirements_updated_at
+    part3_occupancy_required_steps.maximum(:updated_at)
   end
 
   def create_integration_mappings

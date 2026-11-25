@@ -118,11 +118,6 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
     keyStagesHtml: JURISDICTION_ABOUT_TWO_LINE_MAX_CHARS,
   }
 
-  const lineClamp: Partial<Record<TSnippetFieldName, number>> = {
-    processingTimeHtml: 2,
-    keyStagesHtml: 2,
-  }
-
   return (
     <SimpleGrid columns={{ base: 1, md: Math.min(visibleFields.length, 3) }} spacing={6} w="full" alignItems="stretch">
       {visibleFields.map((fieldName) => {
@@ -197,6 +192,7 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                                 rows={2}
                                 maxLength={maxLen[fieldName as TEditableSnippetFieldName]}
                                 resize="none"
+                                minH="unset"
                                 fontSize="sm"
                                 bg="greys.white"
                                 borderColor={fieldState.error ? "semantic.error" : "border.light"}
@@ -204,6 +200,7 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                                 placeholder={t("jurisdiction.aboutSnippets.placeholder")}
                                 aria-label={titles[fieldName]}
                                 aria-invalid={!!fieldState.error}
+                                sx={{ fieldSizing: "content" }}
                               />
                               {fieldState.error?.message ? (
                                 <Text fontSize="xs" color="semantic.error" role="alert">
@@ -212,12 +209,7 @@ export const JurisdictionAboutSnippetCards = observer(({ control, canManage }: I
                               ) : null}
                             </>
                           ) : (
-                            <Text
-                              fontSize="md"
-                              color="theme.blueAlt"
-                              {...(lineClamp[fieldName] != null ? { noOfLines: lineClamp[fieldName] } : {})}
-                              whiteSpace="pre-wrap"
-                            >
+                            <Text fontSize="md" color="theme.blueAlt" whiteSpace="pre-wrap">
                               {text.trim() ? text : canManage ? t("jurisdiction.aboutSnippets.emptyHint") : ""}
                             </Text>
                           )}

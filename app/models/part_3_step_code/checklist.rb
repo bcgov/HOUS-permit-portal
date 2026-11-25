@@ -58,6 +58,8 @@ class Part3StepCode::Checklist < ActiveRecord::Base
              inverse_of: :checklists,
              touch: true
 
+  has_one :report_document, as: :checklist, dependent: :destroy
+
   accepts_nested_attributes_for :step_code, update_only: true
 
   enum :stage, %i[pre_construction mid_construction as_built]

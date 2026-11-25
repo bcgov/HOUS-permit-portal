@@ -53,7 +53,7 @@ class Wrappers::Geocoder < Wrappers::Base
       site_id = site["properties"]["siteID"]
 
       # Add the parent site
-      options << { label: site["properties"]["fullAddress"], value: site_id }
+      options << option_from_feature(site)
 
       # Only fetch subsites if we have a valid siteID (CIVIC_NUMBER matches)
       # BLOCK matches have empty siteIDs and represent street blocks, not buildings
@@ -64,10 +64,7 @@ class Wrappers::Geocoder < Wrappers::Base
         subsites_response = subsites(site_id)
         if subsites_response && subsites_response["features"]
           subsites_response["features"].each do |subsite|
-            options << {
-              label: subsite["properties"]["fullAddress"],
-              value: subsite["properties"]["siteID"]
-            }
+            options << option_from_feature(subsite)
           end
         end
       rescue StandardError => e
@@ -95,14 +92,7 @@ class Wrappers::Geocoder < Wrappers::Base
     r = get("/sites/near.json", site_params)
     # matchPrecision does not exist on near
 
-    (
-      r["features"].map do |site|
-        {
-          label: site["properties"]["fullAddress"],
-          value: site["properties"]["siteID"]
-        }
-      end
-    )
+    (r["features"].map { |site| option_from_feature(site) })
   end
 
   def site(site_id)
@@ -114,10 +104,63 @@ class Wrappers::Geocoder < Wrappers::Base
   end
 
   def pids(site_id)
-    get("/parcels/pids/#{site_id}.json")["pids"].split(/,|\|/)
+    raw_pids =
+      get("/parcels/pids/#{site_id}.json")["pids"]
+        .to_s
+        .split(/,|\|/)
+        .map(&:strip)
+        .reject(&:blank?)
+    return raw_pids if raw_pids.present?
+
+    pids_from_site_coordinates(site_id)
   end
 
   def subsites(site_id)
     get("/sites/#{site_id}/subsites.json")
+  end
+
+  private
+
+  def pids_from_site_coordinates(site_id)
+    coords = coordinates_from_site(site(site_id))
+    return [] if coords.blank?
+
+    response =
+      Wrappers::LtsaParcelMapBc.new.search_pid_from_coordinates(
+        coord_array: coords
+      )
+    return [] unless response.respond_to?(:success?) && response.success?
+
+    JSON
+      .parse(response.body)
+      .dig("features")
+      &.map { |f| f.dig("attributes", "PID") }
+      &.map { |pid| pid.to_s.strip }
+      &.reject(&:blank?)
+      &.uniq || []
+  rescue StandardError
+    # ponytail: parcelPoint can miss the titled lot; LTSA/site miss → [] same as today
+    []
+  end
+
+  def option_from_feature(feature)
+    coords = coordinates_from_site(feature)
+    option = {
+      label: feature.dig("properties", "fullAddress"),
+      value: feature.dig("properties", "siteID")
+    }
+    option[:coordinates] = coords if coords.present?
+    option
+  end
+
+  def coordinates_from_site(payload)
+    return [] unless payload.is_a?(Hash)
+
+    coords =
+      payload.dig("features", 0, "geometry", "coordinates") ||
+        payload.dig("geometry", "coordinates")
+    return [] unless coords.is_a?(Array) && coords.size >= 2
+
+    coords.first(2)
   end
 end

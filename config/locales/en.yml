@@ -115,9 +115,8 @@ en:
               no_jurisdiction: "must be present if not associated with a project."
             pid_or_pin: "must have a PID or PIN."
         permit_project:
+          staff_owned_live_must_be_discarded: "review staff cannot own an active permit project outside of a sandbox"
           attributes:
-            owner:
-              review_staff_requires_sandbox: "review staff cannot own permit projects outside of a sandbox"
             sandbox:
               incorrect_jurisdiction: "must belong to the jurisdiction. Please apply to your own jurisdiction to use this sandbox."
         project_meeting:
@@ -134,7 +133,7 @@ en:
           step_code_package_required: '"Energy Step Code" is required to have the Design package Energy Step Code file'
           duplicate_energy_step_code: 'Multiple "Energy Step Code" requirements found. Please ensure there is only one "Energy Step Code" requirement in the template'
           duplicate_step_code_package: 'Multiple "Design package Energy Step Code files" found. Please ensure there is only one "Design package Energy Step Code file" when there is an "Energy Step Code" requirement'
-          nonunique_nickname: "There can only be one live requirement template with this nickname"
+          nonunique_nickname: "There can only be one live requirement template with this custom name"
           taken: "must be unique"
         requirement_block:
           attributes:
@@ -202,7 +201,8 @@ en:
       notify_reviewer_application_received: "New application received: %{permit_application_number}"
       notify_block_status_ready: "Requirement block status ready"
       notify_review_started: "Your application is now under review: %{permit_application_number}"
-      notify_application_revisions_requested: "Revisions requested on application %{permit_application_number}"
+      notify_application_revisions_requested: "Changes requested for your permit application %{permit_application_number}"
+      notify_applications_added: "%{jurisdiction_name} added permit applications to your project"
       remind_reviewer: "Your report on outstanding permit applications"
       remind_resource_update: "Reminder: Review your jurisdiction resources"
       submission_contact_confirm: "Confirm submission inbox email"
@@ -531,6 +531,28 @@ en:
       restore_error:
         title: "Error"
         message: "There was an error restoring the requirement block"
+    requirement_question:
+      create_success:
+        title: ""
+        message: "Successfully created question!"
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      update_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_success:
+        title: ""
+        message: The question was archived successfully
+      destroy_error:
+        title: Error
+        message: "There was an error archiving the question"
+      restore_success:
+        title: ""
+        message: The question was restored successfully
+      restore_error:
+        title: "Error"
+        message: "There was an error restoring the question"
     external_api_key:
       create_error:
         title: Create Error
@@ -584,12 +606,15 @@ en:
       destroy_error:
         title: Error
         message: "Something went wrong archiving the template"
+      archive_blocked_published:
+        title: Error
+        message: "This template has a published version and cannot be archived"
       update_error:
         title: Error
         message: "%{error_message}"
       schedule_error:
         title: Error
-        message: "There was an error scheduling the template"
+        message: "%{error_message}"
       template_unschedule_error:
         title: Error unscheduling template
         message: "There was an error unscheduling the template"
@@ -615,6 +640,18 @@ en:
         title: ""
         message: "Early access version promoted to scheduled version"
       promote_draft_error:
+        title: Error
+        message: "%{error_message}"
+      restore_layout_success:
+        title: ""
+        message: "Template layout restored from this version"
+      restore_layout_error:
+        title: Error
+        message: "%{error_message}"
+      restore_requirement_block_success:
+        title: ""
+        message: "Requirement block restored from this version"
+      restore_requirement_block_error:
         title: Error
         message: "%{error_message}"
       no_draft_error:
@@ -661,12 +698,6 @@ en:
       retrigger_webhook_error:
         title: Error
         message: "There was an error re-triggering the submitted webhook"
-      create_error:
-        title: Error
-        message: "%{error_message}"
-      create_success:
-        title: ""
-        message: "New permit application started!"
       bulk_create_success:
         title: ""
         message: "Permit applications created successfully!"
@@ -712,6 +743,9 @@ en:
       submit_state_error:
         title: Error
         message: "This application cannot be submitted or re-submitted"
+      digital_seal_checks_pending:
+        title: "Digital seal checks are still running"
+        message: "Your draft has been saved. Wait for the digital seal checks to finish before submitting."
       outdated_error:
         title: Error
         message: "Please refresh the page. A new template version is available."
@@ -810,6 +844,19 @@ en:
       autofill_part_9_step_code_error:
         title: Error
         message: "%{error_message}"
+    submission_contact:
+      create_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_error:
+        title: Error
+        message: "%{error_message}"
+      destroy_failed:
+        title: Error
+        message: "Could not remove email address"
+      resend_error:
+        title: Error
+        message: "This email address is already verified"
     permit_collaboration:
       destroy_success:
         title: ""
@@ -943,6 +990,33 @@ en:
       reorder_templates_success:
         title: ""
         message: "Templates reordered successfully."
+    info_document:
+      create_success:
+        title: ""
+        message: "Document created successfully."
+      update_success:
+        title: ""
+        message: "Document updated successfully."
+      destroy_success:
+        title: ""
+        message: "Document deleted successfully."
+      publish_success:
+        title: ""
+        message: "Document published successfully."
+      unpublish_success:
+        title: ""
+        message: "Document unpublished successfully."
+      reorder_success:
+        title: ""
+        message: "Documents reordered successfully."
+    explainer:
+      update_success:
+        title: ""
+        message: "Permit information saved."
+    jurisdiction_explainer:
+      update_success:
+        title: ""
+        message: "Local context saved."
     help_video:
       create_success:
         title: ""
@@ -1148,6 +1222,16 @@ en:
       publish_before_schedule_date: "Version cannot be published before it's scheduled date"
       copy_customizations_error: "Old jurisdiction customizations could not be copied to new template version for jurisdiction_id:%{jurisdiction_id}"
       copy_customizations_log_error: "Error copying customizations to new template version: %{message}"
+    requirement_template_structure_restore_service:
+      template_unavailable: "Cannot restore layout because the template is missing or archived"
+      empty_snapshot: "This version has no layout snapshot to restore from"
+      malformed_snapshot: "This version's layout snapshot is invalid"
+      missing_blocks: "Cannot restore layout. These blocks are missing or archived in the library: %{blocks}"
+    requirement_block_snapshot_restore_service:
+      missing_block_id: "A requirement block id is required"
+      block_not_found: "This requirement block no longer exists in the library"
+      block_not_in_snapshot: "This requirement block is not present in the selected version snapshot"
+      malformed_snapshot: "This version's block snapshot is invalid"
   formio:
     requirement_template:
       completion_title: "Completion"
@@ -1172,10 +1256,10 @@ en:
         email: "Email"
         phone: "Phone"
         address: "Address"
-        title: "Role/Position"
+        title: "Role or position"
         business_name: "Business name"
         business_license: "Business license"
-        professional_association: "Professional association/organization"
+        professional_association: "Professional association or organization"
         professional_number: "Professional number"
         organization: "Organization"
         add_person_button: "Add another person"
@@ -1228,10 +1312,16 @@ en:
     template_version:
       new_version_notification: 'Please update the Energy Step Code and Zero Carbon Step Code requirements in your Configuration Management for  "%{template_label}"'
       new_customization_notification: "%{jurisdiction_name} has made a modification to the requirements for %{template_label}"
+      elective_published_notification: "%{jurisdiction_name} published or updated elective fields on %{template_label}: %{field_labels}. Open your application to review it."
+      elective_published_notification_unnamed: "%{jurisdiction_name} published or updated an elective field on %{template_label}. Open your application to review it."
     permit_application:
       submission_notification: "Your application %{number} has been received by %{jurisdiction_name} and is pending review."
       resubmission_notification: "Your revised application %{number} has been received by %{jurisdiction_name} and is pending review."
       revisions_request_notification: "%{jurisdiction_name} has reviewed your application %{number} and has requested revisions. Please review and re-submit."
+      applications_added_notification:
+        one: "%{jurisdiction_name} added a permit application to your project: %{applications}."
+        other: "%{jurisdiction_name} added %{count} permit applications to your project: %{applications}."
+      applications_added_message: "Message: %{note}"
       review_started_notification: "%{jurisdiction_name} has started reviewing your application %{number}."
     permit_collaboration:
       submission_delegatee_collaboration_notification: "Collaboration request from %{author_name}. You have been assigned as a designated submitter for permit application %{number}."
@@ -1261,10 +1351,10 @@ en:
       scheduled: "Your project meeting request for project %{project_number} has been accepted and a meeting time has been scheduled."
       rescheduled: "Your project meeting for project %{project_number} has been rescheduled."
     release_note:
-      publish_notification: "Version %{version} is now available. See what's new."
+      publish_notification: "Building Permit Hub has been updated. Read about changes and improvements in the release notes."
     integration_mapping:
       published_template_missing_requirements_mapping: "Missing API mapping: A new version of “%{template_label}” has been published on %{version_date}"
-      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 01:00hrs PST."
+      scheduled_template_missing_requirements_mapping: "Missing API Mapping: A new version of “%{template_label}” has been scheduled for %{version_date}, 00:01hrs Pacific Time."
     file_upload_failed: "File upload failed: %{file_name} was removed during a routine scan."
   export:
     template_version_csv_headers: "Requirement Block,Requirement block tip,Question,Requirement code,Input type,Optional,Is elective,Elective enabled,Elective reason"

@@ -97,7 +97,7 @@ export const ProjectMeetingModel = types
         self.requesterRelationship !== EProjectMeetingRequesterRelationship.ownerOrLandholder
       )
     },
-    get isReadyForSubmission() {
+    get isReadyForSubmission(): boolean {
       const requiresAuthorization =
         !!self.requesterRelationship &&
         self.requesterRelationship !== EProjectMeetingRequesterRelationship.ownerOrLandholder
@@ -145,7 +145,7 @@ export const ProjectMeetingModel = types
       }
       return response.ok
     }),
-    markAsViewed: flow(function* () {
+    markAsViewed: flow(function* (): Generator<Promise<unknown>, boolean> {
       const wasUnread = !self.viewedAt
       const response = yield* toGenerator(self.environment.api.viewProjectMeeting(self.permitProjectId, self.id))
       if (response.ok) {
@@ -160,7 +160,7 @@ export const ProjectMeetingModel = types
       }
       return response.ok
     }),
-    markAsUnviewed: flow(function* () {
+    markAsUnviewed: flow(function* (): Generator<Promise<unknown>, boolean> {
       const wasViewed = !!self.viewedAt
       const response = yield* toGenerator(self.environment.api.unviewProjectMeeting(self.permitProjectId, self.id))
       if (response.ok) {

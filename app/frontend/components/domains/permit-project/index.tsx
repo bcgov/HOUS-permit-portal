@@ -20,27 +20,32 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   const { preCheckStore, userStore, sandboxStore, siteConfigurationStore } = useMst()
   const { currentUser } = userStore
   const { isSandboxActive } = sandboxStore
+  const { codeComplianceEnabled, overheatingToolEnabled } = siteConfigurationStore
   const location = useLocation()
   const navigate = useNavigate()
   const [isPending, startTransition] = useTransition()
 
   const TABS_DATA: ITabItem[] = [
-    { label: t("permitProject.index.title", "Projects"), icon: Buildings, to: "projects", tabIndex: 0 },
-    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "step-codes", tabIndex: 1 },
-    {
-      label: t("preCheck.index.title", "Pre-checks"),
-      icon: ListMagnifyingGlass,
-      to: "pre-checks",
-      tabIndex: 2,
-      badgeCount: preCheckStore.unviewedCount,
-    },
-    ...(siteConfigurationStore.overheatingToolEnabled
+    { label: t("permitProject.index.title", "Projects"), icon: Buildings, to: "/projects", tabIndex: 0 },
+    { label: t("stepCode.index.title", "Step Codes"), icon: ClipboardText, to: "/step-codes", tabIndex: 1 },
+    ...(codeComplianceEnabled
+      ? [
+          {
+            label: t("preCheck.index.title", "Pre-checks"),
+            icon: ListMagnifyingGlass,
+            to: "/pre-checks",
+            tabIndex: 2,
+            badgeCount: preCheckStore.unviewedCount,
+          },
+        ]
+      : []),
+    ...(overheatingToolEnabled
       ? [
           {
             label: t("overheatingCode.index.title", "Overheating"),
             icon: Thermometer,
-            to: "overheating-codes",
-            tabIndex: 3,
+            to: "/overheating-codes",
+            tabIndex: codeComplianceEnabled ? 3 : 2,
           },
         ]
       : []),
@@ -49,13 +54,13 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
   ]
 
   const getTabIndex = () => {
-    const tabIndex = TABS_DATA.find((tab) => location.pathname.endsWith(tab.to))?.tabIndex
+    const tabIndex = TABS_DATA.find((tab) => location.pathname === tab.to)?.tabIndex
     return tabIndex ?? 0
   }
 
   const handleTabChange = (index: number) => {
     startTransition(() => {
-      navigate(`/${TABS_DATA[index].to}`)
+      navigate(TABS_DATA[index].to)
     })
   }
 
@@ -79,8 +84,10 @@ export const ProjectDashboardScreen = observer(({}: IProjectDashboardScreenProps
         <TabPanels>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ProjectTabPanelContent />}</TabPanel>
           <TabPanel p={0}>{isPending ? <LoadingScreen /> : <StepCodeTabPanelContent />}</TabPanel>
-          <TabPanel p={0}>{isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}</TabPanel>
-          {siteConfigurationStore.overheatingToolEnabled && (
+          {codeComplianceEnabled && (
+            <TabPanel p={0}>{isPending ? <LoadingScreen /> : <PreCheckTabPanelContent />}</TabPanel>
+          )}
+          {overheatingToolEnabled && (
             <TabPanel p={0}>{isPending ? <LoadingScreen /> : <OverheatingCodeTabPanelContent />}</TabPanel>
           )}
           {/* <TabPanel p={0}>{isPending ? <LoadingScreen /> : <ComingSoonPlaceholder />}</TabPanel> */}

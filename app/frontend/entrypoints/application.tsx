@@ -5,15 +5,21 @@ import React from "react"
 import { createRoot } from "react-dom/client"
 import { Helmet } from "react-helmet"
 import { Navigation } from "../components/domains/navigation"
+import { AppErrorBoundary } from "../components/shared/sentry/error-boundary"
 import "../i18n/i18n"
 import { useLanguageChange } from "../i18n/use-language-change"
-import { setupReactotron } from "../setup/reactotron"
+import { listenForFrontendUpdates } from "../services/frontend-update"
+import { initializeSentry, observeSentryUser } from "../services/observability"
+import { isReactotronEnabled, setupReactotron } from "../setup/reactotron"
 import { Provider, setupRootStore } from "../setup/root"
 import { GlobalStyles } from "../styles"
 import { theme } from "../styles/theme"
 
 import { useTranslation } from "react-i18next"
-import "../i18n/i18n"
+import { getCurrentSandboxId, syncMatomoSandboxFlag } from "../utils/utility-functions"
+
+listenForFrontendUpdates()
+initializeSentry()
 
 const renderApp = (rootStore) => {
   const container = document.getElementById("app")
@@ -29,6 +35,8 @@ const renderApp = (rootStore) => {
         return
       }
 
+      // Seed before mtm.Start so the first pageview is tagged live vs sandbox.
+      syncMatomoSandboxFlag(Boolean(getCurrentSandboxId()))
       const _mtm = ((window as any)._mtm = (window as any)._mtm || [])
       _mtm.push({ "mtm.startTime": new Date().getTime(), event: "mtm.Start" })
       const d = document
@@ -58,18 +66,21 @@ const renderApp = (rootStore) => {
       </ChakraProvider>
     )
   }
-  root.render(<RootComponent />)
+  root.render(
+    <AppErrorBoundary>
+      <RootComponent />
+    </AppErrorBoundary>
+  )
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   const rootStore = setupRootStore()
-  if (import.meta.env.PROD) {
+  observeSentryUser(rootStore)
+  if (import.meta.env.PROD || !isReactotronEnabled()) {
     renderApp(rootStore)
-  } else if (import.meta.env.DEV) {
+  } else {
     setupReactotron(rootStore.environment.api).then((reactotron) => {
-      // @ts-expect-error: trackMstNode is not part of the official Reactotron type definitions
       reactotron.trackMstNode(rootStore)
-      // set reactotron into console
       window.console.tron = reactotron
       renderApp(rootStore)
     })

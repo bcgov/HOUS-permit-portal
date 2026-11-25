@@ -44,5 +44,6 @@ class Api::PermitCollaborationsController < Api::ApplicationController
 
   def set_permit_collaboration
     @permit_collaboration = PermitCollaboration.kept.find(params[:id])
+    ensure_in_sandbox!(@permit_collaboration.permit_application)
   end
 end

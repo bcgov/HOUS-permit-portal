@@ -1,0 +1,197 @@
+#!/usr/bin/env node
+// Explicit synthetic harness only. Never boots Rails, connects to a DB, or reads .env.
+import { readFile, mkdir, writeFile } from "node:fs/promises"
+import { spawnSync } from "node:child_process"
+import { resolve } from "node:path"
+import { pathToFileURL } from "node:url"
+import { build } from "vite"
+import { sentryVitePlugin } from "@sentry/vite-plugin"
+import { BrowserClient, Scope, captureFeedback, makeFetchTransport, defaultStackParser } from "@sentry/react"
+
+const send = process.argv.includes("--send")
+const secretsIndex = process.argv.indexOf("--secrets")
+if (process.argv.some((arg) => ["--help", "-h"].includes(arg))) {
+  console.log(
+    "bin/sentry-smoke [--send --secrets tmp/sentry.secrets]\nDefault: offline recording transport, synthetic data only. --send uploads a synthetic source map and sends synthetic test events to both BPH projects."
+  )
+  process.exit(0)
+}
+const secrets = {}
+if (send) {
+  if (secretsIndex < 0 || !process.argv[secretsIndex + 1]) throw new Error("--send requires an explicit --secrets file")
+  for (const line of (await readFile(process.argv[secretsIndex + 1], "utf8")).split("\n")) {
+    const match = line.match(/^([A-Z_]+)=(.*)$/)
+    if (match) secrets[match[1]] = match[2].trim()
+  }
+  // Destination is fixed to the previously created BPH projects, never an arbitrary URL from the file.
+  for (const [key, project] of [
+    ["TEST_SENTRY_FRONTEND_DSN", "4512289869463552"],
+    ["TEST_SENTRY_BACKEND_DSN", "4512289872871424"],
+  ]) {
+    const dsn = new URL(secrets[key])
+    if (
+      dsn.protocol !== "https:" ||
+      dsn.hostname !== "o4512211650347008.ingest.us.sentry.io" ||
+      dsn.pathname !== "/" + project ||
+      dsn.password ||
+      dsn.search ||
+      dsn.hash
+    )
+      throw new Error("Unexpected smoke-test destination")
+  }
+  if (!secrets.SENTRY_AUTH_TOKEN?.startsWith("sntrys_")) throw new Error("Missing CI upload token")
+}
+const revision = spawnSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" })
+if (revision.status !== 0) throw new Error("Cannot identify revision")
+const release = "hous-permit-portal@" + revision.stdout.trim()
+const directory = resolve("tmp/sentry-smoke")
+await mkdir(directory, { recursive: true, mode: 0o700 })
+await writeFile(
+  directory + "/fixture.ts",
+  'export function syntheticSmoke(): never { throw new TypeError("synthetic-only") }\n'
+)
+const built = await build({
+  configFile: false,
+  envFile: false,
+  publicDir: false,
+  logLevel: "error",
+  plugins: [
+    sentryVitePlugin({
+      org: "bc-government-ministry-of-hous",
+      project: "bph-frontend",
+      telemetry: false,
+      errorHandler: (error) => {
+        throw error
+      },
+      authToken: send ? secrets.SENTRY_AUTH_TOKEN : "",
+      release: { name: release, create: send, finalize: send },
+      sourcemaps: {
+        disable: send ? false : "disable-upload",
+        assets: directory + "/assets/**",
+        ...(send ? { filesToDeleteAfterUpload: directory + "/assets/**/*.map" } : {}),
+      },
+    }),
+  ],
+  build: {
+    outDir: directory + "/assets",
+    sourcemap: "hidden",
+    minify: true,
+    lib: { entry: directory + "/fixture.ts", formats: ["es"], fileName: () => "sentry-smoke.mjs" },
+  },
+})
+const bundle = (Array.isArray(built) ? built[0] : built).output.find((item) => item.type === "chunk")
+const debugId = bundle.code.match(/debugId=([a-f0-9-]{36})/)?.[1]
+if (!debugId) throw new Error("Synthetic bundle is missing a debug ID")
+// Reuse the real privacy processor, without importing application state or initialization.
+const privacyBuild = await build({
+  configFile: false,
+  envFile: false,
+  publicDir: false,
+  logLevel: "error",
+  plugins: [
+    {
+      name: "smoke-privacy",
+      resolveId: (id) => (id.endsWith("virtual:smoke-privacy") ? id : undefined),
+      load: (id) =>
+        id.endsWith("virtual:smoke-privacy")
+          ? `export { privateTransport } from ${JSON.stringify(resolve("app/frontend/services/observability/privacy.ts"))}`
+          : undefined,
+    },
+  ],
+  build: {
+    write: false,
+    minify: false,
+    lib: { entry: "virtual:smoke-privacy", formats: ["es"] },
+  },
+})
+const privacyCode = (Array.isArray(privacyBuild) ? privacyBuild[0] : privacyBuild).output.find(
+  (item) => item.type === "chunk"
+).code
+const { privateTransport } = await import(`data:text/javascript;base64,${Buffer.from(privacyCode).toString("base64")}`)
+const recorded = []
+const client = new BrowserClient({
+  dsn: send ? secrets.TEST_SENTRY_FRONTEND_DSN : `https://${"a".repeat(32)}@o1.ingest.us.sentry.io/1`,
+  dataCollection: { userInfo: false },
+  integrations: [],
+  stackParser: defaultStackParser,
+  release,
+  environment: "test",
+  sendClientReports: false,
+  transport: (options) =>
+    privateTransport(
+      send
+        ? makeFetchTransport(options)
+        : {
+            send: async (envelope) => {
+              recorded.push(envelope)
+              return { statusCode: 200 }
+            },
+            flush: async () => true,
+          },
+      "https://test.buildingpermit.gov.bc.ca"
+    ),
+})
+const scope = new Scope()
+scope.setClient(client)
+scope.setTag("route", "/[synthetic]")
+const fixture = await import(pathToFileURL(directory + "/assets/sentry-smoke.mjs").href)
+let line = 1
+let column = 1
+try {
+  fixture.syntheticSmoke()
+} catch (error) {
+  const location = String(error.stack).match(/sentry-smoke\.mjs:(\d+):(\d+)/)
+  if (location) {
+    line = Number(location[1])
+    column = Number(location[2])
+  }
+}
+const codeFile = "https://test.buildingpermit.gov.bc.ca/vite/assets/sentry-smoke.mjs"
+const eventId = scope.captureEvent({
+  exception: {
+    values: [
+      {
+        type: "TypeError",
+        value: "synthetic-only",
+        stacktrace: {
+          frames: [{ filename: codeFile, lineno: line, colno: column, function: "syntheticSmoke", in_app: true }],
+        },
+      },
+    ],
+  },
+  debug_meta: { images: [{ type: "sourcemap", debug_id: debugId, code_file: codeFile }] },
+})
+const feedbackId = captureFeedback(
+  {
+    message: "Synthetic BPH smoke test; no user or permit data.",
+    associatedEventId: eventId,
+    tags: { feedback_entrypoint: "crash_prompt", feedback_area: "general", feedback_route: "/[synthetic]" },
+  },
+  { includeReplay: false },
+  scope
+)
+if (!(await client.flush(15000))) throw new Error("Frontend transport did not flush")
+if (!send && recorded.length !== 2) throw new Error("Missing offline synthetic envelopes")
+await client.close()
+const ruby = spawnSync("bundle", ["exec", "ruby", "scripts/sentry/smoke.rb"], {
+  encoding: "utf8",
+  env: {
+    ...process.env,
+    BPH_SENTRY_SMOKE_SEND: send ? "true" : "false",
+    BPH_SENTRY_SMOKE_DSN: secrets.TEST_SENTRY_BACKEND_DSN ?? "",
+    BPH_SENTRY_SMOKE_RELEASE: release,
+  },
+})
+if (ruby.status !== 0) {
+  process.stderr.write(ruby.stderr)
+  throw new Error("Ruby synthetic smoke test failed")
+}
+process.stdout.write(ruby.stdout)
+console.log(
+  `${send ? "Live synthetic test sent" : "Offline synthetic test passed"}. Frontend event=${eventId}, feedback=${feedbackId}, release=${release}`
+)
+console.log(
+  send
+    ? "Verify both projects in Sentry with environment=test; confirm the frontend stack resolves to fixture.ts and feedback links to the event. Event IDs alone are not ingestion proof."
+    : "No events or source maps were sent. Normal local application capture remains off."
+)

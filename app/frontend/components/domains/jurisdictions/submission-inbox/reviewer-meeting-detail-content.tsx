@@ -10,6 +10,7 @@ import { useProjectMeeting } from "../../../../hooks/resources/use-project-meeti
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
 import { EFlashMessageStatus, EProjectMeetingStatus } from "../../../../types/enums"
+import { INoteAttachmentDraft } from "../../../../types/types"
 import { ErrorScreen } from "../../../shared/base/error-screen"
 import { LoadingScreen } from "../../../shared/base/loading-screen"
 import { ConfirmationModal } from "../../../shared/confirmation-modal"
@@ -79,12 +80,12 @@ export const ReviewerMeetingDetailContent = observer(
       }
     }
 
-    const handleAddNote = async (body: string) => {
-      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body)
+    const handleAddNote = async (body: string, attachments: INoteAttachmentDraft[]) => {
+      const response = await noteStore.createProjectMeetingNote(currentProjectMeeting.id, body, attachments)
       return response.ok
     }
 
-    const handleCompleteMeeting = async () => {
+    const handleCompleteMeeting = async (closeModal: () => void) => {
       setIsCompleting(true)
       const response = await projectMeetingStore.transitionProjectMeetingStatus(
         currentProjectMeeting.permitProjectId,
@@ -93,7 +94,9 @@ export const ReviewerMeetingDetailContent = observer(
       )
       setIsCompleting(false)
 
-      if (!response.ok) {
+      if (response.ok) {
+        closeModal()
+      } else {
         uiStore.flashMessage.show(
           EFlashMessageStatus.error,
           null,
@@ -133,9 +136,19 @@ export const ReviewerMeetingDetailContent = observer(
           </Box>
           <HStack spacing={4}>
             {currentProjectMeeting.canComplete && (
-              <Button variant="secondary" size="sm" onClick={handleCompleteMeeting} isLoading={isCompleting}>
-                {t("projectMeeting.detail.reviewer.markCompleted")}
-              </Button>
+              <ConfirmationModal
+                title={t("projectMeeting.detail.reviewer.completeConfirmationTitle")}
+                body={t("projectMeeting.detail.reviewer.completeConfirmationBody")}
+                triggerText={t("projectMeeting.detail.reviewer.markCompleted")}
+                triggerButtonProps={{ variant: "secondary", size: "sm" }}
+                renderConfirmationButton={(props) => (
+                  <Button variant="primary" isLoading={isCompleting} {...props}>
+                    {t("projectMeeting.detail.reviewer.confirmCompleteMeeting")}
+                  </Button>
+                )}
+                modalContentProps={{ maxW: "604px" }}
+                onConfirm={handleCompleteMeeting}
+              />
             )}
             {currentProjectMeeting.canWithdraw && (
               <ConfirmationModal

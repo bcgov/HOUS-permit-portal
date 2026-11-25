@@ -1,4 +1,4 @@
-import { Grid, GridItem, Radio, RadioGroup, Tag } from "@chakra-ui/react"
+import { Grid, GridItem, Radio, RadioGroup, Tag, Text } from "@chakra-ui/react"
 import { t } from "i18next"
 import { observer } from "mobx-react-lite"
 import React from "react"
@@ -24,9 +24,9 @@ export const StepRequirementRadioGroup = observer(function StepRequirementRadioS
         </GridItem>
 
         {complianceReports.map((report, index) => (
-          <>
+          <React.Fragment key={report.requirementId || index}>
             <GridItem mx="auto">
-              <Radio key={index} value={report.requirementId}></Radio>
+              <Radio value={report.requirementId}></Radio>
             </GridItem>
             <GridItem mx="auto">
               <Tag
@@ -57,7 +57,14 @@ export const StepRequirementRadioGroup = observer(function StepRequirementRadioS
                   : t(`${i18nPrefix}.notRequired`)}
               </Tag>
             </GridItem>
-          </>
+            {report.description?.trim() ? (
+              <GridItem colSpan={4}>
+                <Text fontSize="sm" color="text.secondary" pl={8}>
+                  {report.description.trim()}
+                </Text>
+              </GridItem>
+            ) : null}
+          </React.Fragment>
         ))}
       </Grid>
     </RadioGroup>

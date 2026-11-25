@@ -8,16 +8,14 @@ module Api::Concerns::Search::RequirementBlocks
       where: {
         discarded: discarded
       },
-      page: search_params[:page],
+      page: search_params[:page].presence || 1,
       per_page:
-        (
-          if search_params[:page]
-            (search_params[:per_page] || Kaminari.config.default_per_page)
-          else
-            nil
-          end
-        ),
-      includes: %i[taggings requirements],
+        search_params[:per_page].presence || Kaminari.config.default_per_page,
+      includes: [
+        :taggings,
+        :requirement_documents,
+        { requirements: { requirement_question: %i[taggings requirements] } }
+      ],
       scope_results: ->(relation) { policy_scope(relation) }
     }
 

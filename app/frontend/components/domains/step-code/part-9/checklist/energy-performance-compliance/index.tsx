@@ -83,7 +83,12 @@ export const EnergyPerformanceCompliance = observer(function EnergyPerformanceCo
       </HStack>
       <Divider />
       <FormControl>
-        <FormLabel>{t(`${i18nPrefix}.calculationAirtightness`)}</FormLabel>
+        <HStack gap={0}>
+          <FormLabel>{t(`${i18nPrefix}.calculationAirtightness`)}</FormLabel>
+          <Text ml={-2} mb={2}>
+            {t("ui.optional")}
+          </Text>
+        </HStack>
         <Controller
           control={control}
           name="epcCalculationAirtightness"

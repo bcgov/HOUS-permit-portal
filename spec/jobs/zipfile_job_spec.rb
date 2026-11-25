@@ -2,7 +2,12 @@ require "rails_helper"
 require "sidekiq/testing"
 
 RSpec.describe ZipfileJob, type: :job do
-  before { Sidekiq::Testing.fake! }
+  before do
+    Sidekiq::Testing.fake!
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :report_generation_issues
+    ).and_return([])
+  end
 
   it "locks by permit_application_id" do
     expect(described_class.lock_args(%w[pa1 x])).to eq(["pa1"])
@@ -17,24 +22,71 @@ RSpec.describe ZipfileJob, type: :job do
       zipper
     )
 
-    pa =
-      instance_double(
-        "PermitApplication",
-        notifiable_users: double("UsersRel", pluck: ["u1"]),
-        reload: double("PermitApplication")
-      )
-    allow(PermitApplication).to receive(:find_by_id).with("pa1").and_return(pa)
+    pa = create(:permit_application, :newly_submitted)
+    version = pa.latest_submission_version
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ).and_return(false)
+    allow(SupportingDocumentsZipper).to receive(:new).with(
+      pa.id,
+      submission_version: version,
+      version_ids: [version.id]
+    ).and_return(zipper)
     allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return(
       { "p" => 1 }
     )
     allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
 
-    described_class.new.perform("pa1")
+    described_class.new.perform(pa.id)
 
-    expect(pdf_job).to have_received(:perform).with("pa1")
+    expect(pdf_job).to have_received(:perform).with(pa.id, [version.id])
     expect(zipper).to have_received(:perform)
     expect(WebsocketBroadcaster).to have_received(
       :push_update_to_relevant_users
+    )
+  end
+
+  it "rebuilds later packages when the earliest version is missing a PDF" do
+    pdf_job = instance_double("PdfGenerationJob")
+    generated = false
+    allow(PdfGenerationJob).to receive(:new).and_return(pdf_job)
+    allow(pdf_job).to receive(:perform) { generated = true }
+
+    zipper = instance_double("SupportingDocumentsZipper", perform: true)
+    allow(SupportingDocumentsZipper).to receive(:new).and_return(zipper)
+    allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return({})
+    allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+
+    permit_application = create(:permit_application, :newly_submitted)
+    earliest = permit_application.latest_submission_version
+    later =
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        created_at: earliest.created_at + 1.minute
+      )
+    later.update_columns(
+      zipfile_data: {
+        "id" => "zip",
+        "storage" => "store"
+      },
+      package_ready_at: Time.current
+    )
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ) { |version| version.id == earliest.id && !generated }
+
+    described_class.new.perform(permit_application.id)
+
+    expect(SupportingDocumentsZipper).to have_received(:new).with(
+      permit_application.id,
+      submission_version: earliest,
+      version_ids: [earliest.id]
+    )
+    expect(SupportingDocumentsZipper).to have_received(:new).with(
+      permit_application.id,
+      submission_version: later,
+      version_ids: [earliest.id, later.id]
     )
   end
 
@@ -49,5 +101,96 @@ RSpec.describe ZipfileJob, type: :job do
     expect(WebsocketBroadcaster).not_to have_received(
       :push_update_to_relevant_users
     )
+  end
+
+  it "marks ready versions and enqueues V2 package_ready without file URLs" do
+    jurisdiction = create(:sub_district, external_api_state: "j_on")
+    v2_key =
+      create(
+        :external_api_key,
+        jurisdiction: jurisdiction,
+        api_version: "v2",
+        webhook_url: "https://v2.example.com/webhook"
+      )
+    create(
+      :external_api_key,
+      jurisdiction: jurisdiction,
+      api_version: "v1",
+      webhook_url: "https://v1.example.com/webhook"
+    )
+    permit_application =
+      create(:permit_application, :newly_submitted, jurisdiction: jurisdiction)
+    permit_application.latest_submission_version.update_columns(
+      zipfile_data: {
+        "id" => "zip",
+        "storage" => "store",
+        "metadata" => {
+        }
+      }
+    )
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ).and_return(false)
+    allow(PdfGenerationJob).to receive_message_chain(:new, :perform)
+    allow(SupportingDocumentsZipper).to receive_message_chain(:new, :perform)
+    allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+    allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return({})
+    PermitWebhookJob.clear
+
+    described_class.new.perform(permit_application.id)
+
+    version = permit_application.latest_submission_version.reload
+    expect(version.package_ready_at).to be_present
+
+    jobs = PermitWebhookJob.jobs
+    expect(jobs.length).to eq(1)
+    expect(jobs.first["args"][0]).to eq(v2_key.id)
+    expect(jobs.first["args"][1]).to eq(
+      Constants::Webhooks::Events::PermitApplication::PACKAGE_READY
+    )
+    payload = jobs.first["args"][2]
+    expect(payload).to include(
+      "permit_application_id" => permit_application.id,
+      "permit_project_id" => permit_application.permit_project_id,
+      "submission_version_id" => version.id,
+      "number" => permit_application.number
+    )
+    expect(payload.keys).not_to include("zipfile_url", "submission_data")
+  end
+
+  it "does not mark a version ready twice" do
+    permit_application = create(:permit_application, :newly_submitted)
+    version = permit_application.latest_submission_version
+    version.update_columns(
+      zipfile_data: {
+        "id" => "zip",
+        "storage" => "store"
+      }
+    )
+    version.update!(package_ready_at: 1.hour.ago)
+    allow_any_instance_of(SubmissionVersion).to receive(
+      :missing_pdfs?
+    ).and_return(false)
+    allow(PdfGenerationJob).to receive_message_chain(:new, :perform)
+    allow(SupportingDocumentsZipper).to receive_message_chain(:new, :perform)
+    allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+    allow(PermitApplicationBlueprint).to receive(:render_as_hash).and_return({})
+    PermitWebhookJob.clear
+
+    described_class.new.perform(permit_application.id)
+
+    expect(version.reload.package_ready_at).to be_within(1.second).of(
+      1.hour.ago
+    )
+    expect(PermitWebhookJob.jobs).to be_empty
+  end
+
+  it "re-enqueues from after_unlock when a version appeared mid-job" do
+    job = described_class.new
+    job.instance_variable_set(:@reenqueue, true)
+    job.instance_variable_set(:@permit_application_id, "pa1")
+
+    expect(described_class).to receive(:perform_async).with("pa1")
+    job.after_unlock
   end
 end

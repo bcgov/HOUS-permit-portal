@@ -30,10 +30,16 @@ export const MeetingRequestsFilter = observer(function MeetingRequestsFilter({
     // @ts-ignore
     { value: ERadioFilterValue.hide, label: t("submissionInbox.filters.hide") },
   ]
+  const title =
+    value === ERadioFilterValue.onlyShow
+      ? t("submissionInbox.filters.hasMeetingRequest")
+      : value === ERadioFilterValue.hide
+        ? t("submissionInbox.filters.meetingRequestsHidden")
+        : t("submissionInbox.filters.meetingRequests")
 
   return (
     <InboxFilter
-      title={t("submissionInbox.filters.meetingRequests")}
+      title={title}
       leftIcon={<Icon as={CalendarDots} boxSize={5} color="theme.blueActive" />}
       isMulti={false}
       value={value}

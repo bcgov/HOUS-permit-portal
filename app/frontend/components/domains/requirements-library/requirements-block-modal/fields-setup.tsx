@@ -1,8 +1,8 @@
 import { Box, Button, Flex, HStack, Tag, Text, useDisclosure, VStack } from "@chakra-ui/react"
-import { Info } from "@phosphor-icons/react"
+import { Info, Plus } from "@phosphor-icons/react"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useState } from "react"
+import React, { useEffect, useMemo, useState } from "react"
 import { Controller, useController, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { IRequirementBlock } from "../../../../models/requirement-block"
@@ -12,6 +12,7 @@ import { IDenormalizedRequirementBlock } from "../../../../types/types"
 import { CustomMessageBox } from "../../../shared/base/custom-message-box"
 import { EditableInputWithControls } from "../../../shared/editable-input-with-controls"
 import { EditorWithPreview } from "../../../shared/editor/custom-extensions/editor-with-preview"
+import { AddQuestionsModal } from "../add-questions-modal"
 import { FieldsSetupDrawer } from "../fields-setup-drawer"
 import { IRequirementBlockForm } from "./index"
 import { ReorderList } from "./reorder-list"
@@ -21,9 +22,11 @@ import { useRequirementLogic } from "./use-requirement-logic"
 export const FieldsSetup = observer(function FieldsSetup({
   requirementBlock,
   isEditable = true,
+  autoOpenRequirementCode,
 }: {
   requirementBlock: IRequirementBlock | IDenormalizedRequirementBlock
   isEditable?: boolean
+  autoOpenRequirementCode?: string
 }) {
   const { t } = useTranslation()
   const {
@@ -48,23 +51,70 @@ export const FieldsSetup = observer(function FieldsSetup({
   const [requirementIdToEdit, setRequirementIdToEdit] = useState<string | undefined>()
 
   const { isOpen: isInReorderMode, onToggle } = useDisclosure()
+  const { isOpen: isAddQuestionsOpen, onOpen: onOpenAddQuestions, onClose: onCloseAddQuestions } = useDisclosure()
+
+  useEffect(() => {
+    if (!autoOpenRequirementCode) return
+
+    const requirementIndex = watchedRequirements.findIndex(
+      (requirement) => requirement.requirementCode === autoOpenRequirementCode
+    )
+    const requirementFieldId = fields[requirementIndex]?.id
+    if (requirementFieldId) setRequirementIdToEdit(requirementFieldId)
+  }, [autoOpenRequirementCode, fields, watchedRequirements])
 
   const toggleRequirementToEdit = (requirementId: string) => {
     setRequirementIdToEdit((pastRequirementId) => (pastRequirementId === requirementId ? undefined : requirementId))
   }
 
-  const { onUseRequirement, onRemoveRequirement, disabledRequirementTypeOptions } = useRequirementLogic({
-    append,
-    remove,
-    watchedRequirements: watchedRequirements as IRequirementAttributes[],
-    requirementBlock,
-  })
+  const { onUseRequirement, onUseBankQuestion, onRemoveRequirement, disabledRequirementTypeOptions } =
+    useRequirementLogic({
+      append,
+      remove,
+      watchedRequirements: watchedRequirements as IRequirementAttributes[],
+      requirementBlock,
+    })
 
   const hasFields = fields.length > 0
+
+  const linkedQuestionIds = useMemo(
+    () =>
+      (watchedRequirements as IRequirementAttributes[] | undefined)
+        ?.filter((requirement) => requirement.requirementQuestionId)
+        .map((requirement) => requirement.requirementQuestionId as string) ?? [],
+    [watchedRequirements]
+  )
 
   function isRequirementInEditMode(id: string) {
     return !isInReorderMode && requirementIdToEdit === id
   }
+
+  const addButtons = (
+    <HStack spacing={3}>
+      <Button
+        leftIcon={<Plus size={12} />}
+        variant={"primary"}
+        onClick={onOpenAddQuestions}
+        aria-label={t("requirementsLibrary.bankQuestions.addQuestion")}
+      >
+        {t("requirementsLibrary.bankQuestions.addQuestion")}
+      </Button>
+      <FieldsSetupDrawer
+        disabledRequirementTypeOptions={disabledRequirementTypeOptions}
+        onUse={onUseRequirement}
+        renderTriggerButton={(props) => (
+          <Button
+            leftIcon={<Plus size={12} />}
+            variant={"primary"}
+            aria-label={t("requirementsLibrary.bankQuestions.addFormField")}
+            {...props}
+          >
+            {t("requirementsLibrary.bankQuestions.addFormField")}
+          </Button>
+        )}
+      />
+    </HStack>
+  )
 
   return (
     <Box position="relative" w="full" h="full">
@@ -128,10 +178,7 @@ export const FieldsSetup = observer(function FieldsSetup({
             {!hasFields && (
               <Flex w={"full"} justifyContent={"space-between"} px={6}>
                 <Text>{t("requirementsLibrary.modals.noFormFieldsAdded")}</Text>
-                <FieldsSetupDrawer
-                  disabledRequirementTypeOptions={disabledRequirementTypeOptions}
-                  onUse={onUseRequirement}
-                />
+                {addButtons}
               </Flex>
             )}
             {isInReorderMode ? (
@@ -143,7 +190,7 @@ export const FieldsSetup = observer(function FieldsSetup({
                     <RequirementFieldRow
                       key={field.id}
                       index={index}
-                      field={field}
+                      field={field as IRequirementAttributes}
                       isEditing={isRequirementInEditMode(field.id)}
                       toggleEdit={() => toggleRequirementToEdit(field.id)}
                       onRemove={() => onRemoveRequirement(index)}
@@ -151,14 +198,9 @@ export const FieldsSetup = observer(function FieldsSetup({
                   )
                 })}
                 {hasFields && (
-                  <FieldsSetupDrawer
-                    disabledRequirementTypeOptions={disabledRequirementTypeOptions}
-                    onUse={onUseRequirement}
-                    defaultButtonProps={{
-                      alignSelf: "flex-end",
-                      mr: 3,
-                    }}
-                  />
+                  <Flex w="full" justifyContent="flex-end" pr={3}>
+                    {addButtons}
+                  </Flex>
                 )}
               </VStack>
             )}
@@ -185,6 +227,14 @@ export const FieldsSetup = observer(function FieldsSetup({
           </Flex>
         </Box>
       )}
+      <AddQuestionsModal
+        hideTrigger
+        isOpen={isAddQuestionsOpen}
+        onOpen={onOpenAddQuestions}
+        onClose={onCloseAddQuestions}
+        onUse={onUseBankQuestion}
+        disabledQuestionIds={linkedQuestionIds}
+      />
     </Box>
   )
 })

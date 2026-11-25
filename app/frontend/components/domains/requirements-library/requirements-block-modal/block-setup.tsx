@@ -16,17 +16,16 @@ import {
 } from "@chakra-ui/react"
 import { ArrowCounterClockwise, Trash, Upload } from "@phosphor-icons/react"
 import { UppyFile } from "@uppy/core"
-import "@uppy/core/dist/style.min.css"
-import Dashboard from "@uppy/react/lib/Dashboard.js"
 import { observer } from "mobx-react-lite"
 import * as R from "ramda"
-import React, { useRef } from "react"
+import React, { useEffect, useRef } from "react"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import useUppyS3 from "../../../../hooks/use-uppy-s3"
 import { IRequirementBlock } from "../../../../models/requirement-block"
 import { useMst } from "../../../../setup/root"
 import { TagsSelect } from "../../../shared/select/selectors/tags-select"
+import { UppyDashboard } from "../../../shared/uppy-dashboard"
 import { BlockSetupOptionsMenu } from "../block-setup-options-menu"
 import { IRequirementBlockForm } from "./index"
 
@@ -37,9 +36,11 @@ const helperTextStyles: Partial<TextProps> = {
 export const BlockSetup = observer(function BlockSetup({
   requirementBlock,
   withOptionsMenu,
+  onIsUploadingChange,
 }: {
   requirementBlock?: IRequirementBlock
   withOptionsMenu?: boolean
+  onIsUploadingChange?: (isUploading: boolean) => void
 }) {
   const { requirementBlockStore } = useMst()
   const { t } = useTranslation()
@@ -89,7 +90,16 @@ export const BlockSetup = observer(function BlockSetup({
     }
   }
 
-  const { uppy } = useUppyS3({ onUploadSuccess: handleUploadSuccess, maxNumberOfFiles: 10, autoProceed: true })
+  const { uppy, isUploading } = useUppyS3({
+    onUploadSuccess: handleUploadSuccess,
+    maxNumberOfFiles: 10,
+    autoProceed: true,
+  })
+
+  useEffect(() => {
+    onIsUploadingChange?.(isUploading)
+    return () => onIsUploadingChange?.(false)
+  }, [isUploading, onIsUploadingChange])
 
   return (
     <Box as={"section"} w={"350px"} boxShadow={"md"} borderRadius={"xl"} bg={"greys.grey10"} ref={containerRef}>
@@ -178,7 +188,7 @@ export const BlockSetup = observer(function BlockSetup({
             </Flex>
           ))}
           <Box position="relative">
-            <Dashboard uppy={uppy} height={300} />
+            <UppyDashboard uppy={uppy} height={300} />
             {R.isEmpty(uppy.getFiles()) && (
               <Center position="absolute" top={"48%"} left={"48%"}>
                 <Upload size={24} />

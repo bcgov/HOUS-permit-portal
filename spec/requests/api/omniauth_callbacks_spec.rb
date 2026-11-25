@@ -78,6 +78,37 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
       expect(response.headers["Location"]).to eq(root_url)
     end
 
+    it "issues both prefixed cookies when another environment's cookies are present" do
+      with_auth_cookie_prefix("hub_test_") do
+        OmniAuth.config.mock_auth[:keycloak] = mock_auth_hash(idp_hint: "bceid")
+        stub_resolver_for(invitation_token: nil, result_user: user)
+
+        get "/api/auth/keycloak/callback",
+            headers: {
+              "Cookie" =>
+                "access_token=production-token; id_token=production-id-token"
+            },
+            env: {
+              "HTTPS" => "on",
+              "omniauth.auth" => OmniAuth.config.mock_auth[:keycloak],
+              "omniauth.origin" => set_origin
+            }
+
+        expect(response).to have_http_status(:found)
+        set_cookie = Array(response.headers["Set-Cookie"])
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_access_token=")
+        )
+        expect(set_cookie).to include(
+          a_string_starting_with("hub_test_id_token=id-token-bceid;")
+        )
+        expect(set_cookie).not_to include(
+          a_string_starting_with("access_token=")
+        )
+        expect(set_cookie).not_to include(a_string_starting_with("id_token="))
+      end
+    end
+
     it "redirects to login on failure from resolver" do
       OmniAuth.config.mock_auth[:keycloak] = mock_auth_hash(idp_hint: "bceid")
       invalid_user = User.new(email: nil)
@@ -92,26 +123,39 @@ RSpec.describe "Api::OmniauthCallbacks", type: :request do
 
       expect(response).to have_http_status(:found)
       expect(response.headers["Location"]).to include(login_path)
+      expect(login_reason_from(response.headers["Location"])).to eq("denied")
     end
   end
 
   describe "GET /api/auth/failure" do
-    before do
-      allow_any_instance_of(ActionView::Base).to receive(
-        :vite_client_tag
-      ).and_return("")
-      allow_any_instance_of(ActionView::Base).to receive(
-        :vite_react_refresh_tag
-      ).and_return("")
-      allow_any_instance_of(ActionView::Base).to receive(
-        :vite_typescript_tag
-      ).and_return("")
+    it "redirects to login with cancelled when the IdP denies access" do
+      get "/api/auth/failure", params: { message: "access_denied" }
+
+      expect(response).to have_http_status(:found)
+      expect(response.headers["Location"]).to include(login_path)
+      expect(login_reason_from(response.headers["Location"])).to eq("cancelled")
     end
 
-    it "redirects to login with error flash" do
-      get "/api/auth/failure"
+    it "redirects to login with error when the login service is unavailable" do
+      get "/api/auth/failure", params: { message: "service_unavailable" }
 
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:found)
+      expect(login_reason_from(response.headers["Location"])).to eq("error")
     end
+
+    it "uses unknown for unrecognized messages and does not copy raw IdP text into loginReason" do
+      raw = "invalid_client: secret leaked from keycloak"
+      get "/api/auth/failure", params: { message: raw }
+
+      expect(response).to have_http_status(:found)
+      expect(login_reason_from(response.headers["Location"])).to eq("unknown")
+      expect(Rack::Utils.unescape(response.headers["Location"])).not_to include(
+        "secret leaked"
+      )
+    end
+  end
+
+  def login_reason_from(location)
+    Rack::Utils.parse_query(URI(location).query)["loginReason"]
   end
 end

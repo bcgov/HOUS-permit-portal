@@ -3,6 +3,7 @@ import {
   EConditionalOperator,
   EConditionalThen,
   EDataValidationOperation,
+  EExternalApiVersion,
   ENumberUnit,
   ERequirementType,
   ETagType,
@@ -10,6 +11,7 @@ import {
 import {
   IHelpLinkItems,
   IOption,
+  IRevisionReferenceDocument,
   IRevisionRequest,
   ISimplifiedRequirementsMap,
   TComputedCompliance,
@@ -44,8 +46,11 @@ export interface IRequirementAttributes {
   id?: string
   label?: string
   inputType?: ERequirementType
-  hint?: string
-  instructions?: string
+  hint?: string | null
+  instructions?: string | null
+  requirementQuestionId?: string | null
+  defaultHint?: string | null
+  defaultInstructions?: string | null
   required?: boolean
   requirementCode: string
   elective?: boolean
@@ -78,6 +83,18 @@ export interface IRequirementBlockParams {
   }>
 }
 
+export interface IRequirementQuestionParams {
+  id: string
+  name: string
+  description?: string
+  associationList?: string[]
+  label: string
+  inputType: ERequirementType
+  hint?: string
+  instructions?: string
+  inputOptions?: IRequirementAttributes["inputOptions"]
+}
+
 export interface IBlockConditional {
   whenBlockId: string
   whenRequirementCode: string
@@ -107,6 +124,7 @@ export interface IRequirementTemplateSectionAttributes {
 export interface IRevisionRequestsAttributes extends Partial<IRevisionRequest> {
   _destroy?: true
   userId?: string
+  revisionReferenceDocumentsAttributes?: Array<Partial<IRevisionReferenceDocument> & { _destroy?: boolean }>
 }
 
 export interface IRevisionReasonsAttributes {
@@ -136,6 +154,7 @@ export interface ISiteConfigurationUpdateParams {
   overheatingToolEnabled?: boolean | null
   archistarEnabledForAllJurisdictions?: boolean | null
   sitewideMessage?: string | null
+  infoDocumentsIntroText?: string | null
   helpLinkItems?: IHelpLinkItems
   revisionReasonsMap?: { [key: string]: IRevisionReason }
   revisionReasonsAttributes?: IRevisionReasonsAttributes[]
@@ -149,6 +168,7 @@ export interface ITagSearchParams {
 export interface IExternalApiKeyParams {
   name?: string
   connectingApplication?: string
+  apiVersion?: EExternalApiVersion
   webhookUrl?: string
   expiredAt?: Date
   jurisdictionId?: string
@@ -158,6 +178,22 @@ export interface IExternalApiKeyParams {
 
 export interface IIntegrationMappingUpdateParams {
   simplifiedMap?: ISimplifiedRequirementsMap
+}
+
+export interface IExplainerDocumentAttribute {
+  id?: string
+  _destroy?: boolean
+  file?: IUppyAttachmentFile
+}
+
+export interface IExplainerParams {
+  introductionHtml?: string
+  beforeYouApplyHtml?: string
+  steps?: { title: string; description: string }[]
+  links?: { title: string; url: string }[]
+  documentsAttributes?: IExplainerDocumentAttribute[]
+  relatedTemplateIds?: string[]
+  publish?: boolean
 }
 
 // Added for Permit Project Updates
@@ -174,6 +210,8 @@ export interface IPermitProjectUpdateParams {
   fullAddress?: string
   pid?: string
   jurisdictionId?: string
+  latitude?: number
+  longitude?: number
   // other PermitProject fields that can be updated
   projectDocumentsAttributes?: IProjectDocumentAttribute[]
 }

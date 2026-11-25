@@ -1,0 +1,23 @@
+# Development Environment Overrides for ClamAV Helm Chart
+# Usage: helm install/upgrade clamav -f values.yaml -f values-dev.yaml
+
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: dev
+
+clamav:
+  image: "bb18ab-dev/clamav-scanner"
+  registry: image-registry.apps.silver.devops.gov.bc.ca
+  replicaCount: 1  # Can be scaled up to 2-3 for load distribution (pod anti-affinity prevents same node)
+
+  persistentVolume:
+    size: "500Mi"  # Dev environment PVC size (shared by all replicas)
+
+  freshclam:
+    mirrors:
+      - https://clamav-mirror.apps.silver.devops.gov.bc.ca
+
+cronJob:
+  image:
+    repository: "image-registry.apps.silver.devops.gov.bc.ca/bb18ab-dev/clamav-scanner"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3  # Keep 3 failed jobs for debugging (was 1)
