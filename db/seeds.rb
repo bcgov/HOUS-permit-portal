@@ -476,11 +476,14 @@ seed_pa_status =
         revisions_requested_at: [base_time + 1.day, Time.current].min
       )
     when :resubmitted
-      resub_time = base_time + rand(72..240).hours
-      resub_time = [resub_time, Time.current].min
-      if resub_time <= base_time
-        resub_time = [base_time + 1.hour, Time.current].min
-      end
+      # A resubmission is a later version. Pull the first submit back when it
+      # was clamped to now, so the second version is still strictly after it.
+      first_time = [base_time, Time.current - 3.days].min
+      first_time = [first_time, pa.created_at + 1.minute].max
+      sv1.update_columns(created_at: first_time, updated_at: first_time)
+
+      resub_time = [first_time + rand(24..48).hours, Time.current].min
+      resub_time = first_time + 1.minute if resub_time <= first_time
 
       pa.submission_versions.create!(
         form_json: pa.template_version&.form_json || {},
