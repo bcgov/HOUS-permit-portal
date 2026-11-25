@@ -454,6 +454,7 @@ class Jurisdiction < ApplicationRecord
         .published
         .or(TemplateVersion.scheduled)
         .or(TemplateVersion.deprecated.where(deprecation_reason: "new_publish"))
+        .where(requirement_template_id: RequirementTemplate.kept.select(:id))
         .where.not(id: existing_mapping_template_ids)
         .order(version_date: :asc)
 

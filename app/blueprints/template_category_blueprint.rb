@@ -6,7 +6,7 @@ class TemplateCategoryBlueprint < Blueprinter::Base
   view :extended do
     association :requirement_templates,
                 blueprint: RequirementTemplateBlueprint do |category, _options|
-      category.requirement_templates
+      category.requirement_templates.kept
     end
   end
 end

@@ -376,6 +376,16 @@ RSpec.describe Api::RequirementTemplatesController, type: :controller do
       json_response["data"].map { |option| option["label"] }
     end
 
+    it "includes an archived template when applications on it exist" do
+      inbox_template.discard!
+      sign_in submitter
+
+      get :for_filter
+
+      expect(response).to have_http_status(:success)
+      expect(option_labels).to include("Plumbing permit")
+    end
+
     it "returns only templates on the current user's applications when unscoped" do
       sign_in submitter
       get :for_filter

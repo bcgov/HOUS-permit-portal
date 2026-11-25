@@ -93,8 +93,7 @@ class Api::TemplateCategoriesController < Api::ApplicationController
   end
 
   def render_categories(message_key = nil)
-    categories =
-      policy_scope(TemplateCategory).ordered.includes(:requirement_templates)
+    categories = policy_scope(TemplateCategory).ordered
     uncategorized_templates =
       policy_scope(RequirementTemplate)
         .kept

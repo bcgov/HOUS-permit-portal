@@ -44,6 +44,37 @@ RSpec.describe Jurisdiction, type: :model do
           [template_version_published.id, template_version_deprecated.id]
         )
       end
+
+      it "does not create mappings for versions on a discarded requirement template" do
+        discarded_template = create(:requirement_template)
+        discarded_published =
+          create(
+            :template_version,
+            status: "published",
+            requirement_template: discarded_template
+          )
+        discarded_scheduled =
+          create(
+            :template_version,
+            status: "scheduled",
+            requirement_template: discarded_template
+          )
+        discarded_deprecated =
+          create(
+            :template_version,
+            status: "deprecated",
+            deprecation_reason: "new_publish",
+            requirement_template: discarded_template
+          )
+        discarded_template.discard!
+
+        enabled = create(:sub_district, external_api_state: "j_on")
+
+        mapped_ids = enabled.integration_mappings.pluck(:template_version_id)
+        expect(mapped_ids).not_to include(discarded_published.id)
+        expect(mapped_ids).not_to include(discarded_scheduled.id)
+        expect(mapped_ids).not_to include(discarded_deprecated.id)
+      end
     end
 
     context "when external_api_enabled is false" do

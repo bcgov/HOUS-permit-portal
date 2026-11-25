@@ -51,6 +51,8 @@ class TemplateVersion < ApplicationRecord
           end
         end
 
+  PUBLISHED_IDS_CACHE_KEY = "published_template_version_ids_on_kept_templates"
+
   # Published versions whose owning RequirementTemplate has not been discarded.
   scope :published_on_kept_templates,
         -> do
@@ -60,9 +62,13 @@ class TemplateVersion < ApplicationRecord
   def self.cached_published_ids
     Rails
       .cache
-      .fetch("published_template_version_ids", expires_in: 24.hours) do
-        where(status: :published).pluck(:id)
+      .fetch(PUBLISHED_IDS_CACHE_KEY, expires_in: 24.hours) do
+        published_on_kept_templates.pluck(arel_table[:id])
       end
+  end
+
+  def self.clear_published_ids_cache
+    Rails.cache.delete(PUBLISHED_IDS_CACHE_KEY)
   end
 
   def customizations
@@ -168,7 +174,7 @@ class TemplateVersion < ApplicationRecord
   end
 
   def create_integration_mappings
-    return unless !deprecation_reason_unscheduled?
+    return if deprecation_reason_unscheduled? || requirement_template.discarded?
 
     api_enabled_jurisdictions = Jurisdiction.where(external_api_state: "j_on")
 
@@ -230,6 +236,6 @@ class TemplateVersion < ApplicationRecord
   end
 
   def clear_published_ids_cache
-    Rails.cache.delete("published_template_version_ids")
+    self.class.clear_published_ids_cache
   end
 end

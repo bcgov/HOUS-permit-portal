@@ -34,6 +34,44 @@ RSpec.describe Api::TemplateCategoriesController, type: :controller do
       ).to eq([uncategorized_template.id])
     end
 
+    it "omits discarded templates from categories and uncategorized" do
+      sign_in super_admin
+      category = create(:template_category)
+      kept_template = create(:requirement_template, template_category: category)
+      archived_template =
+        create(:requirement_template, template_category: category)
+      archived_template.discard!
+      uncategorized_template = create(:requirement_template)
+      archived_uncategorized = create(:requirement_template)
+      archived_uncategorized.discard!
+
+      get :index, format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(
+        json_response.dig("data", 0, "requirement_templates").pluck("id")
+      ).to eq([kept_template.id])
+      expect(
+        json_response.dig("meta", "uncategorized_requirement_templates").pluck(
+          "id"
+        )
+      ).to eq([uncategorized_template.id])
+    end
+
+    it "lists a restored template in its category again" do
+      sign_in super_admin
+      category = create(:template_category)
+      template = create(:requirement_template, template_category: category)
+      template.discard!
+      template.undiscard!
+
+      get :index, format: :json
+
+      expect(
+        json_response.dig("data", 0, "requirement_templates").pluck("id")
+      ).to eq([template.id])
+    end
+
     it "prevents non-super admins from listing categories" do
       sign_in create(:user)
 
@@ -119,6 +157,31 @@ RSpec.describe Api::TemplateCategoriesController, type: :controller do
       expect(existing_template.sort_order).to eq(0)
       expect(moving_template.reload.template_category).to eq(target_category)
       expect(moving_template.sort_order).to eq(1)
+    end
+
+    it "reorders the visible templates and leaves an archived template hidden" do
+      sign_in super_admin
+      category = create(:template_category)
+      first = create(:requirement_template, template_category: category)
+      second = create(:requirement_template, template_category: category)
+      archived = create(:requirement_template, template_category: category)
+      archived.discard!
+
+      post :reorder_templates,
+           params: {
+             id: category.id,
+             ordered_ids: [second.id, first.id]
+           },
+           format: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(second.reload.sort_order).to eq(0)
+      expect(first.reload.sort_order).to eq(1)
+      expect(archived.reload).to be_discarded
+      expect(archived.template_category).to eq(category)
+      expect(
+        json_response.dig("data", 0, "requirement_templates").pluck("id")
+      ).to eq([second.id, first.id])
     end
 
     it "can move templates to the uncategorized bucket" do
