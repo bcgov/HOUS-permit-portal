@@ -1078,6 +1078,7 @@ RSpec.describe PermitApplicationPolicy do
         create(
           :permit_application,
           submitter: expanded,
+          created_by: expanded,
           permit_project: project,
           jurisdiction: jurisdiction,
           sandbox: sandbox
@@ -1110,6 +1111,7 @@ RSpec.describe PermitApplicationPolicy do
         create(
           :permit_application,
           submitter: standard,
+          created_by: standard,
           permit_project: project,
           jurisdiction: jurisdiction,
           sandbox: sandbox

@@ -55,9 +55,11 @@ class Api::PermitProjectsController < Api::ApplicationController
   # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
-    # Members get the submitter view before the review-staff inbox view.
-    # A review assignment is not membership, so an assigned reviewer keeps
-    # the inbox view. A reviewer who later accepts a membership would not.
+    # REVIEW STAFF PROJECT MEMBER TODO: a membership selects :extended before
+    # the inbox view. Review staff are not project members. A review
+    # assignment is not a membership, so an assigned reviewer keeps the inbox
+    # view. If staff can be members, the inbox view has to win, or the URL
+    # has to name which view. See ProjectMembershipPolicy#show_invitation?.
     view =
       if project_access.view_project?
         :extended

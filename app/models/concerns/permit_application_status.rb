@@ -236,7 +236,7 @@ module PermitApplicationStatus
       reset_submission_block_statuses_for_revision_requests
     end
 
-    def handle_submission
+    def handle_submission(submitted_by = nil)
       if aasm.from_state == :revisions_requested
         reset_review_block_statuses_for_changed_fields
       end
@@ -256,6 +256,7 @@ module PermitApplicationStatus
           checklist.present? && using_digital_energy_step_code_tool?
         version =
           submission_versions.build(
+            submitted_by: submitted_by,
             form_json:
               PermitApplication::FormJsonService
                 .new(permit_application: self, customizations: customizations)

@@ -45,13 +45,12 @@ RSpec.describe ProjectMembership, type: :model do
     expect(extra_primary).not_to be_valid
   end
 
-  it "refuses to clear the primary contact" do
+  it "clears the primary contact" do
     project = create(:permit_project)
     membership = project.project_memberships.find_by!(user: project.creator)
     membership.contact_designation = :none
 
-    expect(membership).not_to be_valid
-    expect(membership.errors[:contact_designation]).to be_present
+    expect(membership).to be_valid
   end
 
   it "moves primary contact onto another membership" do
@@ -137,14 +136,13 @@ RSpec.describe ProjectMembership, type: :model do
     expect(ProjectMembership.exists?(membership.id)).to be true
   end
 
-  it "refuses to remove the primary contact while another full member remains" do
+  it "removes the primary contact while another full member remains" do
     project = create(:permit_project)
     create(:project_membership, permit_project: project, access: :full)
     membership = project.project_memberships.find_by!(user: project.creator)
 
-    expect(membership.destroy).to be false
-    expect(membership.errors[:base]).to be_present
-    expect(ProjectMembership.exists?(membership.id)).to be true
+    expect(membership.destroy).to be_truthy
+    expect(ProjectMembership.exists?(membership.id)).to be false
   end
 
   it "removes a pending invite" do

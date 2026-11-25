@@ -70,7 +70,6 @@ class UserDataCleanupJob
       .discarded
       .where(discarded_at: ..cutoff_time)
       .find_each do |user|
-        handle_user_resources(user)
         user.destroy!
       rescue ActiveRecord::InvalidForeignKey,
              ActiveRecord::RecordNotDestroyed => e
@@ -82,51 +81,6 @@ class UserDataCleanupJob
           "[UserDataCleanupJob] Unexpected error deleting user #{user.id}: #{e.message}"
         )
       end
-  end
-
-  def handle_user_resources(user)
-    # Ensure all models are loaded so PublicRecordable.recordable_models is fully populated.
-    # In development/test, Rails uses lazy loading, so models that include PublicRecordable
-    # won't register themselves until their class file is loaded.
-    Rails.application.eager_load! unless Rails.application.config.eager_load
-
-    PublicRecordable.recordable_models.each do |model_class|
-      # Skip if the model doesn't have a user association (shouldn't happen if using the concern correctly)
-      association_name = model_class.public_recordable_user_association
-      next unless association_name
-
-      # Find records belonging to this user. Permit applications point at a
-      # membership, so the user id is on that row. Drafts are destroyed here
-      # because the user no longer has a dependent destroy for them.
-      foreign_key = "#{association_name}_id"
-      scope =
-        if model_class == PermitApplication
-          PermitApplication.unscoped.where(
-            submitter_membership_id:
-              ProjectMembership.where(user_id: user.id).select(:id)
-          )
-        else
-          model_class.where(foreign_key => user.id)
-        end
-      null_column =
-        (
-          if model_class == PermitApplication
-            :submitter_membership_id
-          else
-            foreign_key
-          end
-        )
-
-      scope.find_each do |record|
-        if record.public_record?
-          record.take_user_snapshots!
-          record.update_column(null_column, nil)
-          record.reindex if record.respond_to?(:search_data)
-        elsif model_class == PermitApplication
-          record.destroy!
-        end
-      end
-    end
   end
 
   def day_window_ending(current_time, target_days_ago)

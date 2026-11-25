@@ -3,7 +3,6 @@ class PermitApplication < ApplicationRecord
                nickname
                full_address
                template_tags
-               submitter
                status
                review_delegatee_name
              ],
@@ -25,11 +24,7 @@ class PermitApplication < ApplicationRecord
     :submission_versions,
     :step_code,
     :created_by,
-    {
-      permit_collaborations: :collaborator,
-      application_contact_membership: :user,
-      submitter_membership: :user
-    }
+    { permit_collaborations: :collaborator, submitter_membership: :user }
   ]
 
   belongs_to :created_by, polymorphic: true, optional: true
@@ -39,10 +34,7 @@ class PermitApplication < ApplicationRecord
              class_name: "CustomizationChange",
              optional: true
   belongs_to :permit_project, optional: true, touch: true
-  belongs_to :application_contact_membership,
-             class_name: "ProjectMembership",
-             optional: true,
-             inverse_of: false
+  # The application contact.
   belongs_to :submitter_membership,
              class_name: "ProjectMembership",
              optional: true,
@@ -106,7 +98,6 @@ class PermitApplication < ApplicationRecord
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_validation :assign_created_by_from_submitter, on: :create
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -120,10 +111,6 @@ class PermitApplication < ApplicationRecord
                if: :status_changed_to_intake?
   after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
   after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
-  scope :with_submitter_role,
-        -> do
-          joins(submitter_membership: :user).where(users: { role: "submitter" })
-        end
 
   scope :unviewed,
         -> do
@@ -148,16 +135,17 @@ class PermitApplication < ApplicationRecord
     !new_draft?
   end
 
-  # A submitted application with no contact is orphaned. A draft is not.
+  # The project carries the retention clock. A blank contact is not abandonment.
+  # Rows already stamped orphaned_at stay frozen.
   def orphaned?
-    orphaned_at.present? || (public_record? && submitter_membership_id.blank?)
+    orphaned_at.present? || permit_project&.orphaned? || false
   end
 
-  # The membership's user, or the snapshot left when that contact is gone.
+  # The membership's user, or the snapshot left when that account is gone.
   def submitter
     user = submitter_membership&.user
     return user if user.present?
-    return nil unless orphaned?
+    return nil unless orphaned? || submitter_name_snapshot?
 
     record_id = id
     User
@@ -176,6 +164,11 @@ class PermitApplication < ApplicationRecord
 
   def submitter_id
     submitter_membership&.user_id
+  end
+
+  def submitter_name_snapshot?
+    omniauth_username_snapshot.present? || first_name_snapshot.present? ||
+      last_name_snapshot.present?
   end
 
   def submitter=(user)
@@ -356,14 +349,11 @@ class PermitApplication < ApplicationRecord
       full_address: full_address,
       template_tags: template_tag_list&.join(", "),
       template_nickname: template_nickname,
-      submitter:
-        (submitter.present? ? "#{submitter.name} #{submitter.email}" : nil),
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction&.id,
-      submitter_id: submitter_id,
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
@@ -843,7 +833,6 @@ class PermitApplication < ApplicationRecord
     aggregates =
       PermitApplication
         .joins(template_version: :requirement_template)
-        .joins(submitter_membership: :user)
         .joins(
           "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
         )
@@ -856,7 +845,6 @@ class PermitApplication < ApplicationRecord
         .joins(
           "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
         )
-        .where(users: { role: "submitter" })
         .where(permit_projects: { sandbox_id: nil })
         .group(
           "jurisdictions.id",
@@ -959,20 +947,30 @@ class PermitApplication < ApplicationRecord
     end
   end
 
-  # Who is told about this application. The contact wins when one is set.
+  # Who is told about this application. The submitter membership is the contact.
   def application_message_recipient
-    application_contact_membership&.user || submitter
+    submitter
+  end
+
+  # The application contact and the user who submitted the latest version.
+  # One entry each.
+  def application_message_recipients
+    [application_message_recipient, latest_submission_submitter].compact.uniq
   end
 
   private
 
+  def latest_submission_submitter
+    submission_versions
+      .where.not(submitted_by_id: nil)
+      .order(created_at: :desc, id: :desc)
+      .first
+      &.submitted_by
+  end
+
   # The project's own sandbox, so a model check never depends on the request.
   def project_access_for(user)
     ProjectAccess.new(user, permit_project&.sandbox, permit_project)
-  end
-
-  def assign_created_by_from_submitter
-    self.created_by ||= submitter_membership&.user
   end
 
   def primary_contact_membership(project)
@@ -1215,17 +1213,6 @@ class PermitApplication < ApplicationRecord
   # TODO: Also enqueue project when a meeting request is made
   def enqueue_permit_project_if_draft
     permit_project&.enqueue! if permit_project&.draft?
-  end
-
-  def submitter_must_have_role
-    unless submitter&.submitter?
-      errors.add(
-        :submitter,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.submitter.incorrect_role"
-        )
-      )
-    end
   end
 
   def jurisdiction_has_matching_submission_contact

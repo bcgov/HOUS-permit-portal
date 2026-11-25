@@ -266,16 +266,22 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   def update_submitter
     authorize @permit_application
-    membership =
-      @permit_application.permit_project&.project_memberships&.find_by(
-        id: params.dig(:permit_application, :submitter_membership_id)
-      )
-    if membership&.active?
-      @permit_application.submitter_membership = membership
+    membership_id = params.dig(:permit_application, :submitter_membership_id)
+    if membership_id.blank?
+      @permit_application.submitter_membership = nil
       saved = @permit_application.save
     else
-      @permit_application.errors.add(:submitter, :inactive_member)
-      saved = false
+      membership =
+        @permit_application.permit_project&.project_memberships&.find_by(
+          id: membership_id
+        )
+      if membership&.active?
+        @permit_application.submitter_membership = membership
+        saved = @permit_application.save
+      else
+        @permit_application.errors.add(:submitter, :inactive_member)
+        saved = false
+      end
     end
 
     if saved
@@ -346,7 +352,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
             pending_checks = checks
             false
           else
-            @permit_application.submit!
+            @permit_application.submit!(current_user)
           end
         end
       end

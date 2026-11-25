@@ -14,7 +14,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
   end
 
   # Access and contact designation. Hard Full block, not a grant.
-  # The last Full member and the primary contact are model validations.
+  # The last Full member and a pending invite are model validations.
   def update_standing?
     project_access.manage_member_standing?
   end
@@ -25,7 +25,7 @@ class ProjectMembershipPolicy < ApplicationPolicy
 
   # Canceling a pending or expired invite matches invite. Removing someone else is standing.
   # Leaving is removing your own active membership, at any access level.
-  # ProjectMembership still refuses the last Full member and the primary.
+  # ProjectMembership still refuses the last Full member.
   def destroy?
     return may_send_invite?(record) unless record.active?
     return true if own_membership?
@@ -33,21 +33,27 @@ class ProjectMembershipPolicy < ApplicationPolicy
     project_access.manage_member_standing?
   end
 
-  # MEMBERSHIP COMMENT - submitters only. If reviewers can accept later:
-  # PermitProjectsController#show selects the submitter :extended view before
-  # the review inbox view, so an accepted reviewer would lose the inbox view
-  # of that project. Accept also does not check sandbox, so a reviewer in
-  # another sandbox could accept and then be denied on the overview redirect.
+  # REVIEW STAFF PROJECT MEMBER TODO: invitations are submitter-only. Review
+  # staff are not project members. A review assignment is not a membership.
+  # Accept does not check sandbox, so a reviewer in another sandbox could
+  # accept and then fail same_sandbox? and the overview redirect.
+  # PermitProjectsController#show picks the membership :extended view before
+  # the inbox view, so a staff member would lose the inbox project screen.
+  # The inbox view has to win for review staff, or the URL has to name which
+  # view. ProjectAccess is membership only. Policies OR a jurisdiction check
+  # beside it, so a staff member would get both. Grants are Limited and
+  # Expanded submitter delegation; decide whether jurisdiction powers replace
+  # grants or stack with them.
   def show_invitation?
     user&.submitter?
   end
 
-  # MEMBERSHIP COMMENT - see show_invitation?
+  # REVIEW STAFF PROJECT MEMBER TODO: see show_invitation?.
   def accept_invitation?
     show_invitation?
   end
 
-  # MEMBERSHIP COMMENT - see show_invitation?
+  # REVIEW STAFF PROJECT MEMBER TODO: see show_invitation?.
   def decline_invitation?
     show_invitation?
   end

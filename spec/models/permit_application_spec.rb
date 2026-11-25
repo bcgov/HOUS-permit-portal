@@ -120,7 +120,7 @@ RSpec.describe PermitApplication, type: :model do
       expect(application.submitter_membership).to eq(primary)
     end
 
-    it "orphans a submitted application when the membership is removed and leaves a draft" do
+    it "clears the submitter when the member is removed and leaves the application" do
       project = create(:permit_project)
       member =
         create(
@@ -150,10 +150,10 @@ RSpec.describe PermitApplication, type: :model do
       submitted.reload
       draft.reload
       expect(submitted.submitter_membership_id).to be_nil
-      expect(submitted.orphaned_at).to be_present
+      expect(submitted.orphaned_at).to be_nil
       expect(submitted.discarded_at).to be_nil
-      expect(submitted).to be_orphaned
-      expect(submitted.submitter).to be_readonly
+      expect(submitted).not_to be_orphaned
+      expect(submitted.submitter).to be_nil
       expect(draft.submitter_membership_id).to be_nil
       expect(draft.orphaned_at).to be_nil
       expect(draft).not_to be_orphaned

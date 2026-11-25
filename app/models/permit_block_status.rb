@@ -56,9 +56,7 @@ class PermitBlockStatus < ApplicationRecord
   end
 
   def users_to_notify_status_ready
-    if submission?
-      return [permit_application.application_message_recipient].compact
-    end
+    return permit_application.application_message_recipients if submission?
 
     users_to_notify =
       permit_application.users_by_collaboration_options(

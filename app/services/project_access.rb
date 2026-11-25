@@ -2,7 +2,7 @@
 # together. A caller with no accepted
 # membership gets false everywhere. Review staff are not an access level;
 # policies OR their jurisdiction check with these answers. Rules that need
-# a record (last Full member, primary contact, pending invite) stay on the
+# a record (last Full member, pending invite) stay on the
 # policy.
 class ProjectAccess
   # Access levels that pass a check, for policy scopes. Derived from the

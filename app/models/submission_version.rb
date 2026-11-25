@@ -6,6 +6,10 @@ class SubmissionVersion < ApplicationRecord
   include ZipfileUploader.Attachment(:zipfile)
 
   belongs_to :permit_application
+  belongs_to :submitted_by,
+             class_name: "User",
+             optional: true,
+             inverse_of: :submitted_submission_versions
   has_many :revision_requests, dependent: :destroy
   has_many :supporting_documents, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy

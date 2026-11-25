@@ -607,6 +607,9 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(permit_application.reload).to be_newly_submitted
+      expect(permit_application.latest_submission_version.submitted_by).to eq(
+        member
+      )
     end
 
     it "forbids a Limited member from submitting a draft" do
@@ -1993,6 +1996,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
         create(
           :permit_application,
           submitter: member,
+          created_by: member,
           permit_project: permit_project,
           template_version: template_version,
           jurisdiction: jurisdiction
@@ -2064,6 +2068,7 @@ RSpec.describe "Api::PermitApplications", type: :request do
         create(
           :permit_application,
           submitter: member,
+          created_by: member,
           permit_project: permit_project,
           template_version: template_version,
           jurisdiction: jurisdiction
@@ -2170,6 +2175,20 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(response).to have_http_status(:forbidden)
       expect(application.reload.submitter_membership).to eq(member)
       expect(application.submitter).to eq(member.user)
+
+      sign_in submitter
+      patch "/api/permit_applications/#{application.id}/submitter",
+            params: {
+              permit_application: {
+                submitter_membership_id: nil
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(application.reload.submitter_membership_id).to be_nil
+      expect(application).not_to be_orphaned
     end
   end
 end

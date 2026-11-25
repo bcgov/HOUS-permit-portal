@@ -252,7 +252,6 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
   }
 
   const saveContact = async () => {
-    if (!contactId) return
     setSaving(true)
     const ok = await permitApplication.updateSubmitter(contactId)
     if (ok) setView("summary")
@@ -282,7 +281,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
         {...sticky}
       >
         <Flex
-          align="center"
+          align="flex-start"
           justify="space-between"
           px={6}
           py={6}
@@ -290,9 +289,19 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
           borderBottom="1px solid"
           borderColor="border.light"
         >
-          <Text fontWeight="bold" fontSize="lg">
-            {t("permitApplication.people.title")}
-          </Text>
+          <Box minW={0} pr={2}>
+            <Text fontWeight="bold" fontSize="lg">
+              {t("permitApplication.people.title")}
+            </Text>
+            <Text fontSize="sm" noOfLines={2}>
+              {permitApplication.templateNickname || permitApplication.number}
+            </Text>
+            {permitApplication.nickname && (
+              <Text fontSize="sm" color="text.secondary" noOfLines={1}>
+                {permitApplication.nickname}
+              </Text>
+            )}
+          </Box>
           <IconButton aria-label={t("ui.close")} icon={<X />} variant="ghost" onClick={onClose} />
         </Flex>
 
@@ -431,6 +440,7 @@ export const ApplicationPeoplePanel = observer(function ApplicationPeoplePanel({
               <Text color="text.secondary">{t("permitApplication.people.contactChoose")}</Text>
               <AsyncSelect<IOption, false>
                 isCreatable={false}
+                isClearable
                 defaultOptions={storedContactOption ? [storedContactOption] : []}
                 loadOptions={loadContactOptions}
                 value={selectedContactOption}

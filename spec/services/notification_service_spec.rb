@@ -267,7 +267,7 @@ RSpec.describe NotificationService do
         instance_double(
           "PermitApplication",
           permit_project: nil,
-          application_message_recipient: submitter
+          application_message_recipients: [submitter]
         )
       step_code =
         instance_double(
@@ -365,7 +365,7 @@ RSpec.describe NotificationService do
       permit_application =
         instance_double(
           "PermitApplication",
-          application_message_recipient: contact,
+          application_message_recipients: [contact],
           review_started_event_notification_data: {
             msg: "review_started"
           }
@@ -378,7 +378,8 @@ RSpec.describe NotificationService do
       described_class.publish_review_started_event(permit_application)
 
       expect(PermitHubMailer).to have_received(:notify_review_started).with(
-        permit_application
+        permit_application,
+        contact
       )
       expect(NotificationPushJob).to have_received(:perform_async).with(
         { "u1" => { msg: "review_started" } }
@@ -416,8 +417,61 @@ RSpec.describe NotificationService do
         { contact_user.id => anything }
       )
       expect(PermitHubMailer).to have_received(:notify_review_started).with(
-        permit_application
+        permit_application,
+        contact_user
       )
+    end
+
+    it "also notifies the user who submitted the latest version" do
+      submitter = create(:user, :submitter)
+      other = create(:user, :submitter)
+      permit_application = create(:permit_application, submitter: submitter)
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        submitted_by: other
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_review_started).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      described_class.publish_review_started_event(permit_application)
+
+      expect(NotificationPushJob).to have_received(:perform_async).with(
+        { submitter.id => anything, other.id => anything }
+      )
+      expect(PermitHubMailer).to have_received(:notify_review_started).with(
+        permit_application,
+        submitter
+      )
+      expect(PermitHubMailer).to have_received(:notify_review_started).with(
+        permit_application,
+        other
+      )
+    end
+
+    it "notifies a user once when they submitted and are the submitter" do
+      submitter = create(:user, :submitter)
+      permit_application = create(:permit_application, submitter: submitter)
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        submitted_by: submitter
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_review_started).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      described_class.publish_review_started_event(permit_application)
+
+      expect(NotificationPushJob).to have_received(:perform_async).once.with(
+        { submitter.id => anything }
+      )
+      expect(PermitHubMailer).to have_received(
+        :notify_review_started
+      ).once.with(permit_application, submitter)
     end
   end
 
@@ -611,7 +665,7 @@ RSpec.describe NotificationService do
         instance_double(
           "PermitApplication",
           permit_project: nil,
-          application_message_recipient: submitter,
+          application_message_recipients: [submitter],
           submit_event_notification_data: {
             msg: "submitted"
           },
@@ -921,7 +975,9 @@ RSpec.describe NotificationService do
       # case/when uses is_a?, which an instance double does not pass.
       pa = PermitApplication.new
       allow(pa).to receive(:permit_project).and_return(nil)
-      allow(pa).to receive(:application_message_recipient).and_return(submitter)
+      allow(pa).to receive(:application_message_recipients).and_return(
+        [submitter]
+      )
       file_attachment = instance_double("FileAttachment", attached_to: pa)
 
       owners = described_class.send(:determine_file_owner, file_attachment)

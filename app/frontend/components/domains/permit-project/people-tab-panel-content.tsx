@@ -157,13 +157,9 @@ const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
   const projectAccess = permitProject.currentUserAccess
   const selectedIsActive = selectedPerson?.status === EProjectMembershipStatus.active
   const leavingSelf = selectedIsActive && Boolean(selectedPerson?.userId && selectedPerson.userId === currentUser?.id)
-  // The API also refuses the last Full member and the primary contact.
+  // The API also refuses the last Full member.
   const canRemoveSelected =
-    leavingSelf ||
-    (selectedIsActive
-      ? !!projectAccess?.manageMemberStanding &&
-        selectedPerson?.contactDesignation !== EProjectContactDesignation.primary
-      : !!projectAccess?.invitePeople)
+    leavingSelf || (selectedIsActive ? !!projectAccess?.manageMemberStanding : !!projectAccess?.invitePeople)
 
   const accessOptions = Object.values(EProjectAccess).map((access) => ({
     value: access,

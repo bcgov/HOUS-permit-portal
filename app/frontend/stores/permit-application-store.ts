@@ -293,7 +293,7 @@ export const PermitApplicationStoreModel = types
         pid: overrides.pid || null,
         tags: overrides.tags || [],
         status: overrides.status || EPermitApplicationStatus.ephemeral,
-        submitter: overrides.submitter || self.rootStore.userStore.currentUser?.id || null,
+        submitter: overrides.submitter || null,
         jurisdiction: overrides.jurisdiction || null,
         templateVersion: overrides.templateVersion || templateVersion.id,
         publishedTemplateVersion: overrides.publishedTemplateVersion || templateVersion.id,

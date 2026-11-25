@@ -595,7 +595,7 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       expect(creator_membership.reload.contact_designation).to eq("none")
     end
 
-    it "rejects removing primary from the current primary contact" do
+    it "clears primary on the current primary contact" do
       creator_membership = project.project_memberships.find_by!(user: owner)
       sign_in owner
 
@@ -608,8 +608,8 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
             headers: headers,
             as: :json
 
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(creator_membership.reload.contact_designation).to eq("primary")
+      expect(response).to have_http_status(:ok)
+      expect(creator_membership.reload.contact_designation).to eq("alternate")
     end
 
     it "forbids a reviewer who can see the project" do
@@ -689,15 +689,15 @@ RSpec.describe "Api::PermitProjects::Memberships", type: :request do
       end
     end
 
-    it "rejects removing the primary contact" do
+    it "removes the primary contact when another Full member remains" do
       creator_membership = project.project_memberships.find_by!(user: owner)
       sign_in owner
 
       delete "/api/permit_projects/#{project.id}/memberships/#{creator_membership.id}",
              headers: headers
 
-      expect(response).to have_http_status(:unprocessable_content)
-      expect(ProjectMembership.exists?(creator_membership.id)).to be(true)
+      expect(response).to have_http_status(:ok)
+      expect(ProjectMembership.exists?(creator_membership.id)).to be(false)
     end
 
     it "forbids a reviewer who can see the project" do

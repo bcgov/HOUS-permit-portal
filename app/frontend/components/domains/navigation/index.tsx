@@ -861,11 +861,11 @@ const AppRoutes = observer(() => {
             <Route path="/documents" element={<ProjectDashboardScreen />} />
             {/* Already handled above with path-based tabs */}
             <Route path="/projects" element={<ProjectDashboardScreen />} />
-            {/* MEMBERSHIP COMMENT: this screen renders for any confirmed signed-in user.
-                The API limits show, accept, and decline to submitters. If reviewers can
-                accept later, the project show view must stay the inbox view for review
-                staff, and accept must check sandbox so they are not sent to an overview
-                they cannot open. */}
+            {/* REVIEW STAFF PROJECT MEMBER TODO: this screen renders for any confirmed
+                signed-in user. The API limits show, accept, and decline to submitters.
+                Accept does not check sandbox. If review staff can be members, the
+                project show view must stay the inbox view, and accept must check
+                sandbox so they are not sent to an overview they cannot open. */}
             <Route path="/project-invitations/:invitationToken" element={<AcceptProjectInvitationScreen />} />
             <Route path="/projects/new" element={<NewPermitProjectScreen />} />
             <Route path="/projects/:permitProjectId">
