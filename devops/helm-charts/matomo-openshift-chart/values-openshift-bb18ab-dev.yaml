@@ -83,8 +83,6 @@ db:
   image: mariadb:11.4
   collation: "utf8mb4_uca1400_ai_ci"
   storage:
-    # 500Mi (was 1Gi). A PVC cannot be shrunk and volumeClaimTemplates are immutable, so changing
-    # this on a RUNNING release needs the runbook in UPGRADE-AND-RESTORE-GUIDE.md ("Shrinking the DB volume").
     size: 500Mi
     storageClass: ""
     mountPath: /var/lib/mysql

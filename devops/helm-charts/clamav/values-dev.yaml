@@ -8,12 +8,8 @@ clamav:
   image: "bb18ab-dev/clamav-scanner"
   registry: image-registry.apps.silver.devops.gov.bc.ca
   replicaCount: 1  # Can be scaled up to 2-3 for load distribution (pod anti-affinity prevents same node)
-
-  # Shrinking an existing volume: a PVC cannot shrink in place, so on a running release scale clamav to 0,
-  # delete the PVC, then helm upgrade (freshclam re-downloads the ~170M signature DB on first boot).
-  # Peak need is ~255M (main.cvd + daily.cld + a second copy of daily.cld while updating): keep >= 300Mi.
   persistentVolume:
-    size: "300Mi"  # Dev PVC size (shared by all replicas); was 500Mi
+    size: "300Mi" 
 
   freshclam:
     mirrors:
@@ -23,4 +19,4 @@ cronJob:
   image:
     repository: "image-registry.apps.silver.devops.gov.bc.ca/bb18ab-dev/clamav-scanner"
   successfulJobsHistoryLimit: 3
-  failedJobsHistoryLimit: 3  # Keep 3 failed jobs for debugging (was 1)
+  failedJobsHistoryLimit: 3  # Keep 3 failed jobs for debugging

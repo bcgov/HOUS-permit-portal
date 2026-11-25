@@ -14,7 +14,7 @@ clamav:
       cpu: "10m"
 
   persistentVolume:
-    size: "500Mi"  # Dev environment PVC size (shared by all replicas)
+    size: "300Mi"  # Dev environment PVC size (shared by all replicas)
 
   freshclam:
     mirrors:

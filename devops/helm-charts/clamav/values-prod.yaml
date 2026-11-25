@@ -1,6 +1,5 @@
 # Production Environment Overrides for ClamAV Helm Chart
 # Usage: helm install/upgrade clamav -f values.yaml -f values-prod.yaml -n bb18ab-prod
-# Image is promoted from test: oc tag bb18ab-test/clamav-scanner:latest bb18ab-prod/clamav-scanner:latest
 
 OPENSHIFT_NAMESPACE: bb18ab
 STAGE: prod
@@ -15,7 +14,7 @@ clamav:
       cpu: "10m"
 
   persistentVolume:
-    size: "500Mi"  # Prod PVC size (shared by all replicas)
+    size: "500Mi"
 
   freshclam:
     mirrors:
