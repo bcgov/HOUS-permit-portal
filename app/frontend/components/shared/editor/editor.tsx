@@ -69,6 +69,8 @@ export const Editor = observer(
     )
 
     const editor = useEditor({
+      // Create the editor after React commits so Tiptap's cleanup cannot destroy it during rendering.
+      immediatelyRender: false,
       extensions: [
         StarterKit.configure({
           // Disable underline from StarterKit since we use separate extension
@@ -86,7 +88,7 @@ export const Editor = observer(
       content: htmlValue,
       editable: !readonly,
       onUpdate: ({ editor }) => {
-        if (isSyncingExternalContentRef.current) return
+        if (editor.isDestroyed || isSyncingExternalContentRef.current) return
 
         const html = editor.getHTML()
         debouncedHandleChange(html)
@@ -112,7 +114,7 @@ export const Editor = observer(
 
     // Update content when htmlValue prop changes externally
     useEffect(() => {
-      if (editor && htmlValue !== editor.getHTML()) {
+      if (editor && !editor.isDestroyed && htmlValue !== editor.getHTML()) {
         debouncedHandleChange.cancel()
         isSyncingExternalContentRef.current = true
         try {
@@ -131,24 +133,20 @@ export const Editor = observer(
 
     // Handle autoFocus
     useEffect(() => {
-      if (autoFocus && editor && !readonly) {
+      if (autoFocus && editor && !editor.isDestroyed && !readonly) {
         editor.commands.focus()
       }
     }, [autoFocus, editor, readonly])
 
     // Handle readonly changes
     useEffect(() => {
-      if (editor) {
+      if (editor && !editor.isDestroyed) {
         editor.setEditable(!readonly)
       }
     }, [readonly, editor])
 
-    if (!editor) {
-      return null
-    }
-
     const handleLinkClick = React.useCallback(() => {
-      if (!editor) return
+      if (!editor || editor.isDestroyed) return
       const url = window.prompt("Enter the URL of the link:")
       if (url) {
         const validUrl = getValidUrl(url)
@@ -169,6 +167,10 @@ export const Editor = observer(
         editor.chain().focus().unsetLink().run()
       }
     }, [editor])
+
+    if (!editor || editor.isDestroyed) {
+      return null
+    }
 
     const toolbarItems: Array<{
       name: TToolbarItemName | string
