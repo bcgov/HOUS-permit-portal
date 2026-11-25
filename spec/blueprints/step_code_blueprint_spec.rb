@@ -23,7 +23,7 @@ RSpec.describe StepCodeBlueprint do
           {
             stage: "pre_construction",
             status: "complete",
-            stage_completed_at: pre_construction.stage_completed_at.iso8601
+            stage_completed_at: pre_construction.stage_completed_at.to_i * 1000
           },
           {
             stage: "mid_construction",

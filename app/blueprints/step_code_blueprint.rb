@@ -14,8 +14,19 @@ class StepCodeBlueprint < Blueprinter::Base
          :phase,
          :current_stage,
          :permit_application_id,
-         :permit_project_title,
-         :stage_completions
+         :permit_project_title
+
+  # datetime_format does not walk into this hash. JSON.generate would emit
+  # "2026-06-12 10:00:00 -0700", which Safari parses as an Invalid Date.
+  field :stage_completions do |step_code|
+    formatter = Blueprinter.configuration.datetime_format
+    step_code.stage_completions.map do |completion|
+      completed_at = completion[:stage_completed_at]
+      next completion unless completed_at
+
+      completion.merge(stage_completed_at: formatter.call(completed_at))
+    end
+  end
 
   association :creator, blueprint: UserBlueprint
 
