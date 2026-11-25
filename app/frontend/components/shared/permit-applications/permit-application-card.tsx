@@ -5,7 +5,6 @@ import React from "react"
 import { Trans, useTranslation } from "react-i18next"
 import { datefnsTableDateFormat } from "../../../constants"
 import { IPermitApplication } from "../../../models/permit-application"
-import { useMst } from "../../../setup/root"
 import { YellowLineSmall } from "../../shared/base/decorative/yellow-line-small"
 import { RouterLinkButton } from "../../shared/navigation/router-link-button"
 import SandboxHeader from "../sandbox/sandbox-header"
@@ -31,15 +30,14 @@ const calloutBannerTextProps = {
 
 export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationCardProps) => {
   const { id, nickname, tagsOrNickname, number, createdAt, updatedAt, viewedAt } = permitApplication
-  const { userStore } = useMst()
-  const currentUser = userStore.currentUser
   const { t } = useTranslation()
 
   const { usingCurrentTemplateVersion } = permitApplication
 
   const showNewVersionWarning = !usingCurrentTemplateVersion && !permitApplication.isSubmitted
 
-  const isSubmissionCollaboration = permitApplication.submitter?.id !== currentUser?.id
+  const access = permitApplication.currentUserAccess
+  const isSubmissionCollaboration = !!access && !access.editApplication
 
   const routingButtonText = (() => {
     if (permitApplication.isSubmitted) return t("ui.view")
@@ -117,7 +115,7 @@ export const PermitApplicationCard = ({ permitApplication }: IPermitApplicationC
                   t={t}
                   components={{ 1: <Text as="span" fontWeight="bold" /> }}
                   values={{
-                    authorName: permitApplication.submitter?.name,
+                    authorName: permitApplication.createdBy?.name,
                   }}
                 />
               </Text>

@@ -39,10 +39,8 @@ module Api::Concerns::Search::Collaborators
   end
 
   def collaborator_where_clause
-    unless @collaboratorable.present?
-      raise ArgumentError, "Missing collaboratorable"
-    end
+    raise ArgumentError, "Missing jurisdiction" unless @jurisdiction.present?
 
-    { collaboratorable_id: @collaboratorable.id }
+    { jurisdiction_id: @jurisdiction.id }
   end
 end

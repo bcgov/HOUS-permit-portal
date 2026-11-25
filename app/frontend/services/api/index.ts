@@ -52,6 +52,7 @@ import {
   IOptionResponse,
   IPageMeta,
   IProjectMeetingResponse,
+  IProjectMembershipsResponse,
   IRequirementBlockResponse,
   IRequirementQuestionResponse,
   IRequirementTemplateResponse,
@@ -66,7 +67,9 @@ import {
   EPermitBlockStatus,
   EPermitProjectSortFields,
   EPreCheckSortFields,
+  EProjectAccess,
   EProjectAuditSortFields,
+  EProjectContactDesignation,
   EProjectMeetingSortFields,
   EQuestionBankSortFields,
   EReleaseNoteSortFields,
@@ -89,7 +92,10 @@ import {
   IPermitApplicationSearchFilters,
   IPermitProjectSearchFilters,
   IProjectAuditSearchFilters,
+  IProjectGrant,
+  IProjectInvitation,
   IProjectMeetingInboxSearchFilters,
+  IProjectPerson,
   IReportGenerationIssue,
   ISubmissionContact,
   ITemplateVersionDiff,
@@ -428,6 +434,8 @@ export class Api {
     pin?: string
     latitude?: number
     longitude?: number
+    projectContactEmail?: string
+    projectContactPhone?: string
   }) {
     return this.client.post<ApiResponse<IPermitProject>>("/permit_projects", { permitProject: projectData })
   }
@@ -485,6 +493,88 @@ export class Api {
 
   async fetchPermitProjectNotes(permitProjectId: string) {
     return this.client.get<INoteResponse>(`/permit_projects/${permitProjectId}/notes`)
+  }
+
+  async fetchPermitProjectMemberships(
+    permitProjectId: string,
+    params?: TSearchParams<never, { access?: EProjectAccess[]; roleTags?: string[] }>
+  ) {
+    return this.client.post<IProjectMembershipsResponse>(
+      `/permit_projects/${permitProjectId}/memberships/search`,
+      params
+    )
+  }
+
+  async createPermitProjectMembership(
+    permitProjectId: string,
+    membership: {
+      firstName: string
+      lastName: string
+      email: string
+      roleTags?: string[]
+      access?: EProjectAccess
+      allowInvite?: boolean
+    }
+  ) {
+    return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships`,
+      { membership }
+    )
+  }
+
+  async reinvitePermitProjectMembership(permitProjectId: string, membershipId: string) {
+    return this.client.post<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/reinvite`
+    )
+  }
+
+  async updatePermitProjectMembership(
+    permitProjectId: string,
+    membershipId: string,
+    membership: {
+      roleTags?: string[]
+      contactDesignation?: EProjectContactDesignation
+      access?: EProjectAccess
+      allowInvite?: boolean
+    }
+  ) {
+    return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}`,
+      { membership }
+    )
+  }
+
+  async destroyPermitProjectMembership(permitProjectId: string, membershipId: string) {
+    return this.client.delete<IApiResponse<null, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}`
+    )
+  }
+
+  async fetchProjectInvitation(token: string) {
+    return this.client.get<IApiResponse<IProjectInvitation, Record<string, never>>>(`/project_invitations/${token}`)
+  }
+
+  async acceptProjectInvitation(token: string) {
+    return this.client.post<
+      IApiResponse<{ permitProjectId: string; projectTitle: string; membershipId: string }, Record<string, never>>
+    >(`/project_invitations/${token}/accept`)
+  }
+
+  async shareProjectContactDetails(
+    permitProjectId: string,
+    membershipId: string,
+    membership: { projectContactEmail?: string; projectContactPhone?: string }
+  ) {
+    return this.client.patch<IApiResponse<IProjectPerson, Record<string, never>>>(
+      `/permit_projects/${permitProjectId}/memberships/${membershipId}/share_contact_details`,
+      { membership }
+    )
+  }
+
+  async declineProjectInvitation(token: string) {
+    return this.client.post<IApiResponse<{ projectTitle: string }, Record<string, never>>>(
+      `/project_invitations/${token}/decline`
+    )
   }
 
   async downloadPermitProjectNotesCsv(permitProjectId: string) {
@@ -593,13 +683,9 @@ export class Api {
     return this.client.patch("/permit_applications/reorder", { items })
   }
 
-  async fetchSubmissionCollaboratorOptions(id: string) {
-    return this.client.get<IOptionResponse>(`/permit_projects/${id}/submission_collaborator_options`)
-  }
-
-  async fetchCollaboratorsByCollaboratorable(collaboratorableId: string, params?: TSearchParams<never, never>) {
+  async fetchCollaboratorsByJurisdiction(jurisdictionId: string, params?: TSearchParams<never, never>) {
     return this.client.post<ICollaboratorSearchResponse>(
-      `/collaborators/collaboratorable/${collaboratorableId}/search`,
+      `/collaborators/jurisdictions/${jurisdictionId}/search`,
       params
     )
   }
@@ -758,11 +844,9 @@ export class Api {
     {
       collaboratorId,
       collaboratorType,
-      collaborationType,
     }: {
       collaboratorId: string
       collaboratorType: ECollaboratorType
-      collaborationType: ECollaborationType
     }
   ) {
     return this.client.delete<ApiResponse<IPermitCollaboration>>(
@@ -770,7 +854,6 @@ export class Api {
       {
         collaboratorId,
         collaboratorType,
-        collaborationType,
       }
     )
   }
@@ -779,12 +862,12 @@ export class Api {
     permitApplicationId: string,
     {
       requirementBlockId,
-      collaborationType,
       status,
+      collaborationType,
     }: {
       requirementBlockId: string
-      collaborationType: ECollaborationType
       status: EPermitBlockStatus
+      collaborationType: ECollaborationType
     }
   ) {
     return this.client.post<ApiResponse<IPermitCollaboration>>(
@@ -793,26 +876,6 @@ export class Api {
         requirementBlockId,
         status,
         collaborationType,
-      }
-    )
-  }
-
-  async inviteNewCollaboratorToPermitApplication(
-    permitApplicationId: string,
-    params: {
-      user: {
-        email: string
-        firstName: string
-        lastName: string
-      }
-      collaboratorType: ECollaboratorType
-      assignedRequirementBlockId?: string
-    }
-  ) {
-    return this.client.post<ApiResponse<IPermitCollaboration>>(
-      `/permit_applications/${permitApplicationId}/permit_collaborations/invite`,
-      {
-        collaboratorInvite: params,
       }
     )
   }
@@ -844,6 +907,34 @@ export class Api {
     return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter_note`, {
       permitApplication: { submitterNote },
     })
+  }
+
+  async updateSubmitter(id: string, submitterMembershipId: string | null) {
+    return this.client.patch<ApiResponse<IPermitApplication>>(`/permit_applications/${id}/submitter`, {
+      permitApplication: { submitterMembershipId },
+    })
+  }
+
+  async fetchProjectGrants(permitApplicationId: string) {
+    return this.client.get<IApiResponse<IProjectGrant[], {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants`
+    )
+  }
+
+  async createProjectGrant(
+    permitApplicationId: string,
+    grant: { membershipId: string; kind: "block" | "application"; requirementBlockId?: string | null }
+  ) {
+    return this.client.post<IApiResponse<IProjectGrant, {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants`,
+      { grant }
+    )
+  }
+
+  async destroyProjectGrant(permitApplicationId: string, id: string) {
+    return this.client.delete<IApiResponse<null, {}>>(
+      `/permit_applications/${permitApplicationId}/project_grants/${id}`
+    )
   }
 
   async submitPermitApplication(id, params) {

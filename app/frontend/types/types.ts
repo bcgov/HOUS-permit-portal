@@ -7,7 +7,6 @@ import {
   EAutoComplianceType,
   EBaselineOccupancyKey,
   EBaselinePerformanceRequirement,
-  ECollaborationType,
   ECollaboratorType,
   EConditionalOperator,
   EDocumentReferenceDocumentType,
@@ -27,7 +26,10 @@ import {
   ENumberUnit,
   EPermitApplicationSocketEventTypes,
   EPermitApplicationStatus,
+  EProjectAccess,
+  EProjectContactDesignation,
   EProjectMeetingStatus,
+  EProjectMembershipStatus,
   EProjectState,
   EReleaseNoteNotificationAudience,
   EReleaseNoteType,
@@ -146,6 +148,7 @@ export type TSearchParams<IModelSortFields, IModelFilterFields = {}> = {
   page?: number
   perPage?: number
   showArchived?: boolean
+  accessibleOnly?: boolean
   publishedOnly?: boolean
   releaseType?: EReleaseNoteType
   year?: number
@@ -492,7 +495,6 @@ export interface IPermitCollaborationNotificationObjectData {
 
 export interface IPermitBlockStatusReadyNotificationObjectData {
   permitApplicationId?: string
-  collaborationType: ECollaborationType
   requirementBlockName?: string
 }
 
@@ -689,6 +691,62 @@ export interface IPermitApplicationSearchFilters {
   hasCollaborator?: boolean
   permitProjectId?: string
   query?: string
+}
+
+export interface IProjectPerson {
+  id: string
+  userId: string | null
+  name: string
+  firstName?: string | null
+  organization?: string | null
+  roleTags: string[]
+  access: EProjectAccess | null
+  contactDesignation: EProjectContactDesignation
+  projectContactEmail?: string | null
+  projectContactPhone?: string | null
+  status: EProjectMembershipStatus
+  canEditRoleTags: boolean
+  allowInvite?: boolean
+}
+
+export interface IProjectGrant {
+  id: string
+  kind: "block" | "application" | "invite"
+  projectMembershipId: string
+  permitApplicationId: string | null
+  requirementBlockId: string | null
+  memberName?: string | null
+}
+
+// The caller's project access (ProjectAccess#to_h). The API is the check.
+export interface IProjectAccess {
+  level: EProjectAccess | null
+  editProject: boolean
+  invitePeople: boolean
+  manageMemberStanding: boolean
+  viewInvitations: boolean
+  addApplication: boolean
+  viewApplication: boolean
+  editApplication: boolean
+  submitApplication: boolean
+  deleteStepCode: boolean
+  manageMeetings: boolean
+  viewProjectNotes: boolean
+  viewActivity: boolean
+}
+
+export interface IProjectInvitation {
+  projectId: string
+  projectTitle: string
+  invitedByName?: string | null
+  status: EProjectMembershipStatus
+  alreadyMember?: boolean
+}
+
+export interface IAcceptedProjectInvitation {
+  permitProjectId: string
+  projectTitle: string
+  membershipId: string
 }
 
 export interface IPermitProjectSearchFilters {

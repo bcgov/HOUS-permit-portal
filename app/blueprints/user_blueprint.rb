@@ -1,12 +1,12 @@
 class UserBlueprint < Blueprinter::Base
   identifier :id
 
+  # Another person embedded on a record. Email and phone stay on :base,
+  # which is the user's own account and admin user management.
   view :minimal do
-    fields :email,
-           :role,
+    fields :role,
            :first_name,
            :last_name,
-           :phone_number,
            :organization,
            :certified,
            :confirmed_at,
@@ -19,7 +19,9 @@ class UserBlueprint < Blueprinter::Base
 
   view :base do
     include_view :minimal
-    fields :unconfirmed_email,
+    fields :email,
+           :phone_number,
+           :unconfirmed_email,
            :omniauth_username,
            :omniauth_email,
            :omniauth_provider,

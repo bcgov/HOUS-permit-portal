@@ -14,7 +14,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   update_revision_requests
                   update_submitter_note
                   create_permit_collaboration
-                  invite_new_collaborator
                   remove_collaborator_collaborations
                   create_or_update_permit_block_status
                   retrigger_submission_webhook
@@ -23,6 +22,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
                   restore
                   transition_status
                   mark_as_unviewed
+                  update_submitter
                 ]
   skip_after_action :verify_policy_scoped, only: [:index]
 
@@ -125,19 +125,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
       )
     submission_section&.each { |key, value| submission_section[key] = nil }
 
-    is_current_user_submitter =
-      current_user.id == @permit_application.submitter_id
-
     if @permit_application.draft? &&
          @permit_application.update_with_submission_data_merge(
-           permit_application_params:
-             (
-               if is_current_user_submitter
-                 permit_application_params
-               else
-                 submission_collaborator_permit_application_params
-               end
-             ),
+           permit_application_params: permit_application_params,
            current_user: current_user
          )
       if !Rails.env.development? || ENV["RUN_COMPLIANCE_ON_SAVE"] == "true"
@@ -233,6 +223,9 @@ class Api::PermitApplicationsController < Api::ApplicationController
       end
     else
       authorize @permit_application
+      unless supporting_documents_within_block_grant?
+        raise Pundit::NotAuthorizedError
+      end
     end
     begin
       success = @permit_application.update(supporting_document_params)
@@ -268,6 +261,47 @@ class Api::PermitApplicationsController < Api::ApplicationController
       end
     rescue Shrine::FileNotFound
       render_error "permit_application.file_not_found_error"
+    end
+  end
+
+  def update_submitter
+    authorize @permit_application
+    membership_id = params.dig(:permit_application, :submitter_membership_id)
+    if membership_id.blank?
+      @permit_application.submitter_membership = nil
+      saved = @permit_application.save
+    else
+      membership =
+        @permit_application.permit_project&.project_memberships&.find_by(
+          id: membership_id
+        )
+      if membership&.active?
+        @permit_application.submitter_membership = membership
+        saved = @permit_application.save
+      else
+        @permit_application.errors.add(:submitter, :inactive_member)
+        saved = false
+      end
+    end
+
+    if saved
+      render_success @permit_application,
+                     nil,
+                     {
+                       blueprint: PermitApplicationBlueprint,
+                       blueprint_opts: {
+                         view: :summary
+                       }
+                     }
+    else
+      render_error "permit_application.update_submitter_error",
+                   {
+                     status: :unprocessable_content,
+                     message_opts: {
+                       error_message:
+                         @permit_application.errors.full_messages.join(", ")
+                     }
+                   }
     end
   end
 
@@ -307,22 +341,10 @@ class Api::PermitApplicationsController < Api::ApplicationController
         return
     end
 
-    is_current_user_submitter =
-      current_user.id == @permit_application.submitter_id
-
     pending_checks = nil
     submitted =
       @permit_application.with_lock do
-        saved =
-          @permit_application.update(
-            (
-              if is_current_user_submitter
-                permit_application_params
-              else
-                submission_collaborator_permit_application_params
-              end
-            )
-          )
+        saved = @permit_application.update(permit_application_params)
         if saved
           checks = @permit_application.digital_seal_checks
           if checks[:pending_count].positive?
@@ -330,7 +352,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
             pending_checks = checks
             false
           else
-            @permit_application.submit!
+            @permit_application.submit!(current_user)
           end
         end
       end
@@ -403,43 +425,6 @@ class Api::PermitApplicationsController < Api::ApplicationController
     end
   end
 
-  def invite_new_collaborator
-    begin
-      @permit_collaboration =
-        PermitCollaboration::CollaborationManagementService.new(
-          @permit_application
-        ).invite_new_submission_collaborator!(
-          authorize_collaboration: ->(permit_collaboration) do
-            authorize permit_collaboration,
-                      policy_class: PermitApplicationPolicy
-          end,
-          user_params: collaborator_invite_params[:user],
-          inviter: current_user,
-          collaborator_type: collaborator_invite_params[:collaborator_type],
-          assigned_requirement_block_id:
-            collaborator_invite_params[:assigned_requirement_block_id]
-        )
-
-      render_success @permit_collaboration,
-                     "permit_application.assign_collaborator_success",
-                     {
-                       blueprint: PermitCollaborationBlueprint,
-                       blueprint_opts: {
-                         view: :base
-                       }
-                     }
-    rescue PermitCollaborationError => e
-      # The skip_authorization is necessary here as if there are any errors
-      # in the invite_new_submission_collaborator! method, before the permit_collaboration
-      # is created, the policy will not be able to authorize the permit_collaboration
-      skip_authorization
-      render_error "permit_application.assign_collaborator_error",
-                   message_opts: {
-                     error_message: e.message
-                   }
-    end
-  end
-
   def generate_missing_pdfs
     authorize @permit_application
 
@@ -456,7 +441,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
   def download_supporting_documents_zip
     authorize @permit_application
 
-    document_ids = Array(params[:supporting_document_ids]).presence
+    document_ids = zip_document_ids
     request_id = SecureRandom.uuid
 
     SupportingDocumentsZipDownloadJob.perform_async(
@@ -495,8 +480,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     collaborations_to_remove =
       @permit_application.permit_collaborations.where(
         collaborator_id: params.require(:collaborator_id),
-        collaborator_type: params.require(:collaborator_type),
-        collaboration_type: params.require(:collaboration_type)
+        collaborator_type: params.require(:collaborator_type)
       )
 
     if collaborations_to_remove.discard_all
@@ -517,7 +501,7 @@ class Api::PermitApplicationsController < Api::ApplicationController
     @permit_block_status =
       @permit_application.permit_block_statuses.find_or_initialize_by(
         requirement_block_id: params.require(:requirement_block_id),
-        collaboration_type: params.require(:collaboration_type)
+        collaboration_type: block_status_collaboration_type
       )
 
     authorize @permit_block_status, policy_class: PermitApplicationPolicy
@@ -614,6 +598,19 @@ class Api::PermitApplicationsController < Api::ApplicationController
 
   private
 
+  # The edit screen writes the submission status. The review screen writes the
+  # review status. A missing side follows who is calling.
+  def block_status_collaboration_type
+    requested = params[:collaboration_type].to_s
+    return requested if %w[submission review].include?(requested)
+
+    if current_user.review_staff? && @permit_application.submitted?
+      "review"
+    else
+      "submission"
+    end
+  end
+
   def show_blueprint_view_for(user)
     if params[:review] && user.review_staff?
       :jurisdiction_review_extended
@@ -623,12 +620,16 @@ class Api::PermitApplicationsController < Api::ApplicationController
   end
 
   def set_permit_application
-    @permit_application =
+    relation =
       if current_user.super_admin?
-        PermitApplication.find(params[:id])
+        PermitApplication.all
       else
-        PermitApplication.for_sandbox(current_sandbox).find(params[:id])
+        PermitApplication.for_sandbox(current_sandbox)
       end
+    # Discard hides archived drafts from the default scope. Restore still
+    # needs to find the one the member just archived.
+    relation = relation.with_discarded if action_name == "restore"
+    @permit_application = relation.find(params[:id])
   end
 
   def permit_application_params # params for submitters
@@ -646,32 +647,11 @@ class Api::PermitApplicationsController < Api::ApplicationController
     )
   end
 
-  def submission_collaborator_permit_application_params # permit application params collaborators can update if they are a collaborator during submission
-    designated_submitter =
-      @permit_application.users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-    if designated_submitter&.id == current_user.id
-      params.require(:permit_application).permit(:nickname, submission_data: {})
-    else
-      params.require(:permit_application).permit(submission_data: {})
-    end
-  end
-
   def permit_collaboration_params
     params.require(:permit_collaboration).permit(
       :collaborator_id,
       :collaborator_type,
       :assigned_requirement_block_id
-    )
-  end
-
-  def collaborator_invite_params
-    params.require(:collaborator_invite).permit(
-      :collaborator_type,
-      :assigned_requirement_block_id,
-      user: %i[email first_name last_name]
     )
   end
 
@@ -709,6 +689,40 @@ class Api::PermitApplicationsController < Api::ApplicationController
       )
     end
     version
+  end
+
+  def supporting_documents_within_block_grant?
+    @permit_application.supporting_documents_within_block_grant?(
+      current_user,
+      fulfillment_document_attributes
+    )
+  end
+
+  # :all and review staff keep the requested ids. A block grant zips only
+  # the files on those blocks.
+  def zip_document_ids
+    requested = Array(params[:supporting_document_ids]).presence
+    permissions =
+      @permit_application.submission_requirement_block_edit_permissions(
+        user_id: current_user.id
+      )
+    return requested unless permissions.is_a?(Array)
+
+    allowed_documents =
+      @permit_application.supporting_documents_for_submitter_based_on_user_permissions(
+        @permit_application.supporting_documents,
+        user: current_user
+      )
+    allowed = allowed_documents == false ? [] : allowed_documents.map(&:id)
+    if requested && (requested.map(&:to_s) - allowed.map(&:to_s)).any?
+      raise Pundit::NotAuthorizedError
+    end
+
+    # An empty list would make the zipper include every file.
+    ids = requested || allowed
+    raise Pundit::NotAuthorizedError if Array(ids).empty?
+
+    ids
   end
 
   def supporting_document_params

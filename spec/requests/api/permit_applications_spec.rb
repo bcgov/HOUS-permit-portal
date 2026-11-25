@@ -36,6 +36,18 @@ RSpec.describe "Api::PermitApplications", type: :request do
     allow(SiteConfiguration).to receive(:inbox_enabled?).and_return(true)
   end
 
+  def signed_submission_data
+    {
+      submission_data: {
+        data: {
+          "section-completion-key" => {
+            signed: true
+          }
+        }
+      }
+    }
+  end
+
   def cached_file_data
     file = File.open("spec/support/signed_converted.pdf", binmode: true)
     uploaded_file = Shrine.upload(file, :cache, metadata: false)
@@ -47,6 +59,23 @@ RSpec.describe "Api::PermitApplications", type: :request do
     uploaded_file.data
   ensure
     file&.close
+  end
+
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction,
+        template_version: template_version
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
   end
 
   describe "GET /api/permit_applications/:id" do
@@ -64,6 +93,106 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:forbidden)
       expect(json_response.dig("meta", "message", "message")).to be_present
+    end
+
+    it "returns the permit application for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(permit_application.id)
+    end
+
+    it "forbids a Limited member from opening the application" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "includes reference files for a member who can open the application only after the package is sent" do
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      revision_request =
+        create(
+          :supporting_document_revision_request,
+          submission_version: submitted.latest_submission_version
+        )
+      reference =
+        create(:revision_reference_document, revision_request: revision_request)
+      reference_ids = -> do
+        (
+          json_response.dig("data", "submission_versions") || []
+        ).flat_map do |version|
+          (version["revision_requests"] || []).flat_map do |request|
+            (request["revision_reference_documents"] || []).map do |doc|
+              doc["id"]
+            end
+          end
+        end
+      end
+
+      get "/api/permit_applications/#{submitted.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(reference_ids.call).not_to include(reference.id)
+
+      allow(NotificationService).to receive(
+        :publish_application_revisions_request_event
+      )
+      submitted.finalize_revision_requests!
+
+      get "/api/permit_applications/#{submitted.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(reference_ids.call).to include(reference.id)
+
+      expanded = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: submitted.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+      sign_in expanded
+      get "/api/permit_applications/#{submitted.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(reference_ids.call).to include(reference.id)
+
+      standard = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: submitted.permit_project,
+        user: standard,
+        access: :limited
+      )
+      sign_in standard
+      get "/api/permit_applications/#{submitted.id}", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
     end
 
     it "forbids review staff from opening a new draft" do
@@ -97,6 +226,20 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(json_response.dig("data", "active_project_meeting_id")).to eq(
         active_meeting.id
       )
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/permit_applications/#{permit_application.id}", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+
+      get "/api/permit_applications/#{other_application.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(other_application.id)
     end
   end
 
@@ -198,6 +341,81 @@ RSpec.describe "Api::PermitApplications", type: :request do
             as: :json
 
       expect(response).to have_http_status(:forbidden)
+    end
+
+    it "updates a draft for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{permit_application.id}",
+            params: {
+              permit_application: {
+                nickname: "Expanded edit"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(permit_application.reload.nickname).to eq("Expanded edit")
+    end
+
+    it "forbids a Limited member from editing the application" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{permit_application.id}",
+            params: {
+              permit_application: {
+                nickname: "Nope"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload.nickname).not_to eq("Nope")
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      sign_in outsider
+
+      patch "/api/permit_applications/#{permit_application.id}",
+            params: {
+              permit_application: {
+                nickname: "Nope"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload.nickname).not_to eq("Nope")
+
+      patch "/api/permit_applications/#{other_application.id}",
+            params: {
+              permit_application: {
+                nickname: "Mine"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(other_application.reload.nickname).to eq("Mine")
     end
   end
 
@@ -368,6 +586,122 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response).to include("data", "meta")
+    end
+
+    it "submits a draft for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: signed_submission_data
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(permit_application.reload).to be_newly_submitted
+      expect(permit_application.latest_submission_version.submitted_by).to eq(
+        member
+      )
+    end
+
+    it "forbids a Limited member from submitting a draft" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: signed_submission_data
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload).to be_new_draft
+    end
+
+    it "resubmits a revision request for an Expanded member" do
+      version =
+        create(:submission_version, permit_application: permit_application)
+      create(:revision_request, submission_version: version)
+      permit_application.update!(
+        status: :revisions_requested,
+        submission_data: signed_submission_data[:submission_data]
+      )
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: signed_submission_data
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(permit_application.reload).to be_resubmitted
+    end
+
+    it "forbids a Limited member from resubmitting a revision request" do
+      version =
+        create(:submission_version, permit_application: permit_application)
+      create(:revision_request, submission_version: version)
+      permit_application.update!(
+        status: :revisions_requested,
+        submission_data: signed_submission_data[:submission_data]
+      )
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: signed_submission_data
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload).to be_revisions_requested
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      post "/api/permit_applications/#{permit_application.id}/submit",
+           params: {
+             permit_application: signed_submission_data
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload).to be_new_draft
     end
 
     it "submits when the permit type advises a project meeting" do
@@ -630,16 +964,52 @@ RSpec.describe "Api::PermitApplications", type: :request do
       ).to be_nil
     end
 
-    it "forbids a submission collaborator who is not the submitter" do
-      collaborator_user = create(:user, :submitter)
+    it "acknowledges for an Expanded member" do
+      member = create(:user, :submitter)
       create(
-        :permit_collaboration,
-        permit_application: permit_application,
-        collaborator: create(:collaborator, user: collaborator_user),
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
       )
-      sign_in collaborator_user
+      sign_in member
+
+      post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
+           params: {
+             customization_change_id: SecureRandom.uuid
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "forbids a Limited member from acknowledging published electives" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
+           params: {
+             customization_change_id: SecureRandom.uuid
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(
+        permit_application.reload.acknowledged_customization_change_id
+      ).to be_nil
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
 
       post "/api/permit_applications/#{permit_application.id}/acknowledge_published_electives",
            params: {
@@ -798,6 +1168,66 @@ RSpec.describe "Api::PermitApplications", type: :request do
     end
   end
 
+  describe "PATCH /api/permit_applications/:id while revisions are requested" do
+    let(:revision_application) do
+      create(
+        :permit_application,
+        :revisions_requested,
+        submitter: submitter,
+        permit_project: permit_project,
+        template_version: template_version,
+        jurisdiction: jurisdiction
+      )
+    end
+
+    it "saves a field response for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{revision_application.id}",
+            params: {
+              permit_application: {
+                nickname: "Field response"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(revision_application.reload.nickname).to eq("Field response")
+      expect(revision_application).to be_revisions_requested
+    end
+
+    it "forbids a Limited member from responding to a field revision" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{revision_application.id}",
+            params: {
+              permit_application: {
+                nickname: "Nope"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(revision_application.reload.nickname).not_to eq("Nope")
+    end
+  end
+
   describe "PATCH /api/permit_applications/:id/upload_supporting_document fulfillment" do
     let(:revision_application) do
       create(
@@ -901,6 +1331,38 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(document_request.supporting_documents).to be_empty
     end
 
+    it "uploads a fulfillment for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: revision_application.permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      upload_fulfillment(document_request.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(document_request.supporting_documents.reload.size).to eq(1)
+    end
+
+    it "forbids a Limited member from uploading a fulfillment" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: revision_application.permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      upload_fulfillment(document_request.id)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(document_request.supporting_documents.reload).to be_empty
+    end
+
     it "rejects a field revision id" do
       field_request =
         revision_application
@@ -918,6 +1380,16 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
     it "forbids a reviewer" do
       sign_in create(:user, :reviewer, jurisdiction: jurisdiction)
+
+      upload_fulfillment(document_request.id)
+
+      expect(response).to have_http_status(:forbidden)
+      expect(document_request.supporting_documents).to be_empty
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
 
       upload_fulfillment(document_request.id)
 
@@ -951,15 +1423,66 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "PATCH /api/permit_applications/:id/update_version" do
-    it "updates the template version for drafts" do
+    before do
       allow(TemplateVersioningService).to receive(
         :update_draft_permit_with_new_template_version
       ).and_return(true)
+    end
+
+    it "updates the template version for drafts" do
+      patch "/api/permit_applications/#{permit_application.id}/update_version",
+            headers: headers
+
+      expect(response).to have_http_status(:ok)
+    end
+
+    it "updates the template version for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
 
       patch "/api/permit_applications/#{permit_application.id}/update_version",
             headers: headers
 
       expect(response).to have_http_status(:ok)
+    end
+
+    it "forbids a Limited member from updating the template version" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{permit_application.id}/update_version",
+            headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      template_version_id = permit_application.template_version_id
+      sign_in outsider
+
+      patch "/api/permit_applications/#{permit_application.id}/update_version",
+            headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload.template_version_id).to eq(
+        template_version_id
+      )
+      expect(TemplateVersioningService).not_to have_received(
+        :update_draft_permit_with_new_template_version
+      )
     end
   end
 
@@ -1015,16 +1538,25 @@ RSpec.describe "Api::PermitApplications", type: :request do
   end
 
   describe "POST /api/permit_applications/:id/permit_block_status" do
-    it "creates or updates permit block status" do
+    it "creates or updates permit block status for review staff" do
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      sign_in reviewer
       allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
       allow(NotificationService).to receive(
         :publish_permit_block_status_ready_event
       )
 
-      post "/api/permit_applications/#{permit_application.id}/permit_block_status",
+      post "/api/permit_applications/#{submitted_application.id}/permit_block_status",
            params: {
              requirement_block_id: TestConstants::REQUIREMENT_BLOCK_IDS.first,
-             collaboration_type: "submission",
              status: "ready"
            },
            headers: headers,
@@ -1032,6 +1564,26 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "status")).to eq("ready")
+      expect(json_response.dig("data", "collaboration_type")).to eq("review")
+    end
+
+    it "lets a member set the submission status on a draft" do
+      allow(WebsocketBroadcaster).to receive(:push_update_to_relevant_users)
+
+      post "/api/permit_applications/#{permit_application.id}/permit_block_status",
+           params: {
+             requirement_block_id: TestConstants::REQUIREMENT_BLOCK_IDS.first,
+             status: "in_progress",
+             collaboration_type: "submission"
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "status")).to eq("in_progress")
+      expect(json_response.dig("data", "collaboration_type")).to eq(
+        "submission"
+      )
     end
   end
 
@@ -1080,78 +1632,22 @@ RSpec.describe "Api::PermitApplications", type: :request do
     end
   end
 
-  describe "POST /api/permit_applications/:id/permit_collaborations/invite" do
-    it "invites a new collaborator" do
-      collaborator = create(:collaborator, collaboratorable: submitter)
-      permit_collaboration =
-        create(
-          :permit_collaboration,
-          permit_application: permit_application,
-          collaborator: collaborator
-        )
-      service =
-        instance_double(PermitCollaboration::CollaborationManagementService)
-
-      allow(PermitCollaboration::CollaborationManagementService).to receive(
-        :new
-      ).and_return(service)
-      allow(service).to receive(
-        :invite_new_submission_collaborator!
-      ) do |**kwargs|
-        kwargs[:authorize_collaboration]&.call(permit_collaboration)
-        permit_collaboration
-      end
-
-      post "/api/permit_applications/#{permit_application.id}/permit_collaborations/invite",
-           params: {
-             collaborator_invite: {
-               collaborator_type: "delegatee",
-               user: {
-                 email: "invitee@example.com",
-                 first_name: "New",
-                 last_name: "User"
-               }
-             }
-           },
-           headers: headers,
-           as: :json
-
-      expect(response).to have_http_status(:ok)
-      expect(json_response.dig("data", "id")).to eq(permit_collaboration.id)
-    end
-  end
-
-  describe "PATCH /api/permit_applications/:id/upload_supporting_document" do
-    it "uploads supporting documents and enqueues promotion" do
-      allow(PromoteJob).to receive(:perform_async)
-      allow(VirusScanService).to receive(:new).and_return(
-        instance_double(VirusScanService, scan!: true)
-      )
-
-      patch "/api/permit_applications/#{permit_application.id}/upload_supporting_document",
-            params: {
-              permit_application: {
-                supporting_documents_attributes: [
-                  { data_key: "RB123", file: cached_file_data }
-                ]
-              }
-            },
-            headers: headers,
-            as: :json
-
-      expect(response).to have_http_status(:ok)
-      expect(json_response["data"]).to be_an(Array)
-      expect(PromoteJob).to have_received(:perform_async)
-    end
-  end
-
   describe "POST /api/permit_applications/:id/permit_collaborations" do
     it "creates a permit collaboration via the service" do
-      collaborator = create(:collaborator, collaboratorable: submitter)
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      collaborator = jurisdiction.collaborators.find_by!(user: reviewer)
       permit_collaboration =
         create(
           :permit_collaboration,
-          permit_application: permit_application,
+          permit_application: submitted_application,
           collaborator: collaborator
         )
       service =
@@ -1164,8 +1660,9 @@ RSpec.describe "Api::PermitApplications", type: :request do
         kwargs[:authorize_collaboration]&.call(permit_collaboration)
         permit_collaboration
       end
+      sign_in reviewer
 
-      post "/api/permit_applications/#{permit_application.id}/permit_collaborations",
+      post "/api/permit_applications/#{submitted_application.id}/permit_collaborations",
            params: {
              permit_collaboration: {
                collaborator_id: collaborator.id,
@@ -1182,25 +1679,128 @@ RSpec.describe "Api::PermitApplications", type: :request do
 
   describe "DELETE /api/permit_applications/:id/permit_collaborations/remove_collaborator_collaborations" do
     it "removes collaborator collaborations" do
-      collaborator = create(:collaborator, collaboratorable: submitter)
+      reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+      submitted_application =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      collaborator = jurisdiction.collaborators.find_by!(user: reviewer)
       permit_collaboration =
         create(
           :permit_collaboration,
-          permit_application: permit_application,
+          permit_application: submitted_application,
           collaborator: collaborator
         )
+      sign_in reviewer
 
-      delete "/api/permit_applications/#{permit_application.id}/permit_collaborations/remove_collaborator_collaborations",
+      delete "/api/permit_applications/#{submitted_application.id}/permit_collaborations/remove_collaborator_collaborations",
              params: {
                collaborator_id: collaborator.id,
-               collaborator_type: permit_collaboration.collaborator_type,
-               collaboration_type: permit_collaboration.collaboration_type
+               collaborator_type: permit_collaboration.collaborator_type
              },
              headers: headers,
              as: :json
 
       expect(response).to have_http_status(:ok)
       expect(permit_collaboration.reload.discarded?).to be(true)
+    end
+  end
+  describe "PATCH /api/permit_applications/:id/upload_supporting_document" do
+    before do
+      allow(PromoteJob).to receive(:perform_async)
+      allow(VirusScanService).to receive(:new).and_return(
+        instance_double(VirusScanService, scan!: true)
+      )
+    end
+
+    it "uploads supporting documents and enqueues promotion" do
+      patch "/api/permit_applications/#{permit_application.id}/upload_supporting_document",
+            params: {
+              permit_application: {
+                supporting_documents_attributes: [
+                  { data_key: "RB123", file: cached_file_data }
+                ]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_an(Array)
+      expect(PromoteJob).to have_received(:perform_async)
+    end
+
+    it "uploads a supporting document for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{permit_application.id}/upload_supporting_document",
+            params: {
+              permit_application: {
+                supporting_documents_attributes: [
+                  { data_key: "RB123", file: cached_file_data }
+                ]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response["data"]).to be_an(Array)
+    end
+
+    it "forbids a Limited member from uploading a supporting document" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      patch "/api/permit_applications/#{permit_application.id}/upload_supporting_document",
+            params: {
+              permit_application: {
+                supporting_documents_attributes: [
+                  { data_key: "RB123", file: cached_file_data }
+                ]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.supporting_documents).to be_empty
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      patch "/api/permit_applications/#{permit_application.id}/upload_supporting_document",
+            params: {
+              permit_application: {
+                supporting_documents_attributes: [
+                  { data_key: "RB123", file: cached_file_data }
+                ]
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.supporting_documents).to be_empty
     end
   end
 
@@ -1227,6 +1827,56 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(ZipfileJob).to have_received(:perform_async).with(
         permit_application.id
       )
+    end
+
+    it "enqueues generation for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+      allow(ZipfileJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/generate_missing_pdfs",
+           headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(ZipfileJob).to have_received(:perform_async).with(
+        permit_application.id
+      )
+    end
+
+    it "forbids a Limited member from generating the application zip" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+      allow(ZipfileJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/generate_missing_pdfs",
+           headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ZipfileJob).not_to have_received(:perform_async)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+      allow(ZipfileJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/generate_missing_pdfs",
+           headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(ZipfileJob).not_to have_received(:perform_async)
     end
   end
 
@@ -1266,6 +1916,279 @@ RSpec.describe "Api::PermitApplications", type: :request do
       expect(SupportingDocumentsZipDownloadJob).not_to have_received(
         :perform_async
       )
+    end
+
+    it "enqueues a selective zip for an Expanded member" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:accepted)
+      expect(SupportingDocumentsZipDownloadJob).to have_received(:perform_async)
+    end
+
+    it "forbids a Limited member from downloading the supporting-document zip" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(SupportingDocumentsZipDownloadJob).not_to have_received(
+        :perform_async
+      )
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+      allow(SupportingDocumentsZipDownloadJob).to receive(:perform_async)
+
+      post "/api/permit_applications/#{permit_application.id}/download_supporting_documents_zip",
+           params: {
+             supporting_document_ids: document_ids
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(SupportingDocumentsZipDownloadJob).not_to have_received(
+        :perform_async
+      )
+    end
+  end
+
+  describe "DELETE /api/permit_applications/:id" do
+    it "archives a draft for a Limited member who created it" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      own =
+        create(
+          :permit_application,
+          submitter: member,
+          created_by: member,
+          permit_project: permit_project,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      sign_in member
+
+      delete "/api/permit_applications/#{own.id}", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(own.reload).to be_discarded
+    end
+
+    it "forbids a Limited member from archiving someone else's draft" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      sign_in member
+
+      delete "/api/permit_applications/#{permit_application.id}",
+             headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload).not_to be_discarded
+    end
+
+    it "forbids archiving a submitted application" do
+      submitted =
+        create(
+          :permit_application,
+          :newly_submitted,
+          submitter: submitter,
+          permit_project: permit_project,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+
+      delete "/api/permit_applications/#{submitted.id}", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(submitted.reload).not_to be_discarded
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      delete "/api/permit_applications/#{permit_application.id}",
+             headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload).not_to be_discarded
+    end
+  end
+
+  describe "POST /api/permit_applications/:id/restore" do
+    it "restores a draft for the Limited member who created it" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :limited
+      )
+      own =
+        create(
+          :permit_application,
+          submitter: member,
+          created_by: member,
+          permit_project: permit_project,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      own.discard
+      sign_in member
+
+      post "/api/permit_applications/#{own.id}/restore", headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(own.reload).not_to be_discarded
+    end
+
+    it "denies a Full member of a different project" do
+      permit_application.discard
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      post "/api/permit_applications/#{permit_application.id}/restore",
+           headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_application.reload).to be_discarded
+    end
+  end
+
+  describe "PATCH /api/permit_applications/:id/submitter_note" do
+    it "denies a Full member of a different project" do
+      revision_application =
+        create(
+          :permit_application,
+          :revisions_requested,
+          submitter: submitter,
+          template_version: template_version,
+          jurisdiction: jurisdiction
+        )
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      expect {
+        patch "/api/permit_applications/#{revision_application.id}/submitter_note",
+              params: {
+                permit_application: {
+                  submitter_note: "Nope"
+                }
+              },
+              headers: headers,
+              as: :json
+      }.not_to change(Note, :count)
+
+      expect(response).to have_http_status(:forbidden)
+    end
+  end
+
+  describe "PATCH /api/permit_applications/:id/submitter" do
+    it "lets Full set the submitter and refuses a block grant" do
+      project = create(:permit_project, owner: submitter)
+      application =
+        create(
+          :permit_application,
+          permit_project: project,
+          submitter: submitter,
+          jurisdiction: project.jurisdiction
+        )
+      member =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: create(:user, :submitter),
+          access: :limited
+        )
+
+      sign_in submitter
+      patch "/api/permit_applications/#{application.id}/submitter",
+            params: {
+              permit_application: {
+                submitter_membership_id: member.id
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(application.reload.submitter_membership).to eq(member)
+      expect(application.submitter).to eq(member.user)
+
+      create(
+        :project_grant,
+        project_membership: member,
+        permit_application: application,
+        requirement_block_id: SecureRandom.uuid
+      )
+      sign_in member.user
+      patch "/api/permit_applications/#{application.id}/submitter",
+            params: {
+              permit_application: {
+                submitter_membership_id:
+                  project.project_memberships.find_by!(user: submitter).id
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(application.reload.submitter_membership).to eq(member)
+      expect(application.submitter).to eq(member.user)
+
+      sign_in submitter
+      patch "/api/permit_applications/#{application.id}/submitter",
+            params: {
+              permit_application: {
+                submitter_membership_id: nil
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(application.reload.submitter_membership_id).to be_nil
+      expect(application).not_to be_orphaned
     end
   end
 end

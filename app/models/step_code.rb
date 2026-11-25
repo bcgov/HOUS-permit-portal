@@ -66,8 +66,7 @@ class StepCode < ApplicationRecord
     self[:permit_date]
   end
 
-  delegate :submitter,
-           :newly_submitted_at,
+  delegate :newly_submitted_at,
            :status,
            to: :permit_application,
            allow_nil: true
@@ -125,7 +124,6 @@ class StepCode < ApplicationRecord
       created_at: created_at,
       updated_at: updated_at,
       creator_id: creator_id,
-      submitter_id: permit_application&.submitter_id,
       permit_project_id: permit_project&.id,
       jurisdiction_id: jurisdiction&.id,
       sandbox_id: sandbox_id,

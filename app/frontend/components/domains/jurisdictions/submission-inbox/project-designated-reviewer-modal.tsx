@@ -5,7 +5,6 @@ import React, { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 import { CollaborationAssignmentModalContent } from "../../permit-application/collaborator-management/collaboration-assignment-modal-content"
 
@@ -105,7 +104,6 @@ export const ProjectReviewCollaboratorsModal = observer(function ProjectReviewCo
             onSelect={handleSelectCollaborator}
             onClose={onClose}
             takenCollaboratorIds={takenCollaboratorIds}
-            collaborationType={ECollaborationType.review}
             selectedCollaborations={collaborations}
             selectedTitle={t("permitCollaboration.projectSidebar.projectReviewCollaborators")}
             onUnselectSelected={(collaboration) => handleUnassign(collaboration.collaborator.id)}

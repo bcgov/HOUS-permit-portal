@@ -58,16 +58,17 @@ export const PermitProjectStoreModel = types
       // Handle permit applications (inbox reviewer payloads use permitApplications for full visible list)
       if (permitProject.permitApplications) {
         permitProject.permitApplications.forEach((app) => {
-          if (typeof app === "object") {
-            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
-          }
+          if (typeof app !== "object") return
+          // A row snapshot has no form payload. Putting it resets isFullyLoaded and wipes the open application.
+          if (self.rootStore.permitApplicationStore.permitApplicationMap.get(app.id)?.isFullyLoaded) return
+          self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
         })
       }
       if (permitProject.recentPermitApplications) {
         permitProject.recentPermitApplications.forEach((app) => {
-          if (typeof app === "object") {
-            self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
-          }
+          if (typeof app !== "object") return
+          if (self.rootStore.permitApplicationStore.permitApplicationMap.get(app.id)?.isFullyLoaded) return
+          self.rootStore.permitApplicationStore.mergeUpdate(app, "permitApplicationMap")
         })
       }
 
@@ -274,6 +275,8 @@ export const PermitProjectStoreModel = types
       pin?: string
       latitude?: number
       longitude?: number
+      projectContactEmail?: string
+      projectContactPhone?: string
     }) {
       const response = yield self.environment.api.createPermitProject(projectData)
       if (response.ok && response.data?.data) {

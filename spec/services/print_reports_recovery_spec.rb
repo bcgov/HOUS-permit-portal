@@ -10,9 +10,14 @@ RSpec.describe PrintReports::Recovery do
       permit_application: application
     )
   end
-  let(:pdf) do
-    Rails.root.join("spec/support/Test Document Seal - unsigned.pdf").to_s
+  # The support PDF is a Git LFS pointer in this checkout. Keep the Tempfile
+  # referenced so its path still exists when the renderer yields it.
+  let(:pdf_file) do
+    file = Tempfile.new(%w[report .pdf])
+    HexaPDF::Document.new.tap { |document| document.pages.add }.write(file.path)
+    file
   end
+  let(:pdf) { pdf_file.path }
   before do
     Sidekiq::Testing.fake!
     allow_any_instance_of(VirusScanService).to receive(:scan!).and_return(true)

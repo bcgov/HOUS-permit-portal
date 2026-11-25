@@ -28,6 +28,7 @@ module Constants
       "project_review_collaboration_assignment"
     PROJECT_REVIEW_COLLABORATION_UNASSIGNMENT =
       "project_review_collaboration_unassignment"
+    PROJECT_MEMBERSHIP_INVITATION = "project_membership_invitation"
     RELEASE_NOTE_PUBLISH = "release_note_publish"
   end
 end

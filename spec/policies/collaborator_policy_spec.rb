@@ -9,44 +9,15 @@ RSpec.describe CollaboratorPolicy, type: :policy do
   end
 
   describe "#collaborator_search?" do
-    it "permits when collaboratorable is the user" do
-      record =
-        instance_double(
-          "Collaborator",
-          collaboratorable_type: "User",
-          collaboratorable_id: user.id
-        )
-      expect(policy(record).collaborator_search?).to be true
-    end
-
-    it "denies when collaboratorable is a different user" do
-      record =
-        instance_double(
-          "Collaborator",
-          collaboratorable_type: "User",
-          collaboratorable_id: "someone-else"
-        )
-      expect(policy(record).collaborator_search?).to be false
-    end
-
-    it "permits when collaboratorable is a jurisdiction the user is a member of" do
+    it "permits when the user is a member of the collaborator's jurisdiction" do
       allow(user).to receive(:member_of?).with("j1").and_return(true)
-      record =
-        instance_double(
-          "Collaborator",
-          collaboratorable_type: "Jurisdiction",
-          collaboratorable_id: "j1"
-        )
+      record = instance_double("Collaborator", jurisdiction_id: "j1")
       expect(policy(record).collaborator_search?).to be true
     end
 
-    it "denies when collaboratorable type is unsupported" do
-      record =
-        instance_double(
-          "Collaborator",
-          collaboratorable_type: "Other",
-          collaboratorable_id: "x"
-        )
+    it "denies when the user is not a member of the collaborator's jurisdiction" do
+      allow(user).to receive(:member_of?).with("j1").and_return(false)
+      record = instance_double("Collaborator", jurisdiction_id: "j1")
       expect(policy(record).collaborator_search?).to be false
     end
   end

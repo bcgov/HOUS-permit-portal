@@ -7,12 +7,7 @@ class PermitCollaboration < ApplicationRecord
   belongs_to :collaborator
   belongs_to :permit_application, touch: true
 
-  enum :collaboration_type, { submission: 0, review: 1 }
   enum :collaborator_type, { delegatee: 0, assignee: 1 }, default: 0
-
-  before_validation :set_default_collaboration_type, on: :create
-
-  after_initialize :set_default_collaboration_type
 
   after_save :reindex_permit_application
   after_commit :reindex_permit_project
@@ -25,28 +20,21 @@ class PermitCollaboration < ApplicationRecord
             uniqueness: {
               scope: %i[
                 collaborator_id
-                collaboration_type
                 collaborator_type
                 assigned_requirement_block_id
               ],
               conditions: -> { where(discarded_at: nil) }
             }
-  validates :collaboration_type, presence: true
   validates :collaborator_type, presence: true
   validates :assigned_requirement_block_id, presence: true, if: -> { assignee? }
 
   validate :validate_delegatee, on: :create
   validate :validate_requirement_block_id, on: :create # only needs to validate on create as the requirement block can be deleted after assignment due to new template versions
-  validate :validate_author_not_collaborator
   validate :validate_review_collaborator
-  validate :validate_collaboration_type, on: :create
+  validate :validate_submitted_for_review, on: :create
 
   def collaborator_name
     collaborator.user.name
-  end
-
-  def inviter_name
-    collaborator.collaboratorable&.name
   end
 
   def assigned_requirement_block_name
@@ -60,43 +48,20 @@ class PermitCollaboration < ApplicationRecord
     {
       "id" => SecureRandom.uuid,
       "action_type" =>
-        (
-          if submission?
-            Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_ASSIGNMENT
-          else
-            Constants::NotificationActionTypes::REVIEW_COLLABORATION_ASSIGNMENT
-          end
-        ),
+        Constants::NotificationActionTypes::REVIEW_COLLABORATION_ASSIGNMENT,
       "action_text" =>
         (
           if delegatee?
-            if submission?
-              I18n.t(
-                "notification.permit_collaboration.submission_delegatee_collaboration_notification",
-                number: permit_application.number,
-                author_name: permit_application.submitter.name
-              )
-            else
-              I18n.t(
-                "notification.permit_collaboration.review_delegatee_collaboration_notification",
-                number: permit_application.number
-              )
-            end
+            I18n.t(
+              "notification.permit_collaboration.review_delegatee_collaboration_notification",
+              number: permit_application.number
+            )
           else
-            if submission?
-              I18n.t(
-                "notification.permit_collaboration.submission_assignee_collaboration_notification",
-                number: permit_application.number,
-                requirement_block_name: assigned_requirement_block_name,
-                author_name: permit_application.submitter.name
-              )
-            else
-              I18n.t(
-                "notification.permit_collaboration.review_assignee_collaboration_notification",
-                number: permit_application.number,
-                requirement_block_name: assigned_requirement_block_name
-              )
-            end
+            I18n.t(
+              "notification.permit_collaboration.review_assignee_collaboration_notification",
+              number: permit_application.number,
+              requirement_block_name: assigned_requirement_block_name
+            )
           end
         ),
       "object_data" => {
@@ -111,23 +76,17 @@ class PermitCollaboration < ApplicationRecord
     {
       "id" => SecureRandom.uuid,
       "action_type" =>
-        (
-          if submission?
-            Constants::NotificationActionTypes::SUBMISSION_COLLABORATION_UNASSIGNMENT
-          else
-            Constants::NotificationActionTypes::REVIEW_COLLABORATION_UNASSIGNMENT
-          end
-        ),
+        Constants::NotificationActionTypes::REVIEW_COLLABORATION_UNASSIGNMENT,
       "action_text" =>
         (
           if delegatee?
             I18n.t(
-              "notification.permit_collaboration.#{collaboration_type}_delegatee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.review_delegatee_collaboration_unassignment_notification",
               number: permit_application.number
             )
           else
             I18n.t(
-              "notification.permit_collaboration.#{collaboration_type}_assignee_collaboration_unassignment_notification",
+              "notification.permit_collaboration.review_assignee_collaboration_unassignment_notification",
               number: permit_application.number,
               requirement_block_name: assigned_requirement_block_name
             )
@@ -158,37 +117,25 @@ class PermitCollaboration < ApplicationRecord
     permit_application.permit_project&.reindex
   end
 
-  def validate_author_not_collaborator
-    return unless submission?
-    return if collaborator.blank? || permit_application.blank?
-
-    if collaborator.user == permit_application.submitter
-      errors.add(:collaborator, :cannot_be_author)
-    end
-  end
-
-  def validate_collaboration_type
+  def validate_submitted_for_review
     return if permit_application.blank?
+    return if permit_application.submitted_at_least_once?
 
-    if submission?
-      unless permit_application.draft?
-        errors.add(:base, :must_be_draft_for_submission)
-      end
-    elsif review?
-      unless permit_application.submitted_at_least_once?
-        errors.add(:base, :must_be_submitted_for_review)
-      end
-    end
+    errors.add(:base, :must_be_submitted_for_review)
   end
 
   def validate_review_collaborator
-    return unless review?
+    return if collaborator.blank? || permit_application.blank?
 
-    unless collaborator
-             .user
-             .jurisdictions
-             .find_by(id: permit_application.jurisdiction_id)
-             .present?
+    same_jurisdiction =
+      collaborator.jurisdiction_id == permit_application.jurisdiction_id &&
+        collaborator
+          .user
+          .jurisdictions
+          .find_by(id: permit_application.jurisdiction_id)
+          .present?
+
+    unless same_jurisdiction
       errors.add(:collaborator, :must_be_same_jurisdiction)
     end
   end
@@ -217,18 +164,6 @@ class PermitCollaboration < ApplicationRecord
     return unless existing_delegatee.present?
 
     errors.add(:collaborator_id, :delegatee_already_exists)
-  end
-
-  def set_default_collaboration_type
-    # `after_initialize` runs whenever this record is instantiated
-    #  For persisted records we already have `collaboration_type` from the DB
-    return if persisted? && collaboration_type.present?
-
-    if collaborator && collaborator.collaboratorable_type == "Jurisdiction"
-      self.collaboration_type = :review
-    elsif collaborator && collaborator.collaboratorable_type == "User"
-      self.collaboration_type = :submission
-    end
   end
 
   def send_unassignment_notification

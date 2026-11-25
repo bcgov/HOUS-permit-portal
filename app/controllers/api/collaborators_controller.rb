@@ -1,7 +1,7 @@
 class Api::CollaboratorsController < Api::ApplicationController
   include Api::Concerns::Search::Collaborators
 
-  before_action :set_collaboratorable, only: [:collaborator_search]
+  before_action :set_jurisdiction, only: [:collaborator_search]
   skip_after_action :verify_authorized, only: [:collaborator_search]
 
   def collaborator_search
@@ -21,10 +21,7 @@ class Api::CollaboratorsController < Api::ApplicationController
 
   private
 
-  def set_collaboratorable
-    @collaboratorable =
-      Collaborator.find_by!(
-        collaboratorable_id: params[:collaboratorable_id]
-      ).collaboratorable
+  def set_jurisdiction
+    @jurisdiction = Jurisdiction.find(params[:jurisdiction_id])
   end
 end

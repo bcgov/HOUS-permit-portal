@@ -132,6 +132,7 @@ export const InboxOverviewTab = observer(({ permitProject }: IProps) => {
               <PermitApplicationGridHeaders
                 columns={Object.values(EProjectPermitApplicationSortFields)}
                 includeActionColumn
+                fromInbox
               />
               {(permitProject.recentPermitApplications ?? [])
                 .filter((pa) => !pa.isDiscarded)

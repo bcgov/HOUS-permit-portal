@@ -1,12 +1,10 @@
 FactoryBot.define do
   factory :collaborator do
-    association :user
+    transient { jurisdiction { create(:sub_district) } }
 
-    # Default collaboratorable is a User (submission collaborator context)
-    association :collaboratorable, factory: :user
+    user { create(:user, :reviewer, jurisdiction: jurisdiction) }
 
-    trait :for_jurisdiction do
-      association :collaboratorable, factory: :sub_district
-    end
+    # Membership callbacks already insert the roster row.
+    initialize_with { jurisdiction.collaborators.find_by!(user_id: user.id) }
   end
 end

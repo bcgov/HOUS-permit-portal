@@ -1,5 +1,5 @@
 import { t } from "i18next"
-import { cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
+import { applySnapshot, cast, flow, getSnapshot, Instance, toGenerator, types } from "mobx-state-tree"
 import * as R from "ramda"
 import { withEnvironment } from "../lib/with-environment"
 import { withRootStore } from "../lib/with-root-store"
@@ -22,6 +22,7 @@ import {
   IFormJson,
   IPermitApplicationSelectiveZipReady,
   IPermitApplicationSupportingDocumentsUpdate,
+  IProjectAccess,
   IReportGenerationIssue,
   ISubmissionData,
   ISubmissionVersion,
@@ -36,6 +37,7 @@ import {
   combineRevisionButtons,
   highlightPublishedElectives,
   processFieldsForEphemeral,
+  stampEditAccessLinks,
 } from "../utils/formio-component-traversal"
 import { injectOptionalElectivesButtons } from "../utils/view-optional-electives"
 
@@ -47,6 +49,7 @@ import { ICollaborator } from "./collaborator"
 import { JurisdictionModel } from "./jurisdiction"
 import { IPermitBlockStatus, PermitBlockStatusModel } from "./permit-block-status"
 import { IPermitCollaboration, PermitCollaborationModel } from "./permit-collaboration"
+import { ProjectGrantModel } from "./project-grant"
 import { IRequirement } from "./requirement"
 import { SandboxModel } from "./sandbox"
 import { TemplateVersionModel } from "./template-version"
@@ -99,6 +102,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       missingPdfs: types.maybeNull(types.array(types.string)),
       reportGenerationIssues: types.optional(types.frozen<IReportGenerationIssue[]>(), []),
       isFullyLoaded: types.optional(types.boolean, false),
+      submitterNeedsSharedContact: types.optional(types.boolean, false),
       isDirty: types.optional(types.boolean, false),
       isLoading: types.optional(types.boolean, false),
       usingCurrentTemplateVersion: types.maybeNull(types.boolean),
@@ -113,6 +117,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
       selectedSubmissionVersion: types.maybeNull(types.frozen<ISubmissionVersion>()),
       permitCollaborationMap: types.map(PermitCollaborationModel),
       permitBlockStatusMap: types.map(PermitBlockStatusModel),
+      projectGrantMap: types.map(ProjectGrantModel),
       isViewingPastRequests: types.optional(types.boolean, false),
       templateNickname: types.maybeNull(types.string),
       projectId: types.maybeNull(types.string),
@@ -121,6 +126,12 @@ export const PermitApplicationModel = types.snapshotProcessor(
       inboxSortOrder: types.maybeNull(types.number),
       allowedManualTransitions: types.optional(types.array(types.string), []),
       daysInQueue: types.maybeNull(types.number),
+      // Project list rows only. Full: any draft. Expanded: drafts they created.
+      canArchiveDraft: types.optional(types.boolean, false),
+      // This application, including a block or application grant.
+      canOpen: types.optional(types.boolean, false),
+      // The caller's project access, on the full application payload.
+      currentUserAccess: types.maybeNull(types.frozen<IProjectAccess>()),
     })
     .extend(withEnvironment())
     .extend(withRootStore())
@@ -145,11 +156,19 @@ export const PermitApplicationModel = types.snapshotProcessor(
       get isLockedForReviewStaff() {
         const user = self.rootStore.userStore.currentUser
         if (!user?.isReviewStaff || !this.isNewDraft) return false
-        if (self.submitter?.id === user.id) return false
+        if (self.currentUserAccess?.viewApplication) return false
         if (self.hasActiveProjectMeeting) return false
 
+        // REVIEW STAFF PROJECT MEMBER TODO: a member who is also review staff
+        // opens drafts as a member. Review staff are not project members. If
+        // they can be, drafts need an explicit rule against the inbox. See
+        // ProjectMembershipPolicy#show_invitation?.
         const project = self.rootStore.permitProjectStore.currentPermitProject
-        if (project?.id === self.projectId && (project.isOwner || project.hasActiveProjectMeeting)) return false
+        if (
+          project?.id === self.projectId &&
+          (project.currentUserAccess?.viewApplication || project.hasActiveProjectMeeting)
+        )
+          return false
         return true
       },
       get isDraft() {
@@ -191,12 +210,9 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getRequirementBlockIdToStatusMap(collaborationType: ECollaborationType) {
+      getRequirementBlockIdToStatusMap() {
         return self.permitBlockStatuses.reduce((acc, permitBlockStatus) => {
-          if (permitBlockStatus.collaborationType === collaborationType) {
-            acc[permitBlockStatus.requirementBlockId] = permitBlockStatus
-          }
-
+          acc[permitBlockStatus.requirementBlockId] = permitBlockStatus
           return acc
         }, {})
       },
@@ -209,8 +225,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getPermitBlockStatus(collaborationType: ECollaborationType, requirementBlockId: string) {
-        return self.getRequirementBlockIdToStatusMap(collaborationType)[requirementBlockId]
+      getPermitBlockStatus(requirementBlockId: string) {
+        return self.getRequirementBlockIdToStatusMap()[requirementBlockId]
       },
       get previousSubmissionVersion() {
         if (self.submissionVersions.length <= 1) {
@@ -324,8 +340,7 @@ export const PermitApplicationModel = types.snapshotProcessor(
           )
         }
         const currentUser = self.rootStore.userStore.currentUser
-        const submitterCanEditDraft =
-          forSubmitterEdit && self.isDraft && !!currentUser?.id && currentUser.id === self.submitter?.id
+        const submitterCanEditDraft = forSubmitterEdit && self.isDraft && !!self.currentUserAccess?.editApplication
         const disableRequirementFields = submitterCanEditDraft
           ? self.isViewingPastRequests
           : self.isSubmitted ||
@@ -342,6 +357,10 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         if (self.isEphemeral) {
           return injectOptionalElectivesButtons(revisionModeFormJson, t("templateVersionPreview.viewOptionalElectives"))
+        }
+
+        if (forSubmitterEdit && self.currentUserAccess?.editApplication) {
+          return stampEditAccessLinks(revisionModeFormJson, t("permitApplication.blockAccess.editAccess"))
         }
 
         return revisionModeFormJson
@@ -522,99 +541,76 @@ export const PermitApplicationModel = types.snapshotProcessor(
       },
     }))
     .views((self) => ({
-      getCollaborationsByType(collaborationType: ECollaborationType) {
+      getCollaborations() {
         const collaborations = Array.from(self.permitCollaborationMap.values())
-        const filtered = collaborations.filter((c) => c.collaborationType === collaborationType)
-        return mutableSortPermitCollaborations(filtered)
+        return mutableSortPermitCollaborations(collaborations)
       },
     }))
     .views((self) => ({
-      getCollaborationAssignees(collaborationType: ECollaborationType) {
+      getCollaborationAssignees() {
         return self
-          .getCollaborationsByType(collaborationType)
+          .getCollaborations()
           .filter((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.assignee)
       },
-      getCollaborationDelegatee(collaborationType: ECollaborationType) {
+      getCollaborationDelegatee() {
         return (
           self
-            .getCollaborationsByType(collaborationType)
+            .getCollaborations()
             .find((permitCollaboration) => permitCollaboration.collaboratorType === ECollaboratorType.delegatee) ?? null
         )
       },
     }))
     .views((self) => ({
       get designatedReviewer() {
-        return self.getCollaborationDelegatee(ECollaborationType.review)
-      },
-      get designatedSubmitter() {
-        return self.getCollaborationDelegatee(ECollaborationType.submission)
+        return self.getCollaborationDelegatee()
       },
     }))
     .views((self) => ({
       get currentUserShouldSeeApplicationDiff() {
-        const currentUser = self.rootStore.userStore.currentUser
-        return (
-          currentUser?.id === self.submitter?.id ||
-          currentUser?.id === self?.designatedSubmitter?.collaborator?.user?.id
-        )
+        return !!self.currentUserAccess?.editApplication
       },
-      getCollaborationAssigneesByBlockIdMap(collaborationType: ECollaborationType) {
-        return self
-          .getCollaborationAssignees(collaborationType)
-          .reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
-            const blockId = collaboration.assignedRequirementBlockId
+      getCollaborationAssigneesByBlockIdMap() {
+        return self.getCollaborationAssignees().reduce<Record<string, IPermitCollaboration[]>>((acc, collaboration) => {
+          const blockId = collaboration.assignedRequirementBlockId
 
-            if (!blockId) {
-              return acc
-            }
-
-            if (!acc[blockId]) {
-              acc[blockId] = []
-            }
-
-            acc[blockId].push(collaboration)
-
+          if (!blockId) {
             return acc
-          }, {})
+          }
+
+          if (!acc[blockId]) {
+            acc[blockId] = []
+          }
+
+          acc[blockId].push(collaboration)
+
+          return acc
+        }, {})
       },
     }))
     .views((self) => ({
-      getCollaborationAssigneesByBlockId(collaborationType: ECollaborationType, requirementBlockId: string) {
-        return self.getCollaborationAssigneesByBlockIdMap(collaborationType)[requirementBlockId] ?? []
+      getCollaborationAssigneesByBlockId(requirementBlockId: string) {
+        return self.getCollaborationAssigneesByBlockIdMap()[requirementBlockId] ?? []
       },
       canUserSubmit(user: IUser) {
         if (!user) return false
 
-        if (self.submitter?.id === user.id) {
-          return true
-        }
-
-        const delegateePermitCollaboration = self.designatedSubmitter
-
-        return delegateePermitCollaboration?.collaborator?.user?.id == user.id
+        return !!self.currentUserAccess?.submitApplication
       },
-      canUserManageCollaborators(user: IUser, collaborationType: ECollaborationType) {
+      canUserManageCollaborators(user: IUser) {
         if (!user) return false
 
-        if (collaborationType === ECollaborationType.review) {
-          return !self.isNewDraft && user.isReviewStaff
-        }
-
-        return self.isDraft && user?.id === self.submitter?.id
+        return !self.isNewDraft && user.isReviewStaff
       },
-      delegateeUser(collaborationType: ECollaborationType) {
-        return self.getCollaborationDelegatee(collaborationType)?.collaborator?.user
+      delegateeUser() {
+        return self.getCollaborationDelegatee()?.collaborator?.user
       },
-      getCollaborationUniqueUserCount(collaborationType: ECollaborationType) {
-        return R.uniqBy(
-          (collaboration) => collaboration.collaborator.user.id,
-          self.getCollaborationsByType(collaborationType)
-        ).length
+      getCollaborationUniqueUserCount() {
+        return R.uniqBy((collaboration) => collaboration.collaborator.user.id, self.getCollaborations()).length
       },
     }))
     .views((self) => ({
-      getSidebarAssigneesList(collaborationType: ECollaborationType) {
-        const assignees = self.getCollaborationAssignees(collaborationType)
+      getSidebarAssigneesList() {
+        const assignees = self.getCollaborationAssignees()
 
         return Object.values(
           assignees.reduce<
@@ -706,36 +702,37 @@ export const PermitApplicationModel = types.snapshotProcessor(
         const { data: permitCollaboration } = response.data
 
         if (permitCollaboration.collaboratorType === ECollaboratorType.delegatee) {
-          if (permitCollaboration.collaborationType === ECollaborationType.submission) {
-            const existingDelegatee = self.designatedSubmitter
-            existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
-          } else {
-            const existingDelegatee = self.designatedReviewer
-            existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
-          }
+          const existingDelegatee = self.designatedReviewer
+          existingDelegatee && self.permitCollaborationMap.delete(existingDelegatee.id)
         }
         self.updatePermitCollaboration(permitCollaboration)
 
         return self.getPermitCollaboration(permitCollaboration.id)
       }),
-      removeCollaboratorCollaborations: flow(function* (
-        collaboratorId: string,
-        collaboratorType: ECollaboratorType,
-        collaborationType: ECollaborationType
-      ) {
+      removeCollaboratorCollaborations: flow(function* (collaboratorId: string, collaboratorType: ECollaboratorType) {
         const response = yield self.environment.api.removeCollaboratorCollaborationsFromPermitApplication(self.id, {
           collaboratorId,
           collaboratorType,
-          collaborationType,
         })
 
         if (response.ok) {
-          self.getCollaborationAssignees(collaborationType).forEach((collaboration) => {
+          self.getCollaborationAssignees().forEach((collaboration) => {
             collaboration.collaborator.id === collaboratorId && self.permitCollaborationMap.delete(collaboration.id)
           })
         }
 
         return response.ok
+      }),
+      reinvitePermitCollaboration: flow(function* (permitCollaborationId: string) {
+        const response = yield self.environment.api.reinvitePermitCollaboration(permitCollaborationId)
+
+        if (response.ok) {
+          const { data: permitCollaboration } = response.data
+          self.updatePermitCollaboration(permitCollaboration)
+          return self.getPermitCollaboration(permitCollaboration.id)
+        }
+
+        return false
       }),
       createOrUpdatePermitBlockStatus: flow(function* (
         requirementBlockId: string,
@@ -758,82 +755,27 @@ export const PermitApplicationModel = types.snapshotProcessor(
 
         return self.permitBlockStatusMap.get(permitBlockStatus.id)
       }),
-      inviteNewCollaborator: flow(function* (
-        collaboratorType: ECollaboratorType,
-        user: {
-          email: string
-          firstName: string
-          lastName: string
-        },
-        assignedRequirementBlockId?: string
-      ) {
-        const response = yield self.environment.api.inviteNewCollaboratorToPermitApplication(self.id, {
-          collaboratorType,
-          assignedRequirementBlockId,
-          user,
-        })
-
-        if (response.ok) {
-          const { data: permitCollaboration } = response.data
-          self.updatePermitCollaboration(permitCollaboration)
-          return self.getPermitCollaboration(permitCollaboration.id)
-        }
-
-        return false
-      }),
-      reinvitePermitCollaboration: flow(function* (permitCollaborationId: string) {
-        const response = yield self.environment.api.reinvitePermitCollaboration(permitCollaborationId)
-
-        if (response.ok) {
-          const { data: permitCollaboration } = response.data
-          self.updatePermitCollaboration(permitCollaboration)
-          return self.getPermitCollaboration(permitCollaboration.id)
-        }
-
-        return false
-      }),
+    }))
+    .views((self) => ({
+      get projectGrants() {
+        return Array.from(self.projectGrantMap.values())
+      },
+      get grantedPeopleCount() {
+        return new Set(
+          Array.from(self.projectGrantMap.values())
+            .filter((grant) => grant.kind !== "invite")
+            .map((grant) => grant.projectMembershipId)
+        ).size
+      },
+      grantsFor(membershipId: string) {
+        return Array.from(self.projectGrantMap.values()).filter(
+          (grant) => grant.projectMembershipId === membershipId && grant.kind !== "invite"
+        )
+      },
     }))
     .actions((self) => ({
       __mergeUpdate: (resourceData) => {
-        let jurisdiction = resourceData["jurisdiction"]
-        let submitter = resourceData["submitter"]
-        let templateVersion = resourceData["templateVersion"]
-        let publishedTemplateVersion = resourceData["publishedTemplateVersion"]
-        const permitCollaborations = resourceData["permitCollaborations"]
-
-        if (jurisdiction && typeof jurisdiction !== "string") {
-          self.rootStore.jurisdictionStore.mergeUpdate(jurisdiction, "jurisdictionMap")
-          jurisdiction = jurisdiction["id"]
-        }
-        if (submitter && typeof submitter !== "string") {
-          self.rootStore.userStore.mergeUpdate(submitter, "usersMap")
-          submitter = submitter["id"]
-        }
-        if (templateVersion && typeof templateVersion !== "string") {
-          self.rootStore.templateVersionStore.mergeUpdate(templateVersion, "templateVersionMap")
-          templateVersion = templateVersion["id"]
-        }
-        if (publishedTemplateVersion && typeof publishedTemplateVersion !== "string") {
-          self.rootStore.templateVersionStore.mergeUpdate(publishedTemplateVersion, "templateVersionMap")
-          publishedTemplateVersion = publishedTemplateVersion["id"]
-        }
-
-        if (permitCollaborations && Array.isArray(permitCollaborations)) {
-          const collaborators = R.map(R.prop("collaborator"), permitCollaborations)
-
-          self.rootStore.collaboratorStore.mergeUpdateAll(
-            R.uniqBy((c) => c.id, collaborators),
-            "collaboratorMap"
-          )
-        }
-
-        const newData = R.mergeRight(resourceData, {
-          jurisdiction,
-          submitter,
-          templateVersion,
-          publishedTemplateVersion,
-        })
-        self.rootStore.permitApplicationStore.permitApplicationMap.put(newData)
+        applySnapshot(self, preprocessPermitApplicationSnapshot(R.mergeLeft(resourceData, getSnapshot(self))))
       },
       setFormattedComplianceData(data: Record<string, any>) {
         self.formattedComplianceData = data
@@ -930,6 +872,41 @@ export const PermitApplicationModel = types.snapshotProcessor(
           self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
         }
         return response
+      }),
+      updateSubmitter: flow(function* (membershipId: string | null) {
+        const response = yield self.environment.api.updateSubmitter(self.id, membershipId)
+        if (response.ok) {
+          const { data: permitApplication } = response.data
+          self.rootStore.permitApplicationStore.mergeUpdate(permitApplication, "permitApplicationMap")
+        }
+        return response.ok
+      }),
+      fetchProjectGrants: flow(function* () {
+        const response = yield self.environment.api.fetchProjectGrants(self.id)
+        if (!response.ok) return false
+
+        const grants = response.data?.data ?? []
+        self.projectGrantMap.clear()
+        grants.forEach((grant) => self.projectGrantMap.put(grant))
+        return true
+      }),
+      createProjectGrant: flow(function* (grant: {
+        membershipId: string
+        kind: "block" | "application"
+        requirementBlockId?: string | null
+      }) {
+        const response = yield self.environment.api.createProjectGrant(self.id, grant)
+        if (!response.ok || !response.data?.data) return false
+
+        self.projectGrantMap.put(response.data.data)
+        return true
+      }),
+      destroyProjectGrant: flow(function* (id: string) {
+        const response = yield self.environment.api.destroyProjectGrant(self.id, id)
+        if (!response.ok) return false
+
+        self.projectGrantMap.delete(id)
+        return true
       }),
       submit: flow(function* (params) {
         const response = yield self.environment.api.submitPermitApplication(self.id, params)
@@ -1088,21 +1065,26 @@ export const PermitApplicationModel = types.snapshotProcessor(
       }),
     })),
   {
-    preProcessor: (snapshot: any) => {
-      const processedSnapshot = { ...snapshot }
-
-      if (Array.isArray(snapshot.permitCollaborations)) {
-        processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
-      }
-
-      if (Array.isArray(snapshot.permitBlockStatuses)) {
-        processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
-      }
-
-      return processedSnapshot
-    },
+    preProcessor: preprocessPermitApplicationSnapshot,
   }
 )
+
+// put() runs this preprocessor. applySnapshot does not, so __mergeUpdate calls it too.
+function preprocessPermitApplicationSnapshot(snapshot: any) {
+  const processedSnapshot = { ...snapshot }
+
+  if (Array.isArray(snapshot.permitCollaborations)) {
+    processedSnapshot.permitCollaborationMap = convertResourceArrayToRecord(snapshot.permitCollaborations)
+  }
+  delete processedSnapshot.permitCollaborations
+
+  if (Array.isArray(snapshot.permitBlockStatuses)) {
+    processedSnapshot.permitBlockStatusMap = convertResourceArrayToRecord(snapshot.permitBlockStatuses)
+  }
+  delete processedSnapshot.permitBlockStatuses
+
+  return processedSnapshot
+}
 
 export const reasonCodes = [
   "non_compliant",

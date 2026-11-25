@@ -327,7 +327,6 @@ RSpec.describe "Project activity auditing", type: :model do
           collaboration =
             create(
               :permit_collaboration,
-              :review,
               :delegatee,
               permit_application: permit_application,
               collaborator: review_collaborator

@@ -263,7 +263,12 @@ RSpec.describe NotificationService do
     it "notifies submitter (if permit application) and creator (if present)" do
       submitter = create(:user, :submitter)
       creator = create(:user, :submitter)
-      pa = instance_double("PermitApplication", submitter_id: submitter.id)
+      pa =
+        instance_double(
+          "PermitApplication",
+          permit_project: nil,
+          application_message_recipients: [submitter]
+        )
       step_code =
         instance_double(
           "StepCode",
@@ -349,19 +354,18 @@ RSpec.describe NotificationService do
   end
 
   describe ".publish_review_started_event" do
-    it "emails and pushes based on submitter preference flags" do
+    it "emails and pushes based on the submitter's preference flags" do
       preference =
         instance_double(
           "Preference",
           enable_email_application_view_notification: true,
           enable_in_app_application_view_notification: true
         )
-      submitter = instance_double("User", preference: preference)
+      contact = instance_double("User", id: "u1", preference: preference)
       permit_application =
         instance_double(
           "PermitApplication",
-          submitter_id: "u1",
-          submitter: submitter,
+          application_message_recipients: [contact],
           review_started_event_notification_data: {
             msg: "review_started"
           }
@@ -374,11 +378,100 @@ RSpec.describe NotificationService do
       described_class.publish_review_started_event(permit_application)
 
       expect(PermitHubMailer).to have_received(:notify_review_started).with(
-        permit_application
+        permit_application,
+        contact
       )
       expect(NotificationPushJob).to have_received(:perform_async).with(
         { "u1" => { msg: "review_started" } }
       )
+    end
+
+    it "sends review started to the member chosen as the submitter" do
+      submitter = create(:user, :submitter)
+      contact_user = create(:user, :submitter)
+      project = create(:permit_project, owner: submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: contact_user,
+          access: :limited
+        )
+      permit_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          permit_project: project,
+          jurisdiction: project.jurisdiction
+        )
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_review_started).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      described_class.publish_review_started_event(permit_application)
+
+      expect(NotificationPushJob).to have_received(:perform_async).with(
+        { contact_user.id => anything }
+      )
+      expect(PermitHubMailer).to have_received(:notify_review_started).with(
+        permit_application,
+        contact_user
+      )
+    end
+
+    it "also notifies the user who submitted the latest version" do
+      submitter = create(:user, :submitter)
+      other = create(:user, :submitter)
+      permit_application = create(:permit_application, submitter: submitter)
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        submitted_by: other
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_review_started).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      described_class.publish_review_started_event(permit_application)
+
+      expect(NotificationPushJob).to have_received(:perform_async).with(
+        { submitter.id => anything, other.id => anything }
+      )
+      expect(PermitHubMailer).to have_received(:notify_review_started).with(
+        permit_application,
+        submitter
+      )
+      expect(PermitHubMailer).to have_received(:notify_review_started).with(
+        permit_application,
+        other
+      )
+    end
+
+    it "notifies a user once when they submitted and are the submitter" do
+      submitter = create(:user, :submitter)
+      permit_application = create(:permit_application, submitter: submitter)
+      create(
+        :submission_version,
+        permit_application: permit_application,
+        submitted_by: submitter
+      )
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(:notify_review_started).and_return(
+        instance_double("MailerMessage", deliver_later: true)
+      )
+
+      described_class.publish_review_started_event(permit_application)
+
+      expect(NotificationPushJob).to have_received(:perform_async).once.with(
+        { submitter.id => anything }
+      )
+      expect(PermitHubMailer).to have_received(
+        :notify_review_started
+      ).once.with(permit_application, submitter)
     end
   end
 
@@ -571,8 +664,8 @@ RSpec.describe NotificationService do
       permit_application =
         instance_double(
           "PermitApplication",
-          submitter: submitter,
-          submitter_id: "u_submit",
+          permit_project: nil,
+          application_message_recipients: [submitter],
           submit_event_notification_data: {
             msg: "submitted"
           },
@@ -621,22 +714,81 @@ RSpec.describe NotificationService do
         :notify_application_revisions_requested
       ).with(permit_application, submitter)
     end
+
+    it "includes a Limited submitter alongside Full members" do
+      owner = create(:user, :submitter)
+      contact_user = create(:user, :submitter)
+      project = create(:permit_project, owner: owner)
+      membership =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: contact_user,
+          access: :limited
+        )
+      permit_application =
+        create(
+          :permit_application,
+          submitter: owner,
+          permit_project: project,
+          jurisdiction: project.jurisdiction
+        )
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
+      allow(permit_application).to receive(
+        :confirmed_submission_contacts
+      ).and_return([])
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(
+        :notify_submitter_application_submitted
+      ).and_return(instance_double("MailerMessage", deliver_later: true))
+      allow(PermitHubMailer).to receive(
+        :notify_application_revisions_requested
+      ).and_return(instance_double("MailerMessage", deliver_later: true))
+
+      described_class.publish_application_submission_event(permit_application)
+      described_class.publish_application_revisions_request_event(
+        permit_application
+      )
+
+      expect(PermitHubMailer).to have_received(
+        :notify_submitter_application_submitted
+      ).with(permit_application, contact_user)
+      expect(PermitHubMailer).to have_received(
+        :notify_submitter_application_submitted
+      ).with(permit_application, owner)
+      expect(PermitHubMailer).to have_received(
+        :notify_application_revisions_requested
+      ).with(permit_application, contact_user)
+    end
   end
 
   describe ".publish_applications_added_event" do
-    let(:owner_preference) do
+    let(:primary_preference) do
       instance_double(
         "Preference",
         enable_in_app_applications_added_notification: true,
         enable_email_applications_added_notification: true
       )
     end
-    let(:owner) do
-      instance_double("User", id: "owner-1", preference: owner_preference)
+    let(:alternate_preference) do
+      instance_double(
+        "Preference",
+        enable_in_app_applications_added_notification: true,
+        enable_email_applications_added_notification: true
+      )
     end
-    let(:permit_project) do
-      instance_double("PermitProject", id: "project-1", owner: owner)
+    let(:primary_user) do
+      instance_double("User", id: "primary-1", preference: primary_preference)
     end
+    let(:alternate_user) do
+      instance_double(
+        "User",
+        id: "alternate-1",
+        preference: alternate_preference
+      )
+    end
+    let(:permit_project) { instance_double("PermitProject", id: "project-1") }
 
     def added_application(id, created_by_type: "Jurisdiction")
       instance_double(
@@ -650,13 +802,27 @@ RSpec.describe NotificationService do
     end
 
     before do
+      contacts = [
+        instance_double("ProjectMembership", user: primary_user),
+        instance_double("ProjectMembership", user: alternate_user)
+      ]
+      memberships = double("memberships")
+      filtered = double("filtered memberships")
+      allow(permit_project).to receive(:project_memberships).and_return(
+        memberships
+      )
+      allow(memberships).to receive(:where).with(
+        contact_designation: %i[primary alternate]
+      ).and_return(filtered)
+      allow(filtered).to receive(:includes).with(:user).and_return(contacts)
+
       allow(NotificationPushJob).to receive(:perform_async)
       allow(PermitHubMailer).to receive(:notify_applications_added).and_return(
         instance_double("MailerMessage", deliver_later: true)
       )
     end
 
-    it "sends one in-app notification and one email for every application in the add" do
+    it "notifies the primary and alternate contacts for every application in the add" do
       applications = [added_application("a1"), added_application("a2")]
 
       described_class.publish_applications_added_event(
@@ -667,8 +833,8 @@ RSpec.describe NotificationService do
 
       expect(NotificationPushJob).to have_received(:perform_async).once
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
-        expect(hash.keys).to eq(["owner-1"])
-        payload = hash["owner-1"]
+        expect(hash.keys).to contain_exactly("primary-1", "alternate-1")
+        payload = hash["primary-1"]
         expect(payload["action_type"]).to eq("applications_added")
         expect(payload["action_text"]).to include(
           "North Vancouver",
@@ -683,13 +849,25 @@ RSpec.describe NotificationService do
           { "id" => "a2", "number" => "APP-a2", "nickname" => "Nick a2" }
         )
       end
-      expect(PermitHubMailer).to have_received(
-        :notify_applications_added
-      ).once.with(permit_project, applications, "<p>Please finish</p>", owner)
+      expect(PermitHubMailer).to have_received(:notify_applications_added).with(
+        permit_project,
+        applications,
+        "<p>Please finish</p>",
+        primary_user
+      )
+      expect(PermitHubMailer).to have_received(:notify_applications_added).with(
+        permit_project,
+        applications,
+        "<p>Please finish</p>",
+        alternate_user
+      )
     end
 
     it "does not email when that preference is off" do
-      allow(owner_preference).to receive(
+      allow(primary_preference).to receive(
+        :enable_email_applications_added_notification
+      ).and_return(false)
+      allow(alternate_preference).to receive(
         :enable_email_applications_added_notification
       ).and_return(false)
 
@@ -702,7 +880,8 @@ RSpec.describe NotificationService do
       expect(PermitHubMailer).not_to have_received(:notify_applications_added)
       expect(NotificationPushJob).to have_received(:perform_async).once
       expect(NotificationPushJob).to have_received(:perform_async) do |hash|
-        expect(hash["owner-1"]["object_data"]).not_to have_key("note")
+        expect(hash["primary-1"]["object_data"]).not_to have_key("note")
+        expect(hash["alternate-1"]["object_data"]).not_to have_key("note")
       end
     end
 
@@ -791,9 +970,14 @@ RSpec.describe NotificationService do
   end
 
   describe "private helpers" do
-    it "determine_file_owner returns submitter for permit application attachment" do
+    it "determine_file_owner returns the submitter for a permit application attachment" do
       submitter = instance_double("User")
-      pa = instance_double("PermitApplication", submitter: submitter)
+      # case/when uses is_a?, which an instance double does not pass.
+      pa = PermitApplication.new
+      allow(pa).to receive(:permit_project).and_return(nil)
+      allow(pa).to receive(:application_message_recipients).and_return(
+        [submitter]
+      )
       file_attachment = instance_double("FileAttachment", attached_to: pa)
 
       owners = described_class.send(:determine_file_owner, file_attachment)
@@ -934,6 +1118,60 @@ RSpec.describe NotificationService do
         :notify_new_template_version_published
       ).with(new_template_version, submitter, any_args)
     end
+
+    it "warns the member chosen as the submitter" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      allow(PermitHubMailer).to receive(
+        :notify_new_template_version_published
+      ).and_return(instance_double("MailerMessage", deliver_later: true))
+      jurisdiction = create(:sub_district)
+      manager = create(:user, :review_manager, jurisdiction: jurisdiction)
+      submitter = create(:user, :submitter)
+      contact_user = create(:user, :submitter)
+      project =
+        create(:permit_project, owner: submitter, jurisdiction: jurisdiction)
+      membership =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: contact_user,
+          access: :limited
+        )
+      requirement_template = create(:requirement_template)
+      old_template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          status: :deprecated,
+          deprecation_reason: :new_publish,
+          version_date: Date.new(2026, 1, 1)
+        )
+      new_template_version =
+        create(
+          :template_version,
+          requirement_template: requirement_template,
+          status: :published,
+          version_date: Date.new(2026, 2, 1)
+        )
+      permit_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          permit_project: project,
+          template_version: old_template_version
+        )
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
+
+      described_class.publish_new_template_version_publish_event(
+        new_template_version
+      )
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to include(contact_user.id, manager.id)
+        expect(payload.keys).not_to include(submitter.id)
+      end
+    end
   end
 
   describe ".publish_customization_update_event" do
@@ -975,6 +1213,46 @@ RSpec.describe NotificationService do
 
       expect(NotificationPushJob).to have_received(:perform_async) do |payload|
         expect(payload.keys).to contain_exactly(matching_submitter.id)
+      end
+    end
+
+    it "notifies the member chosen as the submitter" do
+      allow(NotificationPushJob).to receive(:perform_async)
+      requirement_template = create(:requirement_template)
+      template_version =
+        create(:template_version, requirement_template: requirement_template)
+      jurisdiction = create(:sub_district)
+      customization =
+        create(
+          :jurisdiction_template_version_customization,
+          jurisdiction: jurisdiction,
+          template_version: template_version
+        )
+      submitter = create(:user, :submitter)
+      contact_user = create(:user, :submitter)
+      project =
+        create(:permit_project, owner: submitter, jurisdiction: jurisdiction)
+      membership =
+        create(
+          :project_membership,
+          permit_project: project,
+          user: contact_user,
+          access: :limited
+        )
+      permit_application =
+        create(
+          :permit_application,
+          submitter: submitter,
+          permit_project: project,
+          template_version: template_version
+        )
+      permit_application.update!(submitter: contact_user)
+      expect(permit_application.submitter_membership).to eq(membership)
+
+      described_class.publish_customization_update_event(customization)
+
+      expect(NotificationPushJob).to have_received(:perform_async) do |payload|
+        expect(payload.keys).to contain_exactly(contact_user.id)
       end
     end
 

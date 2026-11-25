@@ -16,73 +16,91 @@ export interface IRequirementBlockAssignmentNode {
 interface IProps {
   requirementBlockAssignmentNode: IRequirementBlockAssignmentNode
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
+  collaborationType?: ECollaborationType
 }
 
 export const BlockCollaboratorAssignmentManagement = observer(function BlockCollaboratorAssignmentManagement({
   requirementBlockAssignmentNode,
   permitApplication,
-  collaborationType,
+  collaborationType = ECollaborationType.review,
 }: IProps) {
   const { requirementBlockId, attachmentNode } = requirementBlockAssignmentNode
-  const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(
-    collaborationType,
-    requirementBlockId
+  const existingAssignments = permitApplication.getCollaborationAssigneesByBlockId(requirementBlockId)
+  const submissionSide = collaborationType === ECollaborationType.submission
+  const blockGrantees = permitApplication.projectGrants.filter(
+    (grant) => grant.kind === "block" && grant.requirementBlockId === requirementBlockId && grant.memberName
   )
   return (
     <>
       {createPortal(
-        <HStack mr={6} spacing={6} onClick={(e) => e.stopPropagation()}>
+        <HStack className="block-header-controls" spacing={6} onClick={(e) => e.stopPropagation()}>
           <StatusSelect
             permitApplication={permitApplication}
-            collaborationType={collaborationType}
             requirementBlockId={requirementBlockId}
-          />
-          <CollaboratorAssignmentModal
-            permitApplication={permitApplication}
             collaborationType={collaborationType}
-            requirementBlockId={requirementBlockId}
           />
+          {!submissionSide && (
+            <CollaboratorAssignmentModal
+              permitApplication={permitApplication}
+              requirementBlockId={requirementBlockId}
+            />
+          )}
+          {submissionSide && blockGrantees.length > 0 && (
+            <HStack spacing={1}>
+              {blockGrantees.map((grant) => {
+                const name = grant.memberName ?? ""
+                return (
+                  <Tooltip key={grant.id} label={name}>
+                    <Avatar name={name} size="sm" bg="semantic.warningLight" color="text.primary" />
+                  </Tooltip>
+                )
+              })}
+            </HStack>
+          )}
         </HStack>,
         attachmentNode
       )}
 
-      {createPortal(
-        <Stack
-          as={"ul"}
-          top={0}
-          right={"-48px"}
-          position={"absolute"}
-          listStyleType={"none"}
-          pl={0}
-          spacing={1}
-          onClick={(e) => e.stopPropagation()}
-          cursor={"auto"}
-        >
-          {existingAssignments.map((assignment) => (
-            <Box as={"li"} key={assignment.id} pl={0}>
-              <Tooltip label={assignment.collaborator?.user?.name}>
-                <Avatar name={assignment.collaborator?.user?.name} size={"sm"} />
-              </Tooltip>
-            </Box>
-          ))}
-        </Stack>,
-        attachmentNode
-      )}
+      {!submissionSide &&
+        createPortal(
+          <Stack
+            as={"ul"}
+            top={0}
+            right={"-48px"}
+            position={"absolute"}
+            listStyleType={"none"}
+            pl={0}
+            spacing={1}
+            onClick={(e) => e.stopPropagation()}
+            cursor={"auto"}
+          >
+            {existingAssignments.map((assignment) => (
+              <Box as={"li"} key={assignment.id} pl={0}>
+                <Tooltip label={assignment.collaborator?.user?.name}>
+                  <Avatar name={assignment.collaborator?.user?.name} size={"sm"} />
+                </Tooltip>
+              </Box>
+            ))}
+          </Stack>,
+          attachmentNode
+        )}
     </>
   )
 })
 
 const StatusSelect = observer(function StatusSelect({
   permitApplication,
-  collaborationType,
   requirementBlockId,
+  collaborationType,
 }: {
   permitApplication: IPermitApplication
-  collaborationType: ECollaborationType
   requirementBlockId: string
+  collaborationType: ECollaborationType
 }) {
-  const permitBlockStatus = permitApplication.getPermitBlockStatus(collaborationType, requirementBlockId)
+  const permitBlockStatus = permitApplication.permitBlockStatuses.find(
+    (blockStatus) =>
+      blockStatus.requirementBlockId === requirementBlockId && blockStatus.collaborationType === collaborationType
+  )
 
   const [status, setStatus] = useState<EPermitBlockStatus>(permitBlockStatus?.status || EPermitBlockStatus.draft)
 
@@ -110,7 +128,9 @@ const StatusSelect = observer(function StatusSelect({
   }
 
   const isDisabled =
-    collaborationType === ECollaborationType.review ? !permitApplication.isSubmitted : !permitApplication.isDraft
+    collaborationType === ECollaborationType.submission
+      ? !permitApplication.isDraft || permitApplication.isViewingPastRequests
+      : !permitApplication.isSubmitted
 
   return (
     <BlockStatusSelect

@@ -1,19 +1,15 @@
 module PublicRecordable
-  # This concern handles the logic for records that are considered "Public Records" in the context of
-  # data retention and user deletion. It does NOT mean the record is publicly available to the internet.
+  # This concern handles data retention when a user is deleted. It does NOT
+  # mean the record is publicly available to the internet.
   #
-  # A "Public Record" is a record that must be preserved even if the creating user is deleted,
-  # typically for legal or audit reasons (e.g. submitted permit applications).
+  # remember_user! copies the person's name. That is display only.
+  # abandon! also stamps orphaned_at (and discarded_at when the model uses
+  # Discard) and starts the OrphanCleanupJob clock. An orphaned record is
+  # immutable until that job deletes it.
   #
-  # When a user is deleted:
-  # 1. If the record is a "public record" (public_record? returns true):
-  #    - A snapshot of the user's details (name, username) is taken.
-  #    - The record is orphaned (user association set to nil).
-  #    - The record is discarded (soft-deleted) if the model uses Discard.
-  #    - The record becomes immutable (prevent_updates_if_orphaned).
-  #    - The record is eventually deleted by OrphanCleanupJob after a retention period.
-  # 2. If the record is NOT a "public record" (e.g. a draft):
-  #    - It is destroyed via cascade delete when the user is destroyed.
+  # Project work is abandoned with the project, when account deletion leaves
+  # no Full member. A license agreement is abandoned with the user. A name
+  # remembered on an application or a revision request does not start a clock.
   extend ActiveSupport::Concern
 
   # Thread-safe storage for models
@@ -83,43 +79,39 @@ module PublicRecordable
     end
   end
 
-  def take_user_snapshots!
-    return unless public_record?
+  # The person's name, kept for display after the account is gone.
+  # update_columns skips the orphan immutability check.
+  def remember_user!(user = nil)
+    return unless persisted?
+    return unless respond_to?(:omniauth_username_snapshot=)
 
-    # Determine which user association to snapshot based on the model
+    user_to_snapshot = user || snapshot_source_user
+    return unless user_to_snapshot&.persisted?
+
+    update_columns(
+      omniauth_username_snapshot:
+        user_to_snapshot.omniauth_username.presence || user_to_snapshot.email,
+      first_name_snapshot: user_to_snapshot.first_name,
+      last_name_snapshot: user_to_snapshot.last_name,
+      updated_at: Time.current
+    )
+    reindex if respond_to?(:search_data)
+  end
+
+  # remember_user! plus the retention clock. OrphanCleanupJob deletes the row.
+  def abandon!
+    remember_user!
+    columns = { orphaned_at: Time.current, updated_at: Time.current }
+    columns[:discarded_at] = Time.current if respond_to?(:discarded_at=)
+    update_columns(columns)
+    reindex if respond_to?(:search_data)
+  end
+
+  def snapshot_source_user
     association_name = self.class.public_recordable_user_association
-    return unless association_name
+    return if association_name.blank?
 
-    # Fetch the user using the association name
-    user_to_snapshot = public_send(association_name)
-
-    return unless user_to_snapshot
-
-    username_to_save =
-      user_to_snapshot.omniauth_username.presence || user_to_snapshot.email
-    first_name_to_save = user_to_snapshot.first_name
-    last_name_to_save = user_to_snapshot.last_name
-
-    if respond_to?(:omniauth_username_snapshot=)
-      # Use update_columns to bypass the prevent_updates_if_orphaned callback,
-      # which would otherwise block setting snapshot fields alongside orphaned_at.
-      columns_to_update = {
-        omniauth_username_snapshot: username_to_save,
-        first_name_snapshot: first_name_to_save,
-        last_name_snapshot: last_name_to_save,
-        orphaned_at: Time.current
-      }
-
-      # Also discard the record if the model uses Discard
-      columns_to_update[:discarded_at] = Time.current if respond_to?(
-        :discarded_at=
-      )
-
-      update_columns(columns_to_update)
-
-      # Reindex if the model is searchable to ensure consistency
-      reindex if respond_to?(:search_data)
-    end
+    public_send(association_name)
   end
 
   def orphaned?

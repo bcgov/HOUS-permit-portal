@@ -9,7 +9,6 @@ class Api::PermitProjectsController < Api::ApplicationController
                   pin
                   unpin
                   search_permit_applications
-                  submission_collaborator_options
                   create_permit_applications
                   mark_as_viewed
                   mark_as_unviewed
@@ -56,13 +55,13 @@ class Api::PermitProjectsController < Api::ApplicationController
   # and view variants. Worth doing as a dedicated refactor rather than piecemeal.
   def show
     authorize @permit_project
-    is_owner_or_collaborator =
-      @permit_project.owner_id == current_user.id ||
-        @permit_project.permit_applications.any? do |app|
-          app.collaborators.any? { |c| c.user_id == current_user.id }
-        end
+    # REVIEW STAFF PROJECT MEMBER TODO: a membership selects :extended before
+    # the inbox view. Review staff are not project members. A review
+    # assignment is not a membership, so an assigned reviewer keeps the inbox
+    # view. If staff can be members, the inbox view has to win, or the URL
+    # has to name which view. See ProjectMembershipPolicy#show_invitation?.
     view =
-      if is_owner_or_collaborator
+      if project_access.view_project?
         :extended
       elsif current_user.review_staff?
         :inbox_extended
@@ -181,7 +180,10 @@ class Api::PermitProjectsController < Api::ApplicationController
     @permit_project = PermitProject.new(permit_project_params)
     @permit_project.owner = current_user
     @permit_project.sandbox = current_sandbox
+    assign_creator_contact!
     authorize @permit_project
+
+    return if creator_contact_invalid?
 
     if @permit_project.save
       render_success @permit_project,
@@ -255,20 +257,13 @@ class Api::PermitProjectsController < Api::ApplicationController
                      meta: page_meta(@permit_application_search),
                      blueprint: PermitApplicationBlueprint,
                      blueprint_opts: {
-                       view: :project_base,
-                       current_user: current_user
-                     }
-                   }
-  end
-
-  def submission_collaborator_options
-    authorize @permit_project
-    render_success @permit_project.submission_collaborators(current_user),
-                   nil,
-                   {
-                     blueprint: CollaboratorOptionBlueprint,
-                     blueprint_opts: {
-                       view: :base
+                       view:
+                         PermitProjectBlueprint.application_row_view(
+                           project_access: project_access,
+                           current_user: current_user
+                         ),
+                       current_user: current_user,
+                       project_access: project_access
                      }
                    }
   end
@@ -324,7 +319,8 @@ class Api::PermitProjectsController < Api::ApplicationController
                      {
                        blueprint: PermitApplicationBlueprint,
                        blueprint_opts: {
-                         view: :project_base
+                         view: :project_base,
+                         project_access: project_access
                        }
                      }
     else
@@ -428,8 +424,13 @@ class Api::PermitProjectsController < Api::ApplicationController
       project_ids_with_outdated_drafts: @project_ids_with_outdated_drafts,
       active_project_meeting_ids_by_project_id:
         @active_project_meeting_ids_by_project_id,
-      notes_scope: policy_scope(Note)
+      notes_scope: policy_scope(Note),
+      project_access: @permit_project&.persisted? ? project_access : nil
     }
+  end
+
+  def project_access
+    @project_access ||= pundit_user.access.on(@permit_project)
   end
 
   def set_permit_project
@@ -466,6 +467,51 @@ class Api::PermitProjectsController < Api::ApplicationController
           }
         )
       end
+  end
+
+  def assign_creator_contact!
+    contact =
+      params.fetch(:permit_project, {}).permit(
+        :project_contact_email,
+        :project_contact_phone
+      )
+    @permit_project.project_contact_email = contact[:project_contact_email]
+    @permit_project.project_contact_phone = contact[:project_contact_phone]
+  end
+
+  # The server stores what was submitted. A blank field is not filled from the account.
+  def creator_contact_invalid?
+    email = @permit_project.project_contact_email
+    phone = @permit_project.project_contact_phone
+    if email.blank? && phone.blank?
+      render_error(
+        "permit_project.creator_contact_required",
+        { status: :unprocessable_entity }
+      )
+      return true
+    end
+
+    probe =
+      ProjectMembership.new(
+        project_contact_email: email,
+        project_contact_phone: phone
+      )
+    probe.validate
+    messages =
+      probe.errors.full_messages_for(:project_contact_email) +
+        probe.errors.full_messages_for(:project_contact_phone)
+    return false if messages.empty?
+
+    render_error(
+      "permit_project.creator_contact_invalid",
+      {
+        status: :unprocessable_entity,
+        message_opts: {
+          error_message: messages.join(", ")
+        }
+      }
+    )
+    true
   end
 
   def permit_project_params

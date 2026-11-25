@@ -16,6 +16,7 @@ class PermitApplication::FormJsonService
   def call
     remove_empty_blocks
     remove_empty_sections
+    remove_completion_section_without_submit
     set_step_code_requirement
     return self
   end
@@ -35,11 +36,26 @@ class PermitApplication::FormJsonService
   end
 
   def remove_empty_sections
-    form_json["components"].delete_if do |component|
+    form_json["components"]&.delete_if do |component|
       component["components"].blank? || component["components"].empty?
     end
 
     form_json
+  end
+
+  # The sign-off section is the submit control. A block grant does not submit.
+  def remove_completion_section_without_submit
+    return if current_user.blank?
+
+    permissions =
+      permit_application.submission_requirement_block_edit_permissions(
+        user_id: current_user.id
+      )
+    return unless permissions.is_a?(Array)
+
+    form_json["components"]&.delete_if do |component|
+      component["key"] == PermitApplication::COMPLETION_SECTION_KEY
+    end
   end
 
   def set_step_code_requirement(hash = form_json)

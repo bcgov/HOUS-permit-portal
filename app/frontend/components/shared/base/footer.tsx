@@ -22,6 +22,7 @@ export const Footer = observer(() => {
     "/jurisdictions/:slug/step-code-requirements",
     "/letter-of-assurance",
     "/privacy-policy",
+    "/compare-access-levels",
     "/onboarding-checklist-page-for-lg-adopting",
   ]
 

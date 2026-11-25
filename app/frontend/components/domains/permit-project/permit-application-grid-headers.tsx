@@ -11,10 +11,11 @@ import { SortIcon } from "../../shared/sort-icon"
 interface IPermitApplicationGridHeadersProps {
   columns: EProjectPermitApplicationSortFields[]
   includeActionColumn?: boolean
+  fromInbox?: boolean
 }
 
 export const PermitApplicationGridHeaders = observer(
-  ({ columns, includeActionColumn }: IPermitApplicationGridHeadersProps) => {
+  ({ columns, includeActionColumn, fromInbox = false }: IPermitApplicationGridHeadersProps) => {
     const { t } = useTranslation()
     const { permitApplicationStore } = useMst()
     const { getProjectPermitApplicationSortColumnHeader, toggleSort, sort } = permitApplicationStore
@@ -28,24 +29,30 @@ export const PermitApplicationGridHeaders = observer(
                 <Text px={4}>{t("permitProject.overview.createdBy")}</Text>
               </GridHeader>
             )}
-            <GridHeader>
-              <Flex
-                w={"full"}
-                as={"button"}
-                justifyContent={"space-between"}
-                cursor="pointer"
-                onClick={() => toggleSort(column)}
-                px={4}
-              >
-                <Text textAlign="left" flex="1" minW={0}>
-                  {getProjectPermitApplicationSortColumnHeader(column)}
-                </Text>
-                <SortIcon<EProjectPermitApplicationSortFields>
-                  field={column}
-                  currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
-                />
-              </Flex>
-            </GridHeader>
+            {column === EProjectPermitApplicationSortFields.assignedTo && !fromInbox ? (
+              <GridHeader role={"columnheader"}>
+                <Text px={4}>{t("permitApplication.people.contactTitle")}</Text>
+              </GridHeader>
+            ) : (
+              <GridHeader>
+                <Flex
+                  w={"full"}
+                  as={"button"}
+                  justifyContent={"space-between"}
+                  cursor="pointer"
+                  onClick={() => toggleSort(column)}
+                  px={4}
+                >
+                  <Text textAlign="left" flex="1" minW={0}>
+                    {getProjectPermitApplicationSortColumnHeader(column)}
+                  </Text>
+                  <SortIcon<EProjectPermitApplicationSortFields>
+                    field={column}
+                    currentSort={sort as ISort<EProjectPermitApplicationSortFields>}
+                  />
+                </Flex>
+              </GridHeader>
+            )}
           </React.Fragment>
         ))}
         {includeActionColumn && <GridHeader role={"columnheader"} />}

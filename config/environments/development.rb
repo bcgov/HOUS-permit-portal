@@ -43,6 +43,9 @@ Rails.application.configure do
   config.action_mailer.perform_caching = false
 
   config.action_mailer.delivery_method = :letter_opener
+  # A bare path under a home directory that contains "@" is parsed as a mailto
+  # URI, so macOS opens Mail. A file:// prefix keeps the preview a local file.
+  LetterOpener.configure { |c| c.file_uri_scheme = "file://" }
   config.action_mailer.default_url_options = {
     host: "localhost",
     port: 3000,

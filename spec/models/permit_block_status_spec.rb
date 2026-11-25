@@ -28,9 +28,8 @@ RSpec.describe PermitBlockStatus, type: :model do
 
   describe "validations" do
     it { should validate_presence_of(:requirement_block_id) }
-    it { should validate_presence_of(:collaboration_type) }
 
-    it "enforces uniqueness of permit_application_id scoped to requirement_block_id and collaboration_type" do
+    it "enforces one status per side of a requirement block" do
       block_id = SecureRandom.uuid
       permit_application = create(:permit_application)
       create(
@@ -47,9 +46,17 @@ RSpec.describe PermitBlockStatus, type: :model do
           requirement_block_id: block_id,
           collaboration_type: :submission
         )
+      review =
+        build(
+          :permit_block_status,
+          permit_application: permit_application,
+          requirement_block_id: block_id,
+          collaboration_type: :review
+        )
 
       expect(dup).not_to be_valid
       expect(dup.errors.of_kind?(:permit_application_id, :taken)).to be(true)
+      expect(review).to be_valid
     end
   end
 
@@ -142,8 +149,17 @@ RSpec.describe PermitBlockStatus, type: :model do
   end
 
   describe "#users_to_notify_status_ready" do
-    it "includes submitter for submission collaboration type" do
+    it "notifies the submitter for a submission status" do
       permit_application = create(:permit_application)
+      contact = create(:user, :submitter)
+      membership =
+        create(
+          :project_membership,
+          permit_project: permit_application.permit_project,
+          user: contact
+        )
+      permit_application.update!(submitter: contact)
+      expect(permit_application.submitter_membership).to eq(membership)
       status =
         build(
           :permit_block_status,
@@ -151,24 +167,18 @@ RSpec.describe PermitBlockStatus, type: :model do
           collaboration_type: :submission
         )
 
-      allow(permit_application).to receive(
-        :users_by_collaboration_options
-      ).and_return([])
-
-      expect(status.users_to_notify_status_ready).to eq(
-        [permit_application.submitter]
-      )
+      expect(status.users_to_notify_status_ready).to eq([contact])
     end
 
-    it "includes delegatees and relevant assignees" do
+    it "notifies review delegatees and the assignee for that block" do
       permit_application = create(:permit_application)
       rb_id = SecureRandom.uuid
       status =
         build(
           :permit_block_status,
           permit_application: permit_application,
-          collaboration_type: :review,
-          requirement_block_id: rb_id
+          requirement_block_id: rb_id,
+          collaboration_type: :review
         )
 
       delegatee_users = [create(:user)]
@@ -189,7 +199,7 @@ RSpec.describe PermitBlockStatus, type: :model do
       ).and_return(assignee_users)
 
       expect(status.users_to_notify_status_ready).to match_array(
-        delegatee_users + assignee_users
+        [*delegatee_users, *assignee_users]
       )
     end
   end
@@ -227,7 +237,7 @@ RSpec.describe PermitBlockStatus, type: :model do
 
     describe "#send_status_ready_email" do
       it "emails users with email collaboration notifications enabled" do
-        status = build(:permit_block_status, collaboration_type: :submission)
+        status = build(:permit_block_status)
         allow(status).to receive(:saved_change_to_status?).and_return(true)
         allow(status).to receive(:ready?).and_return(true)
 
@@ -253,9 +263,7 @@ RSpec.describe PermitBlockStatus, type: :model do
         ).with(
           kind_of(ActiveSupport::Duration),
           "permit_block_status_ready_summary:" \
-            "#{status.permit_application_id}:" \
-            "#{status.collaboration_type}:" \
-            "#{user_enabled.id}",
+            "#{status.permit_application_id}:#{status.collaboration_type}:#{user_enabled.id}",
           kind_of(Integer),
           "NotificationAggregators::PermitBlockReadySummary",
           {
@@ -271,7 +279,7 @@ RSpec.describe PermitBlockStatus, type: :model do
 
     describe "#send_status_change_websocket" do
       it "pushes websocket updates only when status changed" do
-        status = build(:permit_block_status, collaboration_type: :submission)
+        status = build(:permit_block_status)
         allow(status).to receive(:saved_change_to_status?).and_return(true)
 
         u1 = create(:user)

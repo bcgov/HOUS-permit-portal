@@ -18,7 +18,8 @@ RSpec.describe PromoteUser do
         "User",
         jurisdiction_ids: ["j1"],
         id: "e1",
-        permit_projects: PermitProject.none
+        permit_projects: PermitProject.none,
+        project_memberships: ProjectMembership.none
       )
     invited_user =
       instance_double("User", jurisdiction_ids: ["j2"], submitter?: false)
@@ -80,7 +81,8 @@ RSpec.describe PromoteUser do
         jurisdiction_ids: [],
         collaborations: existing_collabs,
         id: "e1",
-        permit_projects: PermitProject.none
+        permit_projects: PermitProject.none,
+        project_memberships: ProjectMembership.none
       )
     invited_user =
       instance_double(
@@ -103,7 +105,7 @@ RSpec.describe PromoteUser do
     invited_user_collab =
       instance_double(
         "Collaborator",
-        collaboratorable: "x",
+        jurisdiction_id: "j1",
         permit_collaborations: [],
         update: true
       )
@@ -111,7 +113,7 @@ RSpec.describe PromoteUser do
       [invited_user_collab]
     )
     allow(existing_collabs).to receive(:find_by).with(
-      collaboratorable: "x"
+      jurisdiction_id: "j1"
     ).and_return(nil)
 
     described_class.new(
@@ -139,6 +141,110 @@ RSpec.describe PromoteUser do
 
     expect(overheating_code.reload.creator_id).to eq(existing_user.id)
     expect(User.exists?(invited_user.id)).to be false
-    expect(live_project.reload).to be_discarded
+    expect(PermitProject.unscoped.exists?(live_project.id)).to be false
+  end
+
+  def promote(existing_user)
+    invited_user = create(:user, :review_manager, confirmed: false)
+    described_class.new(existing_user:, invited_user:).call
+  end
+
+  it "keeps a live project another full member still holds" do
+    allow(ActiveRecord::Base).to receive(:transaction).and_call_original
+
+    existing_user = create(:user, :submitter)
+    project = create(:permit_project, owner: existing_user)
+    other = create(:project_membership, permit_project: project, access: :full)
+    membership = project.project_memberships.find_by!(user: existing_user)
+    membership.update!(access: :limited)
+    application =
+      create(
+        :permit_application,
+        :newly_submitted,
+        permit_project: project,
+        submitter: existing_user
+      )
+    grant =
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: application
+      )
+
+    promote(existing_user)
+
+    project.reload
+    application.reload
+    expect(project).not_to be_discarded
+    expect(project.owner_id).to be_nil
+    expect(project.first_name_snapshot).to eq(existing_user.first_name)
+    expect(ProjectMembership.exists?(membership.id)).to be false
+    expect(ProjectMembership.exists?(other.id)).to be true
+    expect(ProjectGrant.exists?(grant.id)).to be false
+    expect(application.submitter_membership_id).to be_nil
+    expect(application).not_to be_discarded
+  end
+
+  it "removes a full membership on someone else's live project" do
+    allow(ActiveRecord::Base).to receive(:transaction).and_call_original
+
+    existing_user = create(:user, :submitter)
+    creator = create(:user, :submitter)
+    project = create(:permit_project, owner: creator)
+    membership =
+      create(
+        :project_membership,
+        permit_project: project,
+        user: existing_user,
+        access: :full
+      )
+
+    promote(existing_user)
+
+    expect(project.reload.owner_id).to eq(creator.id)
+    expect(project).not_to be_discarded
+    expect(ProjectMembership.exists?(membership.id)).to be false
+    expect(project.project_memberships.find_by(user: creator)).to be_present
+  end
+
+  it "abandons a live project when the promoted user is the last full member" do
+    allow(ActiveRecord::Base).to receive(:transaction).and_call_original
+
+    existing_user = create(:user, :submitter)
+    project = create(:permit_project, owner: existing_user)
+    create(
+      :permit_application,
+      :newly_submitted,
+      permit_project: project,
+      submitter: existing_user
+    )
+
+    promote(existing_user)
+
+    project = PermitProject.unscoped.find(project.id)
+    expect(project).to be_discarded
+    expect(project.orphaned_at).to be_present
+  end
+
+  it "keeps a sandbox project they own" do
+    allow(ActiveRecord::Base).to receive(:transaction).and_call_original
+
+    existing_user = create(:user, :submitter)
+    jurisdiction = create(:sub_district)
+    sandbox = jurisdiction.sandboxes.published.first
+    project =
+      create(
+        :permit_project,
+        owner: existing_user,
+        jurisdiction: jurisdiction,
+        sandbox: sandbox
+      )
+    membership = project.project_memberships.find_by!(user: existing_user)
+
+    promote(existing_user)
+
+    expect(project.reload).not_to be_discarded
+    expect(project.owner_id).to eq(existing_user.id)
+    expect(ProjectMembership.exists?(membership.id)).to be true
   end
 end

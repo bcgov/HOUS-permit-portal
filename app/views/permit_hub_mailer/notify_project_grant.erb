@@ -1,0 +1,82 @@
+<%
+  block_grant = @project_grant.block?
+  heading = block_grant ? "You've been given a requirement to edit" : "You've been given access to a permit application"
+  intro =
+    if block_grant
+      "You've been given a requirement on a permit application to view and edit in Building Permit Hub."
+    else
+      "You've been given access to a permit application to view and edit in Building Permit Hub."
+    end
+  application_url = @permit_application.submitter_frontend_url
+%>
+<!-- START MAIN CONTENT AREA -->
+<tr>
+  <td class="wrapper" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; box-sizing: border-box; padding: 56px 32px;" valign="top">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%;" width="100%">
+      <tr>
+        <!-- START CONTENT ROW -->
+        <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+          <h1 style="color: #292929; font-family: 'Open Sans', sans-serif; font-weight: 700; line-height: 1.4; text-align: left; font-size: 28px; margin-top: 0; margin-bottom: 32px;">
+            <%= heading %>
+          </h1>
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            <%= intro %>
+          </p>
+
+          <table class="basic-table" role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; width: 100%; background: #f2f2f2; border: 1px solid #d9d9d9; margin-bottom: 32px;" width="100%">
+            <tr>
+              <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top;" valign="top">
+                <dl class="table-like" style="margin: 0;">
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Project</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @permit_project.title %></dd>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Application #</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;">
+                    <a href="<%= application_url %>" style="color: #1a5a96; text-decoration: underline;"><%= @permit_application.number %></a>
+                  </dd>
+
+                  <% if @requirement_block_name.present? %>
+                    <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Requirement block</dt>
+                    <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 1px solid #d9d9d9;"><%= @requirement_block_name %></dd>
+                  <% end %>
+
+                  <dt style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; font-size: 11px; text-transform: uppercase; font-weight: bold; padding-top: 10px; padding-bottom: 8px;">Permit type</dt>
+                  <dd style="box-sizing: border-box; padding-left: 16px; padding-right: 16px; margin: 0; padding-bottom: 10px; border-bottom: 0;"><%= @permit_application.template_nickname %></dd>
+
+                </dl>
+              </td>
+            </tr>
+          </table>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 16px;">
+            To view the application, select the button below:
+          </p>
+
+          <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: 100%; box-sizing: border-box; width: 100%; margin: 12px auto;" width="100%">
+            <tbody>
+            <tr>
+              <td align="left" style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; padding-bottom: 15px;" valign="top">
+                <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="border-collapse: separate; mso-table-lspace: 0pt; mso-table-rspace: 0pt; min-width: auto; width: auto;">
+                  <tbody>
+                  <tr>
+                    <td style="font-family: 'Open Sans', sans-serif; font-size: 16px; vertical-align: top; border-radius: 5px; text-align: center; background-color: transparent;" valign="top" align="center" bgcolor="transparent">
+                      <a href="<%= application_url %>" target="_blank" style="border: solid 1px #003366; border-radius: 4px; box-sizing: border-box; cursor: pointer; display: inline-block; font-size: 16px; font-weight: normal; line-height: 26px; margin: 0; padding: 6px 12px; text-decoration: none; background-color: #003366; border-color: #003366; color: #ffffff;">View application</a></td>
+                  </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+
+          <p style="font-family: 'Open Sans', sans-serif; font-size: 16px; line-height: 26px; font-weight: normal; margin: 0; margin-bottom: 24px;">
+            The Building Permit Hub Team
+          </p>
+        </td>
+        <!-- END OF CONTENT ROW -->
+      </tr>
+    </table>
+  </td>
+</tr>
+<!-- END MAIN CONTENT AREA -->

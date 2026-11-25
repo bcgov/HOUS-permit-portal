@@ -313,7 +313,7 @@ export const RevisionSideBar = observer(
             {...stickyBelowNavBar(`${topHeight ?? 0}px`)}
             bottom="0"
             height={`calc(100vh - ${topHeight ?? 0}px - var(--app-navbar-offset))`}
-            float="left"
+            flexShrink={0}
             id="permit-revision-sidebar"
             bg={panelBg}
             variant="unstyled"
@@ -502,7 +502,9 @@ export const RevisionSideBar = observer(
             useFieldArrayMethods={useFieldArrayMethods}
             onSave={handleSubmit(onSaveRevision)}
             disableInput={forSubmitter || isViewingPastRequests || permitApplication.isRevisionsRequested}
-            allowFulfillmentUpload={forSubmitter && !isViewingPastRequests}
+            allowFulfillmentUpload={
+              forSubmitter && !isViewingPastRequests && !!permitApplication.currentUserAccess?.editApplication
+            }
             permitApplication={permitApplication}
           />
         )}

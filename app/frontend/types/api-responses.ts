@@ -8,7 +8,7 @@ import { IRequirementBlock } from "../models/requirement-block"
 import { IRequirementQuestion } from "../models/requirement-question"
 import { IRequirementTemplate } from "../models/requirement-template"
 import { IUser } from "../models/user"
-import { INotification, IOption, ITemplateVersionDiff } from "./types"
+import { INotification, IOption, IProjectPerson, ITemplateVersionDiff } from "./types"
 
 export interface IApiResponse<TData, TMeta> {
   data: TData
@@ -38,6 +38,14 @@ export interface IJurisdictionPermitApplicationResponse extends IApiResponse<IPe
 export interface IProjectMeetingResponse extends IApiResponse<IProjectMeeting[], IPageMeta> {}
 
 export interface INoteResponse extends IApiResponse<INote[], IPageMeta> {}
+
+export interface IProjectPeopleMeta extends IPageMeta {
+  roleTags?: string[]
+  primaryContactName?: string | null
+  alternateContactNames?: string[]
+}
+
+export interface IProjectMembershipsResponse extends IApiResponse<IProjectPerson[], IProjectPeopleMeta> {}
 
 export interface IJurisdictionProjectMeetingMeta extends IPageMeta {
   statusCounts?: Record<string, number>

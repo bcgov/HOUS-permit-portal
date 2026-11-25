@@ -3,7 +3,6 @@ class PermitApplication < ApplicationRecord
                nickname
                full_address
                template_tags
-               submitter
                status
                review_delegatee_name
              ],
@@ -24,19 +23,22 @@ class PermitApplication < ApplicationRecord
   SEARCH_INCLUDES = [
     :submission_versions,
     :step_code,
-    :submitter,
     :created_by,
-    { permit_collaborations: :collaborator }
+    { permit_collaborations: :collaborator, submitter_membership: :user }
   ]
 
-  belongs_to :submitter, class_name: "User", optional: true
   belongs_to :created_by, polymorphic: true, optional: true
   public_recordable user_association: :submitter
   belongs_to :template_version
   belongs_to :acknowledged_customization_change,
              class_name: "CustomizationChange",
              optional: true
-  belongs_to :permit_project, optional: true, touch: true
+  belongs_to :permit_project, touch: true
+  # The application contact.
+  belongs_to :submitter_membership,
+             class_name: "ProjectMembership",
+             optional: true,
+             inverse_of: :permit_applications
 
   has_one :requirement_template, through: :template_version
 
@@ -48,6 +50,7 @@ class PermitApplication < ApplicationRecord
   attr_accessor :front_end_form_update
 
   has_many :submission_versions, dependent: :destroy
+  has_many :project_grants, dependent: :destroy
   has_many :notes, as: :noteable, dependent: :destroy
   has_many :permit_collaborations,
            -> { where(discarded_at: nil) },
@@ -79,7 +82,6 @@ class PermitApplication < ApplicationRecord
           )
         end
 
-  validate :jurisdiction_or_permit_project_present
   validate :jurisdiction_has_matching_submission_contact
   validates :number, presence: true
   validates :reference_number, length: { maximum: 300 }, allow_nil: true
@@ -89,13 +91,13 @@ class PermitApplication < ApplicationRecord
             },
             allow_nil: true
   validate :submission_versions_match_status
+  validate :submitter_is_active_member
 
   delegate :published_template_version, to: :template_version
 
   before_validation :assign_unique_number, on: :create
   before_validation :set_template_version, on: :create
   before_validation :populate_base_form_data, on: :create
-  before_validation :assign_created_by_from_submitter, on: :create
   before_create :acknowledge_current_customization_change
   before_save :take_form_customizations_snapshot_if_submitted
 
@@ -109,8 +111,6 @@ class PermitApplication < ApplicationRecord
                if: :status_changed_to_intake?
   after_commit :mark_permit_project_as_unviewed, if: :status_changed_to_intake?
   after_commit :enqueue_permit_project_if_draft, if: :status_changed_to_intake?
-  scope :with_submitter_role,
-        -> { joins(:submitter).where(users: { role: "submitter" }) }
 
   scope :unviewed,
         -> do
@@ -121,8 +121,59 @@ class PermitApplication < ApplicationRecord
 
   COMPLETION_SECTION_KEY = "section-completion-key"
 
+  # created_by is who created this application (a User or a Jurisdiction).
+  # submitter is a different field and is not an access check.
+  def creator
+    created_by
+  end
+
+  def creator_id
+    created_by_id
+  end
+
   def public_record?
     !new_draft?
+  end
+
+  # The project carries the retention clock. A blank contact is not abandonment.
+  # Rows already stamped orphaned_at stay frozen.
+  def orphaned?
+    orphaned_at.present? || permit_project&.orphaned? || false
+  end
+
+  # The membership's user, or the snapshot left when that account is gone.
+  def submitter
+    user = submitter_membership&.user
+    return user if user.present?
+    return nil unless orphaned? || submitter_name_snapshot?
+
+    record_id = id
+    User
+      .new(
+        omniauth_username:
+          omniauth_username_snapshot || I18n.t("misc.removed_placeholder"),
+        first_name: first_name_snapshot || I18n.t("misc.removed_placeholder"),
+        last_name: last_name_snapshot || I18n.t("misc.removed_placeholder"),
+        discarded_at: Time.current
+      )
+      .tap do |snapshot|
+        snapshot.define_singleton_method(:id) { "deleted-#{record_id}" }
+        snapshot.readonly!
+      end
+  end
+
+  def submitter_id
+    submitter_membership&.user_id
+  end
+
+  def submitter_name_snapshot?
+    omniauth_username_snapshot.present? || first_name_snapshot.present? ||
+      last_name_snapshot.present?
+  end
+
+  def submitter=(user)
+    self.submitter_membership = membership_for_submitter(user)
+    @submitter_without_membership = user.present? && submitter_membership.nil?
   end
 
   # Permit-scoped stage pin: which checklist counts for this permit's completion /
@@ -189,14 +240,12 @@ class PermitApplication < ApplicationRecord
   end
 
   def users_by_collaboration_options(
-    collaboration_type:,
     collaborator_type: nil,
     assigned_requirement_block_id: nil
   )
     base_where_clause = {
       collaborations: {
         permit_collaborations: {
-          collaboration_type: collaboration_type,
           permit_application_id: id,
           discarded_at: nil
         }
@@ -220,7 +269,7 @@ class PermitApplication < ApplicationRecord
   def permit_collaborations(user = nil)
     base = association(:permit_collaborations).reader
 
-    return base if user.nil? || submitter_id == user.id
+    return base if user.nil? || project_access_for(user).view_application?
 
     if base.loaded?
       base.select { |pc| pc.collaborator&.user_id == user.id }
@@ -300,26 +349,18 @@ class PermitApplication < ApplicationRecord
       full_address: full_address,
       template_tags: template_tag_list&.join(", "),
       template_nickname: template_nickname,
-      submitter: "#{submitter.name} #{submitter.email}",
       submitted_at: submitted_at,
       resubmitted_at: resubmitted_at,
       viewed_at: viewed_at,
       status: status,
       jurisdiction_id: jurisdiction&.id,
-      submitter_id: submitter.id,
       template_version_id: template_version.id,
       requirement_template_id: template_version.requirement_template.id,
       created_at: created_at,
       updated_at: updated_at,
-      user_ids_with_submission_edit_permissions:
-        [submitter.id] +
-          users_by_collaboration_options(collaboration_type: :submission).pluck(
-            :id
-          ),
       review_delegatee_name: review_delegatee_name,
       review_collaborator_user_ids:
         permit_collaborations
-          .review
           .joins(:collaborator)
           .pluck("collaborators.user_id")
           .uniq,
@@ -327,53 +368,67 @@ class PermitApplication < ApplicationRecord
       sandbox_id: sandbox_id,
       permit_project_id: permit_project_id,
       project_number: permit_project&.number,
-      submission_delegatee_id: submission_delegatee&.id,
       discarded: discarded?,
       queue_time_seconds: queue_time_seconds,
       queue_clock_started_at: queue_clock_started_at&.to_i
     }
   end
 
-  def submission_delegatee
-    collaborators.where(
-      permit_collaborations: {
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      }
-    ).first
-  end
-
-  def collaborator?(user_id:, collaboration_type:, collaborator_type: nil)
-    users_by_collaboration_options(
-      collaboration_type:,
-      collaborator_type:
-    ).exists?(id: user_id)
-  end
-
   def has_collaborator?
     collaborators.any?
   end
 
+  # :all is Full or Expanded on this project. A list is a Limited member's
+  # block grants on this application. nil is everyone else. The form, save,
+  # supporting-file, and revision-request readers already honor those three.
   def submission_requirement_block_edit_permissions(user_id:)
-    if submitter_id != user_id &&
-         !collaborator?(user_id:, collaboration_type: :submission)
-      return nil
-    end
+    user = User.find_by(id: user_id)
+    return nil unless user
+    return :all if project_access_for(user).edit_application?
+    return :all if application_granted_to?(user)
 
-    if submitter_id == user_id ||
-         collaborator?(
-           user_id:,
-           collaboration_type: :submission,
-           collaborator_type: :delegatee
-         )
-      return :all
-    end
+    block_grant_ids_for(user).presence
+  end
 
-    permit_collaborations
-      .joins(:collaborator)
-      .where(collaboration_type: :submission, collaborators: { user_id: })
-      .map(&:assigned_requirement_block_id)
-      .compact
+  def block_granted_to?(user)
+    block_grant_ids_for(user).any?
+  end
+
+  def application_granted_to?(user)
+    return false unless user
+
+    project_grants
+      .application
+      .authorizing
+      .where(project_memberships: { user_id: user.id })
+      .exists?
+  end
+
+  def block_grant_ids_for(user)
+    return [] unless user
+
+    project_grants
+      .block
+      .authorizing
+      .where(project_memberships: { user_id: user.id })
+      .pluck(:requirement_block_id)
+  end
+
+  def block_id_from_data_key(data_key)
+    data_key.to_s[/RB([a-zA-Z0-9\-]+)/, 1]
+  end
+
+  # A new supporting file has to name a granted block. :all keeps every file.
+  def supporting_documents_within_block_grant?(user, attributes)
+    permissions =
+      submission_requirement_block_edit_permissions(user_id: user&.id)
+    return true if permissions == :all
+    return false unless permissions.is_a?(Array)
+
+    Array(attributes).all? do |attrs|
+      key = attrs[:data_key] || attrs["data_key"]
+      permissions.include?(block_id_from_data_key(key))
+    end
   end
 
   def user_can_edit_block?(user_id:, requirement_block_id:)
@@ -463,15 +518,6 @@ class PermitApplication < ApplicationRecord
 
   def notifiable_users
     relevant_collaborators = [submitter]
-    designated_submitter =
-      users_by_collaboration_options(
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      ).first
-
-    if designated_submitter.present?
-      relevant_collaborators << designated_submitter
-    end
 
     if submitted?
       relevant_collaborators =
@@ -787,7 +833,6 @@ class PermitApplication < ApplicationRecord
     aggregates =
       PermitApplication
         .joins(template_version: :requirement_template)
-        .joins(:submitter)
         .joins(
           "LEFT OUTER JOIN permit_projects ON permit_projects.id = permit_applications.permit_project_id"
         )
@@ -800,7 +845,6 @@ class PermitApplication < ApplicationRecord
         .joins(
           "LEFT JOIN (#{sv_max.to_sql}) sv_max ON sv_max.permit_application_id = permit_applications.id"
         )
-        .where(users: { role: "submitter" })
         .where(permit_projects: { sandbox_id: nil })
         .group(
           "jurisdictions.id",
@@ -850,10 +894,7 @@ class PermitApplication < ApplicationRecord
   end
 
   def review_delegatee_name
-    users_by_collaboration_options(
-      collaboration_type: :review,
-      collaborator_type: :delegatee
-    ).first&.name
+    users_by_collaboration_options(collaborator_type: :delegatee).first&.name
   end
 
   def jurisdiction_name
@@ -890,26 +931,88 @@ class PermitApplication < ApplicationRecord
     )
   end
 
+  # A member who adds a draft is its creator and its submitter. Anyone else
+  # adds it as the jurisdiction, with the primary contact as submitter.
   def assign_creation_actors(user)
     project = permit_project
     return unless project && user
 
-    if project.owner_id == user.id
+    membership = project.project_memberships.find_by(user_id: user.id)
+    if membership&.active?
       self.created_by = user
-      self.submitter = user
+      self.submitter_membership = membership
     else
       self.created_by = project.jurisdiction
-      self.submitter = project.owner
+      self.submitter_membership = primary_contact_membership(project)
     end
+  end
+
+  # Who is told about this application. The submitter membership is the contact.
+  def application_message_recipient
+    submitter
+  end
+
+  # The application contact and the user who submitted the latest version.
+  # One entry each.
+  def application_message_recipients
+    [application_message_recipient, latest_submission_submitter].compact.uniq
   end
 
   private
 
-  # ponytail: assign_creation_actors sets a jurisdiction when a reviewer creates
-  # the draft. Anything else is created by the submitter.
-  # association reader skips PublicRecordable's unsaved readonly snapshot user.
-  def assign_created_by_from_submitter
-    self.created_by ||= association(:submitter).reader
+  def latest_submission_submitter
+    submission_versions
+      .where.not(submitted_by_id: nil)
+      .order(created_at: :desc, id: :desc)
+      .first
+      &.submitted_by
+  end
+
+  # The project's own sandbox, so a model check never depends on the request.
+  def project_access_for(user)
+    ProjectAccess.new(user, permit_project&.sandbox, permit_project)
+  end
+
+  def primary_contact_membership(project)
+    project
+      .project_memberships
+      .where.not(user_id: nil)
+      .find_by(contact_designation: :primary)
+  end
+
+  def membership_for_submitter(user)
+    return if user.blank? || permit_project.blank?
+
+    if permit_project.persisted?
+      permit_project.project_memberships.find_by(user_id: user.id)
+    else
+      permit_project.project_memberships.find do |membership|
+        membership.user_id == user.id
+      end
+    end
+  end
+
+  def prevent_updates_if_orphaned
+    return unless orphaned?
+
+    allowed_keys = %w[orphaned_at updated_at submitter_membership_id]
+    return if (changes.keys - allowed_keys).empty?
+
+    errors.add(:base, "Cannot update an orphaned record")
+    throw(:abort)
+  end
+
+  # Orphaning clears the submitter. The membership rule applies only while one is set.
+  def submitter_is_active_member
+    if @submitter_without_membership
+      errors.add(:submitter, :inactive_member)
+      return
+    end
+    return unless permit_project&.persisted?
+    return if submitter_membership_id.blank?
+    return if submitter_membership&.active?
+
+    errors.add(:submitter, :inactive_member)
   end
 
   def update_collaboration_assignments
@@ -1110,28 +1213,6 @@ class PermitApplication < ApplicationRecord
   # TODO: Also enqueue project when a meeting request is made
   def enqueue_permit_project_if_draft
     permit_project&.enqueue! if permit_project&.draft?
-  end
-
-  def jurisdiction_or_permit_project_present
-    if jurisdiction.nil? && permit_project.nil?
-      errors.add(
-        :jurisdiction,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.jurisdiction.no_jurisdiction"
-        )
-      )
-    end
-  end
-
-  def submitter_must_have_role
-    unless submitter&.submitter?
-      errors.add(
-        :submitter,
-        I18n.t(
-          "activerecord.errors.models.permit_application.attributes.submitter.incorrect_role"
-        )
-      )
-    end
   end
 
   def jurisdiction_has_matching_submission_contact

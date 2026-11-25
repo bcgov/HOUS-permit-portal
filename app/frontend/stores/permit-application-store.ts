@@ -42,7 +42,7 @@ export const PermitApplicationStoreModel = types
       templateVersionIdFilter: types.maybeNull(types.string),
       requirementTemplateIdFilter: types.optional(types.array(types.string), []),
       hasCollaboratorFilter: types.maybeNull(types.boolean),
-      submissionDelagateeIdFilter: types.optional(types.array(types.string), []),
+      accessibleOnly: types.optional(types.boolean, false),
     }),
     createSearchModel<EProjectPermitApplicationSortFields | EPermitApplicationSortFields>(
       "searchPermitApplications",
@@ -113,6 +113,10 @@ export const PermitApplicationStoreModel = types
       setQueryParam("hasCollaborator", value.toString())
       self.hasCollaboratorFilter = value
     },
+    setAccessibleOnly(value: boolean) {
+      setQueryParam("accessibleOnly", value ? "true" : "")
+      self.accessibleOnly = value
+    },
     resetCurrentPermitApplication() {
       self.currentPermitApplication = null
       self.rootStore.stepCodeStore.setCurrentStepCode(null)
@@ -137,14 +141,17 @@ export const PermitApplicationStoreModel = types
           )
       }
 
-      return R.mergeRight(pad, {
-        sandbox: pad.sandbox?.id,
-        jurisdiction: pad.jurisdiction?.id,
-        submitter: pad.submitter?.id,
-        templateVersion: pad.templateVersion?.id,
-        publishedTemplateVersion: pad.publishedTemplateVersion?.id,
-        stepCode: pad.stepCode?.id,
-      })
+      return R.mergeRight(
+        pad,
+        R.reject(R.isNil, {
+          sandbox: pad.sandbox?.id,
+          jurisdiction: pad.jurisdiction?.id,
+          submitter: pad.submitter?.id,
+          templateVersion: pad.templateVersion?.id,
+          publishedTemplateVersion: pad.publishedTemplateVersion?.id,
+          stepCode: pad.stepCode?.id,
+        })
+      )
     },
     __beforeMergeUpdateAll(permitApplicationsData) {
       //find all unique jurisdictions
@@ -229,12 +236,6 @@ export const PermitApplicationStoreModel = types
       // @ts-ignore
       self.requirementTemplateIdFilter = requirementTemplateIds
     },
-    setSubmissionCollaboratorIdFilter(submissionDelegateeId: string[] | undefined) {
-      if (!submissionDelegateeId) return
-      setQueryParam("submissionDelagateeId", submissionDelegateeId)
-      // @ts-ignore
-      self.submissionDelagateeIdFilter = submissionDelegateeId
-    },
     searchPermitApplications: flow(function* (opts?: { reset?: boolean; page?: number; countPerPage?: number }) {
       if (opts?.reset) {
         self.resetPages()
@@ -247,12 +248,12 @@ export const PermitApplicationStoreModel = types
         page: opts?.page ?? self.currentPage,
         perPage: opts?.countPerPage ?? self.countPerPage,
         showArchived: self.showArchived,
+        accessibleOnly: self.accessibleOnly,
         filters: {
           status: self.statusFilter,
           templateVersionId: self.templateVersionIdFilter,
           requirementTemplateId,
           hasCollaborator: self.hasCollaboratorFilter,
-          submissionDelegateeId: self.submissionDelagateeIdFilter,
         },
       } as TSearchParams<EPermitApplicationSortFields, IPermitApplicationSearchFilters>
 
@@ -292,7 +293,7 @@ export const PermitApplicationStoreModel = types
         pid: overrides.pid || null,
         tags: overrides.tags || [],
         status: overrides.status || EPermitApplicationStatus.ephemeral,
-        submitter: overrides.submitter || self.rootStore.userStore.currentUser?.id || null,
+        submitter: overrides.submitter || null,
         jurisdiction: overrides.jurisdiction || null,
         templateVersion: overrides.templateVersion || templateVersion.id,
         publishedTemplateVersion: overrides.publishedTemplateVersion || templateVersion.id,
@@ -390,13 +391,13 @@ export const PermitApplicationStoreModel = types
       const templateVersionIdFilter = queryParams.get("templateVersionId")
       const requirementTemplateIdFilter = queryParams.get("requirementTemplateId")?.split(",")
       const hasCollaboratorFilter = queryParams.get("hasCollaborator") === "true"
-      const submissionDelagateeIdFilter = queryParams.get("submissionDelagateeId")?.split(",")
+      const accessibleOnly = queryParams.get("accessibleOnly") === "true"
 
       self.setStatusFilter(statusFilter)
       self.setRequirementTemplateIdFilter(requirementTemplateIdFilter)
-      self.setSubmissionCollaboratorIdFilter(submissionDelagateeIdFilter)
       self.templateVersionIdFilter = templateVersionIdFilter
       self.hasCollaboratorFilter = hasCollaboratorFilter
+      self.accessibleOnly = accessibleOnly
     },
 
     processWebsocketChange: flow(function* (payload: IUserPushPayload) {
@@ -437,10 +438,10 @@ export const PermitApplicationStoreModel = types
       self.hasCollaboratorFilter = null
       self.templateVersionIdFilter = null
       self.requirementTemplateIdFilter = [] as any
-      self.submissionDelagateeIdFilter = [] as any
+      self.accessibleOnly = false
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href)
-        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator", "submissionDelagateeId"]
+        const staticParams = ["templateVersionId", "requirementTemplateId", "hasCollaborator", "accessibleOnly"]
         staticParams.forEach((param) => {
           url.searchParams.delete(param)
         })

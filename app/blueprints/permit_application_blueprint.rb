@@ -1,5 +1,7 @@
 class PermitApplicationBlueprint < Blueprinter::Base
-  view :base do
+  # A project member who cannot open the application (Limited) still sees it
+  # in the project list. No files, PDFs, or submission versions.
+  view :summary do
     identifier :id
     fields :nickname,
            :status,
@@ -10,16 +12,11 @@ class PermitApplicationBlueprint < Blueprinter::Base
            :full_address,
            :pid,
            :pin,
-           :zipfile_size,
-           :zipfile_name,
-           :zipfile_url,
            :reference_number,
            :submitted_at,
            :resubmitted_at,
            :revisions_requested_at,
            :issued_at,
-           :missing_pdfs,
-           :report_generation_issues,
            :template_nickname,
            :discarded_at,
            :days_in_queue,
@@ -30,14 +27,23 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :tags do |pa, _options|
       pa.template_tag_list
     end
-    association :submission_versions,
-                blueprint: SubmissionVersionBlueprint,
-                view: :base
     association :submitter, blueprint: UserBlueprint, view: :minimal
 
+    field :can_archive_draft do |pa, options|
+      options[:project_access]&.archive_draft?(pa) || false
+    end
+
+    # Project-wide view is Full or Expanded. A grant opens this one application.
+    field :can_open do |pa, options|
+      user = options[:current_user]
+      next false unless user
+      next true if options[:project_access]&.view_application?
+
+      pa.block_granted_to?(user) || pa.application_granted_to?(user)
+    end
+
     field :created_by do |pa, _options|
-      # ponytail: applications created before created_by was stored only have a submitter
-      creator = pa.created_by || pa.submitter
+      creator = pa.created_by
       next unless creator
 
       if creator.is_a?(User)
@@ -63,16 +69,33 @@ class PermitApplicationBlueprint < Blueprinter::Base
     field :allowed_manual_transitions, default: []
   end
 
+  view :base do
+    include_view :summary
+    fields :zipfile_size,
+           :zipfile_name,
+           :zipfile_url,
+           :missing_pdfs,
+           :report_generation_issues
+
+    association :submission_versions,
+                blueprint: SubmissionVersionBlueprint,
+                view: :base
+  end
+
   view :project_base do
     include_view :base
+
+    field :can_archive_draft do |pa, options|
+      options[:project_access]&.archive_draft?(pa) || false
+    end
+
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      collabs = pa.permit_collaborations(options[:current_user])
       if options[:current_user]&.review_staff?
-        collabs
+        pa.permit_collaborations(options[:current_user])
       else
-        collabs.select(&:submission?)
+        []
       end
     end
   end
@@ -84,7 +107,7 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, _options|
-      pa.permit_collaborations.where(collaboration_type: :review)
+      pa.permit_collaborations
     end
     association :submitter, blueprint: UserBlueprint, view: :minimal
   end
@@ -102,6 +125,24 @@ class PermitApplicationBlueprint < Blueprinter::Base
 
     field :is_fully_loaded do |_pa, _options|
       true
+    end
+
+    # The application contact who has not shared a project email or phone.
+    field :submitter_needs_shared_contact do |pa, options|
+      membership = pa.submitter_membership
+      user = options[:current_user]
+      membership.present? && user.present? && membership.user_id == user.id &&
+        membership.project_contact_email.blank? &&
+        membership.project_contact_phone.blank?
+    end
+
+    # The caller's project access. The UI hides what the API refuses.
+    field :current_user_access do |pa, options|
+      ProjectAccess.new(
+        options[:current_user],
+        pa.permit_project&.sandbox,
+        pa.permit_project
+      ).to_h
     end
 
     field :form_json do |pa, options|
@@ -150,14 +191,16 @@ class PermitApplicationBlueprint < Blueprinter::Base
     association :permit_collaborations,
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, options|
-      collabs = pa.permit_collaborations(options[:current_user])
       if options[:current_user]&.review_staff?
-        collabs
+        pa.permit_collaborations(options[:current_user])
       else
-        collabs.select(&:submission?)
+        []
       end
     end
-    association :permit_block_statuses, blueprint: PermitBlockStatusBlueprint
+    association :permit_block_statuses,
+                blueprint: PermitBlockStatusBlueprint do |pa|
+      pa.permit_block_statuses.submission
+    end
     association :submission_versions,
                 blueprint: SubmissionVersionBlueprint,
                 view: :extended
@@ -194,6 +237,10 @@ class PermitApplicationBlueprint < Blueprinter::Base
                 blueprint: PermitCollaborationBlueprint,
                 view: :base do |pa, _options|
       pa.permit_collaborations
+    end
+    association :permit_block_statuses,
+                blueprint: PermitBlockStatusBlueprint do |pa|
+      pa.permit_block_statuses.review
     end
     association :all_submission_version_completed_supporting_documents,
                 blueprint: SupportingDocumentBlueprint

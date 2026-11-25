@@ -40,10 +40,9 @@ export const ChecklistSideBar = observer(({ permitApplication, completedBlocks }
         borderRightColor="greys.grey02"
         width={"sidebar.width"}
         position="sticky"
+        flexShrink={0}
         {...stickyBelowNavBar(`${permitHeaderHeight}px`)}
-        bottom="0"
         height={`calc(100vh - ${permitHeaderHeight}px - var(--app-navbar-offset))`}
-        float="left"
         id="permit-checklist-sidebar"
       >
         <Box overflowY="auto">

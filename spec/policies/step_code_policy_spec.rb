@@ -70,168 +70,48 @@ RSpec.describe StepCodePolicy, type: :policy do
         policy_for(submitter, step_code).reassign_to?(permit_application)
       ).to be true
     end
-  end
 
-  context "for a submission delegatee collaborator" do
-    let(:collaborator_user) { create(:user, :submitter) }
-    let(:collaborator) do
+    it "lets an Expanded member attach a Step Code they created" do
+      expanded = create(:user, :submitter)
       create(
-        :collaborator,
-        user: collaborator_user,
-        collaboratorable: submitter
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: expanded,
+        access: :expanded
       )
-    end
-    let(:step_code) do
-      create(
-        :part_9_step_code,
-        permit_application: permit_application,
-        creator: submitter
-      )
-    end
-
-    before do
-      create(
-        :permit_collaboration,
-        permit_application: permit_application,
-        collaborator: collaborator,
-        collaboration_type: :submission,
-        collaborator_type: :delegatee
-      )
-    end
-
-    it "permits create" do
-      expect(policy_for(collaborator_user, step_code).create?).to be true
-    end
-
-    it "permits update" do
-      expect(policy_for(collaborator_user, step_code).update?).to be true
-    end
-
-    it "permits show" do
-      expect(policy_for(collaborator_user, step_code).show?).to be true
-    end
-
-    it "permits reassign_to the collaborating permit application" do
       standalone =
         create(
           :part_9_step_code,
           permit_application: nil,
-          creator: collaborator_user
+          creator: expanded,
+          sandbox: sandbox
         )
+
+      expect(policy_for(expanded, standalone).update?).to be true
       expect(
-        policy_for(collaborator_user, standalone).reassign_to?(
-          permit_application
-        )
+        policy_for(expanded, standalone).reassign_to?(permit_application)
       ).to be true
     end
-  end
 
-  context "for a submission assignee collaborator assigned to the Step Code block" do
-    let(:collaborator_user) { create(:user, :submitter) }
-    let(:collaborator) do
+    it "denies a Limited member from attaching a Step Code they created" do
+      standard = create(:user, :submitter)
       create(
-        :collaborator,
-        user: collaborator_user,
-        collaboratorable: submitter
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: standard,
+        access: :limited
       )
-    end
-    let(:step_code) do
-      create(
-        :part_9_step_code,
-        permit_application: permit_application,
-        creator: submitter
-      )
-    end
-
-    before do
-      create(
-        :permit_collaboration,
-        permit_application: permit_application,
-        collaborator: collaborator,
-        collaboration_type: :submission,
-        collaborator_type: :assignee,
-        assigned_requirement_block_id: step_code_block_id
-      )
-    end
-
-    it "permits create" do
-      expect(policy_for(collaborator_user, step_code).create?).to be true
-    end
-
-    it "permits update" do
-      expect(policy_for(collaborator_user, step_code).update?).to be true
-    end
-
-    it "permits show" do
-      expect(policy_for(collaborator_user, step_code).show?).to be true
-    end
-
-    it "permits reassign_to the collaborating permit application" do
       standalone =
         create(
           :part_9_step_code,
           permit_application: nil,
-          creator: collaborator_user
+          creator: standard,
+          sandbox: sandbox
         )
+
+      expect(policy_for(standard, standalone).update?).to be true
       expect(
-        policy_for(collaborator_user, standalone).reassign_to?(
-          permit_application
-        )
-      ).to be true
-    end
-  end
-
-  context "for a submission assignee collaborator assigned to a different block" do
-    let(:collaborator_user) { create(:user, :submitter) }
-    let(:collaborator) do
-      create(
-        :collaborator,
-        user: collaborator_user,
-        collaboratorable: submitter
-      )
-    end
-    let(:step_code) do
-      create(
-        :part_9_step_code,
-        permit_application: permit_application,
-        creator: submitter
-      )
-    end
-
-    before do
-      create(
-        :permit_collaboration,
-        permit_application: permit_application,
-        collaborator: collaborator,
-        collaboration_type: :submission,
-        collaborator_type: :assignee,
-        assigned_requirement_block_id: other_block_id
-      )
-    end
-
-    it "denies create" do
-      expect(policy_for(collaborator_user, step_code).create?).to be false
-    end
-
-    it "denies update" do
-      expect(policy_for(collaborator_user, step_code).update?).to be false
-    end
-
-    it "denies show" do
-      expect(policy_for(collaborator_user, step_code).show?).to be false
-    end
-
-    it "denies reassign_to" do
-      standalone =
-        create(
-          :part_9_step_code,
-          permit_application: nil,
-          creator: collaborator_user
-        )
-      expect(
-        policy_for(collaborator_user, standalone).reassign_to?(
-          permit_application
-        )
+        policy_for(standard, standalone).reassign_to?(permit_application)
       ).to be false
     end
   end
@@ -353,6 +233,255 @@ RSpec.describe StepCodePolicy, type: :policy do
 
       expect(resolved).to include(visible)
       expect(resolved).not_to include(hidden)
+    end
+  end
+
+  context "for a Limited member of the project" do
+    let(:standard) { create(:user, :submitter) }
+    let(:step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+    end
+
+    before do
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: standard,
+        access: :limited
+      )
+    end
+
+    it "denies show, update, create, destroy, and restore" do
+      expect(policy_for(standard, step_code).show?).to be false
+      expect(policy_for(standard, step_code).create?).to be false
+      expect(policy_for(standard, step_code).update?).to be false
+      expect(policy_for(standard, step_code).destroy?).to be false
+      expect(policy_for(standard, step_code).restore?).to be false
+    end
+
+    it "shows a Step Code for any block grant and edits it only for the energy block" do
+      membership = ProjectMembership.find_by!(user: standard)
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: permit_application,
+        requirement_block_id: other_block_id
+      )
+
+      expect(policy_for(standard, step_code).show?).to be true
+      expect(policy_for(standard, step_code).update?).to be false
+      expect(policy_for(standard, step_code).create?).to be false
+      expect(policy_for(standard, step_code).destroy?).to be false
+
+      create(
+        :project_grant,
+        project_membership: membership,
+        permit_application: permit_application,
+        requirement_block_id: step_code_block_id
+      )
+
+      expect(policy_for(standard, step_code).update?).to be true
+      expect(policy_for(standard, step_code).create?).to be true
+      expect(policy_for(standard, step_code).destroy?).to be false
+    end
+
+    it "lets an application grant edit Step Code without the energy block" do
+      permit_application.template_version.update!(
+        requirement_blocks_json: {
+          SecureRandom.uuid => {
+            "name" => "Site",
+            "requirements" => [
+              { "id" => SecureRandom.uuid, "input_type" => "text" }
+            ]
+          }
+        }
+      )
+      membership = ProjectMembership.find_by!(user: standard)
+      create(
+        :project_grant,
+        :application,
+        project_membership: membership,
+        permit_application: permit_application
+      )
+
+      expect(policy_for(standard, step_code).show?).to be true
+      expect(policy_for(standard, step_code).update?).to be true
+      expect(policy_for(standard, step_code).create?).to be true
+      expect(policy_for(standard, step_code).destroy?).to be false
+    end
+  end
+
+  context "for an Expanded member of the project" do
+    let(:expanded) { create(:user, :submitter) }
+    let(:step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+    end
+
+    before do
+      create(
+        :project_membership,
+        permit_project: permit_application.permit_project,
+        user: expanded,
+        access: :expanded
+      )
+    end
+
+    it "permits show, create, update, destroy, and restore" do
+      expect(policy_for(expanded, step_code).show?).to be true
+      expect(policy_for(expanded, step_code).create?).to be true
+      expect(policy_for(expanded, step_code).update?).to be true
+      expect(policy_for(expanded, step_code).destroy?).to be true
+      expect(policy_for(expanded, step_code).restore?).to be true
+    end
+  end
+
+  it "lets a Full member who did not create the step code delete it" do
+    member = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_application.permit_project,
+      user: member,
+      access: :full
+    )
+    step_code =
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+
+    expect(policy_for(member, step_code).show?).to be true
+    expect(policy_for(member, step_code).update?).to be true
+    expect(policy_for(member, step_code).destroy?).to be true
+    expect(policy_for(member, step_code).restore?).to be true
+  end
+
+  it "denies a Limited member from deleting a Step Code they created on the application" do
+    standard = create(:user, :submitter)
+    create(
+      :project_membership,
+      permit_project: permit_application.permit_project,
+      user: standard,
+      access: :limited
+    )
+    step_code =
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: standard
+      )
+
+    expect(policy_for(standard, step_code).destroy?).to be false
+    expect(policy_for(standard, step_code).restore?).to be false
+  end
+
+  it "denies a reviewer who is not a member from creating or editing an attached Step Code" do
+    reviewer = create(:user, :reviewer, jurisdiction: jurisdiction)
+    step_code =
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+
+    expect(policy_for(reviewer, step_code).create?).to be false
+    expect(policy_for(reviewer, step_code).update?).to be false
+    expect(policy_for(reviewer, step_code).destroy?).to be false
+  end
+
+  context "for a Full member of a different project" do
+    let(:outsider) { create(:user, :submitter) }
+    let(:other_application) do
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction,
+        sandbox: sandbox,
+        with_fake_plan_document: true
+      )
+    end
+    let(:step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: permit_application,
+        creator: submitter
+      )
+    end
+    let(:own_step_code) do
+      create(
+        :part_9_step_code,
+        permit_application: other_application,
+        creator: outsider
+      )
+    end
+
+    def expect_outsider_is_full
+      expect(
+        other_application.permit_project.project_memberships.find_by!(
+          user: outsider
+        )
+      ).to be_full
+    end
+
+    it "show? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(policy_for(outsider, own_step_code).show?).to be true
+      expect(policy_for(outsider, step_code).show?).to be false
+    end
+
+    it "update? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(policy_for(outsider, own_step_code).update?).to be true
+      expect(policy_for(outsider, step_code).update?).to be false
+    end
+
+    it "create? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(policy_for(outsider, own_step_code).create?).to be true
+      expect(policy_for(outsider, step_code).create?).to be false
+    end
+
+    it "destroy? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(policy_for(outsider, own_step_code).destroy?).to be true
+      expect(policy_for(outsider, step_code).destroy?).to be false
+    end
+
+    it "restore? denies a Full member of a different project" do
+      expect_outsider_is_full
+
+      expect(policy_for(outsider, own_step_code).restore?).to be true
+      expect(policy_for(outsider, step_code).restore?).to be false
+    end
+
+    it "reassign_to? denies a Full member of a different project" do
+      expect_outsider_is_full
+      standalone =
+        create(
+          :part_9_step_code,
+          permit_application: nil,
+          creator: outsider,
+          sandbox: sandbox
+        )
+
+      expect(
+        policy_for(outsider, standalone).reassign_to?(other_application)
+      ).to be true
+      expect(
+        policy_for(outsider, standalone).reassign_to?(permit_application)
+      ).to be false
     end
   end
 end

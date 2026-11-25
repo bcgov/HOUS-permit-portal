@@ -22,9 +22,11 @@ class OrphanCleanupJob
   private
 
   def cleanup_model(model, cutoff_time)
-    # Find orphaned records older than the cutoff time
-    # We use orphaned_at to determine when the record was orphaned
-    records_to_delete = model.where("orphaned_at < ?", cutoff_time)
+    # Account deletion discards the record and sets orphaned_at. Discard's
+    # default scope hides those rows, so include them. orphaned_at is the clock.
+    scope =
+      model.respond_to?(:with_discarded) ? model.with_discarded : model.all
+    records_to_delete = scope.where("orphaned_at < ?", cutoff_time)
 
     records_to_delete.find_each do |record|
       record.destroy!

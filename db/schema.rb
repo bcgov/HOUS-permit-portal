@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_23_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pgcrypto"
   enable_extension "plpgsql"
@@ -67,12 +67,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
 
   create_table "collaborators", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "user_id", null: false
-    t.string "collaboratorable_type", null: false
-    t.uuid "collaboratorable_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["collaboratorable_type", "collaboratorable_id"], name: "idx_on_collaboratorable_type_collaboratorable_id_aa1cca136d"
-    t.index ["collaboratorable_type", "collaboratorable_id"], name: "index_collaborators_on_collaboratorable"
+    t.uuid "jurisdiction_id", null: false
+    t.index ["jurisdiction_id"], name: "index_collaborators_on_jurisdiction_id"
+    t.index ["user_id", "jurisdiction_id"], name: "index_collaborators_on_user_id_and_jurisdiction_id", unique: true
     t.index ["user_id"], name: "index_collaborators_on_user_id"
   end
 
@@ -618,7 +617,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
 
   create_table "permit_applications", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.integer "status", default: 0
-    t.uuid "submitter_id"
     t.uuid "jurisdiction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -650,13 +648,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.string "created_by_type"
     t.uuid "created_by_id"
     t.uuid "acknowledged_customization_change_id"
+    t.uuid "submitter_membership_id"
     t.index ["acknowledged_customization_change_id"], name: "index_permit_applications_on_acked_change_id"
     t.index ["created_by_type", "created_by_id"], name: "index_permit_applications_on_created_by"
     t.index ["discarded_at"], name: "index_permit_applications_on_discarded_at"
     t.index ["jurisdiction_id"], name: "index_permit_applications_on_jurisdiction_id"
     t.index ["number"], name: "index_permit_applications_on_number", unique: true
     t.index ["permit_project_id"], name: "index_permit_applications_on_permit_project_id"
-    t.index ["submitter_id"], name: "index_permit_applications_on_submitter_id"
+    t.index ["submitter_membership_id"], name: "index_permit_applications_on_submitter_membership_id"
     t.index ["template_version_id"], name: "index_permit_applications_on_template_version_id"
   end
 
@@ -674,17 +673,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
   create_table "permit_collaborations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "collaborator_id", null: false
     t.uuid "permit_application_id", null: false
-    t.integer "collaboration_type", default: 0
     t.integer "collaborator_type", default: 0
     t.string "assigned_requirement_block_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "discarded_at"
-    t.index ["collaboration_type"], name: "index_permit_collaborations_on_collaboration_type"
     t.index ["collaborator_id"], name: "index_permit_collaborations_on_collaborator_id"
     t.index ["collaborator_type"], name: "index_permit_collaborations_on_collaborator_type"
     t.index ["discarded_at"], name: "index_permit_collaborations_on_discarded_at"
-    t.index ["permit_application_id", "collaborator_id", "collaboration_type", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
+    t.index ["permit_application_id", "collaborator_id", "collaborator_type", "assigned_requirement_block_id"], name: "index_permit_collaborations_on_unique_columns", unique: true, where: "(discarded_at IS NULL)"
     t.index ["permit_application_id"], name: "index_permit_collaborations_on_permit_application_id"
   end
 
@@ -829,6 +826,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.index ["scan_status"], name: "index_project_documents_on_scan_status"
   end
 
+  create_table "project_grants", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "project_membership_id", null: false
+    t.integer "kind", null: false
+    t.uuid "permit_application_id"
+    t.string "requirement_block_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permit_application_id"], name: "index_project_grants_on_permit_application_id"
+    t.index ["project_membership_id", "permit_application_id", "requirement_block_id"], name: "index_project_grants_one_block", unique: true, where: "(kind = 0)"
+    t.index ["project_membership_id", "permit_application_id"], name: "index_project_grants_one_application", unique: true, where: "(kind = 1)"
+    t.index ["project_membership_id"], name: "index_project_grants_on_project_membership_id"
+    t.index ["project_membership_id"], name: "index_project_grants_one_invite", unique: true, where: "(kind = 2)"
+  end
+
   create_table "project_meetings", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.uuid "permit_project_id", null: false
     t.uuid "requested_by_id", null: false
@@ -862,6 +873,31 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.index ["submitted_at"], name: "index_project_meetings_on_submitted_at"
     t.index ["viewed_at"], name: "index_project_meetings_on_viewed_at"
     t.index ["withdrawn_at"], name: "index_project_meetings_on_withdrawn_at"
+  end
+
+  create_table "project_memberships", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "user_id"
+    t.uuid "permit_project_id", null: false
+    t.integer "access", default: 0, null: false
+    t.integer "contact_designation", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "invited_email"
+    t.string "invited_first_name"
+    t.string "invited_last_name"
+    t.uuid "invited_by_id"
+    t.string "invitation_token"
+    t.datetime "invitation_sent_at"
+    t.datetime "invitation_accepted_at"
+    t.string "project_contact_email"
+    t.string "project_contact_phone"
+    t.index "permit_project_id, lower((invited_email)::text)", name: "index_project_memberships_unique_pending_email_per_project", unique: true, where: "(user_id IS NULL)"
+    t.index ["invitation_token"], name: "index_project_memberships_on_invitation_token", unique: true, where: "(invitation_token IS NOT NULL)"
+    t.index ["invited_by_id"], name: "index_project_memberships_on_invited_by_id"
+    t.index ["permit_project_id"], name: "index_project_memberships_on_permit_project_id"
+    t.index ["permit_project_id"], name: "index_project_memberships_one_primary_per_project", unique: true, where: "((contact_designation = 1) AND (user_id IS NOT NULL))"
+    t.index ["user_id", "permit_project_id"], name: "index_project_memberships_on_user_and_project", unique: true
+    t.index ["user_id"], name: "index_project_memberships_on_user_id"
   end
 
   create_table "release_notes", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1209,7 +1245,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
     t.datetime "package_ready_at"
     t.jsonb "zipfile_data"
     t.jsonb "report_snapshot"
+    t.uuid "submitted_by_id"
     t.index ["permit_application_id"], name: "index_submission_versions_on_permit_application_id"
+    t.index ["submitted_by_id"], name: "index_submission_versions_on_submitted_by_id"
   end
 
   create_table "supporting_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -1410,6 +1448,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
 
   add_foreign_key "allowlisted_jwts", "users", on_delete: :cascade
   add_foreign_key "api_key_expiration_notifications", "external_api_keys"
+  add_foreign_key "collaborators", "jurisdictions"
   add_foreign_key "collaborators", "users"
   add_foreign_key "customization_changes", "jurisdiction_template_version_customizations"
   add_foreign_key "design_documents", "pre_checks"
@@ -1451,8 +1490,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
   add_foreign_key "permit_applications", "customization_changes", column: "acknowledged_customization_change_id", on_delete: :nullify
   add_foreign_key "permit_applications", "jurisdictions"
   add_foreign_key "permit_applications", "permit_projects"
+  add_foreign_key "permit_applications", "project_memberships", column: "submitter_membership_id", on_delete: :nullify
   add_foreign_key "permit_applications", "template_versions"
-  add_foreign_key "permit_applications", "users", column: "submitter_id"
   add_foreign_key "permit_block_statuses", "permit_applications"
   add_foreign_key "permit_collaborations", "collaborators"
   add_foreign_key "permit_collaborations", "permit_applications"
@@ -1468,8 +1507,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
   add_foreign_key "pre_checks", "users", column: "creator_id"
   add_foreign_key "preferences", "users"
   add_foreign_key "project_documents", "permit_projects"
+  add_foreign_key "project_grants", "permit_applications"
+  add_foreign_key "project_grants", "project_memberships"
   add_foreign_key "project_meetings", "permit_projects"
   add_foreign_key "project_meetings", "users", column: "requested_by_id"
+  add_foreign_key "project_memberships", "permit_projects"
+  add_foreign_key "project_memberships", "users"
+  add_foreign_key "project_memberships", "users", column: "invited_by_id"
   add_foreign_key "requirement_documents", "requirement_blocks"
   add_foreign_key "requirement_template_sections", "requirement_template_sections", column: "copied_from_id"
   add_foreign_key "requirement_template_sections", "requirement_templates"
@@ -1493,6 +1537,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_19_201500) do
   add_foreign_key "step_codes", "users", column: "creator_id"
   add_foreign_key "submission_contacts", "jurisdictions"
   add_foreign_key "submission_versions", "permit_applications"
+  add_foreign_key "submission_versions", "users", column: "submitted_by_id", on_delete: :nullify
   add_foreign_key "supporting_documents", "permit_applications"
   add_foreign_key "supporting_documents", "revision_requests"
   add_foreign_key "supporting_documents", "submission_versions"

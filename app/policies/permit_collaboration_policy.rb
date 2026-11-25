@@ -2,21 +2,22 @@
 
 class PermitCollaborationPolicy < ApplicationPolicy
   def destroy?
-    if record.submission?
-      user == record.permit_application.submitter
-    elsif record.review?
-      user.review_staff? &&
-        user
-          .jurisdictions
-          .find_by(id: record.permit_application.jurisdiction_id)
-          .present?
-    else
-      false
-    end
+    review_staff_in_application_jurisdiction?
   end
 
+  # Same staff who can unassign. Does not cover resending a reviewer's
+  # account invitation (see UsersController#reinvite).
   def reinvite?
-    record.submission? && record.collaborator.user.submitter? &&
-      user == record.permit_application.submitter
+    review_staff_in_application_jurisdiction?
+  end
+
+  private
+
+  def review_staff_in_application_jurisdiction?
+    user.review_staff? &&
+      user
+        .jurisdictions
+        .find_by(id: record.permit_application.jurisdiction_id)
+        .present?
   end
 end

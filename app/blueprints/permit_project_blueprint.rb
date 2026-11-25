@@ -110,10 +110,18 @@ class PermitProjectBlueprint < Blueprinter::Base
       true
     end
 
-    association :recent_permit_applications,
-                blueprint: PermitApplicationBlueprint,
-                view: :project_base do |permit_project, options|
-      permit_project.recent_permit_applications(options[:current_user])
+    # The UI hides what the API refuses. The policies are the check.
+    field :current_user_access do |_permit_project, options|
+      options[:project_access]&.to_h
+    end
+
+    field :recent_permit_applications do |permit_project, options|
+      PermitApplicationBlueprint.render_as_hash(
+        permit_project.recent_permit_applications(options[:current_user]),
+        view: PermitProjectBlueprint.application_row_view(options),
+        current_user: options[:current_user],
+        project_access: options[:project_access]
+      )
     end
     association :project_documents,
                 blueprint: ProjectDocumentBlueprint do |permit_project, options|
@@ -121,7 +129,10 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
     association :active_project_meeting,
                 blueprint: ProjectMeetingBlueprint,
-                view: :base
+                view: :base,
+                if: ->(_field_name, _permit_project, options) do
+                  options[:project_access]&.manage_meetings?
+                end
     association :jurisdiction, blueprint: JurisdictionBlueprint, view: :base
     association :notes, blueprint: NoteBlueprint do |permit_project, options|
       PermitProjectBlueprint.notes_for(permit_project, options)
@@ -163,10 +174,15 @@ class PermitProjectBlueprint < Blueprinter::Base
     end
   end
 
-  def self.show_private_title?(permit_project, current_user)
-    return false unless current_user
-
-    return true if permit_project.owner_id == current_user.id
+  # Review staff keep the full row. A member who cannot open applications
+  # gets the summary.
+  def self.application_row_view(options)
+    if options[:project_access]&.view_application? ||
+         options[:current_user]&.review_staff?
+      :project_base
+    else
+      :summary
+    end
   end
 
   def self.notes_for(permit_project, options)

@@ -3,7 +3,8 @@ class PermitBlockStatus < ApplicationRecord
   belongs_to :permit_application
 
   enum :status, { draft: 0, in_progress: 1, ready: 2 }, default: 0
-  enum :collaboration_type, { submission: 0, review: 1 }, default: 0
+  # Whose draft / in progress / ready this is. A block can have one of each.
+  enum :collaboration_type, { submission: 0, review: 1 }, default: :submission
 
   validates :requirement_block_id, presence: true
   validates :collaboration_type, presence: true
@@ -49,29 +50,21 @@ class PermitBlockStatus < ApplicationRecord
         ),
       "object_data" => {
         "permit_application_id" => permit_application.id,
-        "collaboration_type" => collaboration_type,
         "requirement_block_name" => requirement_block_name
       }
     }
   end
 
   def users_to_notify_status_ready
-    users_to_notify = []
+    return permit_application.application_message_recipients if submission?
 
-    users_to_notify << permit_application.submitter if submission?
-
-    # add delegatee
-    users_to_notify +=
+    users_to_notify =
       permit_application.users_by_collaboration_options(
-        collaboration_type: collaboration_type,
         collaborator_type: :delegatee
-      )
-
-    # add only assignees who are assigned to same requirement block.
+      ).to_a
 
     users_to_notify +=
       permit_application.users_by_collaboration_options(
-        collaboration_type: collaboration_type,
         collaborator_type: :assignee,
         assigned_requirement_block_id: requirement_block_id
       )
@@ -94,7 +87,7 @@ class PermitBlockStatus < ApplicationRecord
     user_ids_to_send = users_to_notify_status_ready.pluck(:id)
 
     if review?
-      # as all review staff have access to status we send the status update websocket regardless if they are a collaborator
+      # Review staff can see this status without a collaborator row.
       user_ids_to_send +=
         permit_application
           .jurisdiction

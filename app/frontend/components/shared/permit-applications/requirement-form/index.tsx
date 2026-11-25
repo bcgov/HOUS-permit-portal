@@ -25,6 +25,7 @@ import { SharedSpinner } from "../../base/shared-spinner"
 import { defaultOptions, Form } from "../../chefs"
 import { ContactModal } from "../../contact/contact-modal"
 import { SafeTipTapDisplay } from "../../editor/safe-tiptap-display"
+import { RouterLink } from "../../navigation/router-link"
 import { PreviousSubmissionModal } from "../../revisions/previous-submission-modal"
 import { ResubmissionSummaryBox, resubmissionSummaryIsVisible } from "../../revisions/resubmission-summary-box"
 import { PermitApplicationSubmitModal } from "../permit-application-submit-modal"
@@ -48,6 +49,7 @@ interface IRequirementFormProps {
   updateCollaborationAssignmentNodes?: () => void
   onReviewSubmit?: (submission: any) => void
   showResubmissionSummary?: boolean
+  sideOffset?: number
 }
 
 export const RequirementForm = observer(
@@ -64,6 +66,7 @@ export const RequirementForm = observer(
     updateCollaborationAssignmentNodes,
     onReviewSubmit,
     showResubmissionSummary,
+    sideOffset,
   }: IRequirementFormProps) => {
     const {
       jurisdiction,
@@ -385,7 +388,7 @@ export const RequirementForm = observer(
           mb="40vh"
           mx="auto"
           pl={{ base: "10" }}
-          pr={{ base: "10", xl: "var(--app-permit-form-right-white-space)" }}
+          pr={sideOffset ? { base: "10" } : { base: "10", xl: "var(--app-permit-form-right-white-space)" }}
           width="full"
           maxWidth="container.lg"
           gap={8}
@@ -403,7 +406,7 @@ export const RequirementForm = observer(
               <SharedSpinner h={24} w={24} />
             </Center>
           )}
-          <ErrorsBox data={errorBoxData} />
+          <ErrorsBox data={errorBoxData} sideOffset={sideOffset} />
           {shouldShowDiff &&
             userShouldSeeDiff &&
             (permitApplication.diff ? (
@@ -465,6 +468,22 @@ export const RequirementForm = observer(
               description={t("permitApplication.show.templateDisabledByJurisdiction")}
               status={EFlashMessageStatus.error}
             />
+          )}
+          {permitApplication.submitterNeedsSharedContact && (
+            <CustomMessageBox status={EFlashMessageStatus.warning}>
+              <Text as="div" fontSize="md">
+                {t("permitApplication.edit.submitterContactDetailsMissing")}{" "}
+                {permitApplication.projectId && (
+                  <RouterLink
+                    to={`/projects/${permitApplication.projectId}/people?shareContact=1`}
+                    color="text.link"
+                    textDecoration="underline"
+                  >
+                    {t("permitProject.people.manageSharedContactLink")}
+                  </RouterLink>
+                )}
+              </Text>
+            </CustomMessageBox>
           )}
           {showResubmissionSummary &&
           resubmissionSummaryIsVisible(permitApplication) ? null : permitApplication?.isSubmitted ? (

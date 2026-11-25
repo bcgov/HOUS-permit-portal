@@ -17,17 +17,20 @@ export const SessionStoreModel = types
   .extend(withRootStore())
   .views((self) => ({}))
   .actions((self) => ({
-    resetAuth: flow(function* () {
-      self.loggedIn = false
-      self.tokenExpired = false
-      self.rootStore.sandboxStore.clearSandboxId()
-      self.rootStore.userStore.unsetCurrentUser()
-      self.rootStore.disconnectUserChannel()
-    }),
     setAfterLoginPath(path: string | null) {
       // Drop attacker-crafted / persisted paths that RR 6 can open-redirect or XSS with
       self.afterLoginPath = path !== null && isSafeAppPath(path) ? path : null
     },
+  }))
+  .actions((self) => ({
+    resetAuth: flow(function* () {
+      self.loggedIn = false
+      self.tokenExpired = false
+      self.setAfterLoginPath(null)
+      self.rootStore.sandboxStore.clearSandboxId()
+      self.rootStore.userStore.unsetCurrentUser()
+      self.rootStore.disconnectUserChannel()
+    }),
     consumeLoginReason(query: { loginReason?: unknown }): boolean {
       if (!("loginReason" in query)) return false
       captureMatomoLoginFailReason(query.loginReason)

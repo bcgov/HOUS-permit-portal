@@ -17,7 +17,7 @@ export const ProjectMeetingSentScreen = observer(() => {
   if (error) return <ErrorScreen />
   if (!currentPermitProject || currentPermitProject.id !== permitProjectId) return <LoadingScreen />
   if (
-    !currentPermitProject.isOwner ||
+    !currentPermitProject.currentUserAccess?.manageMeetings ||
     !siteConfigurationStore.projectMeetingsEnabled ||
     !currentPermitProject.jurisdiction?.projectMeetingsEnabled
   ) {

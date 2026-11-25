@@ -218,14 +218,11 @@ RSpec.describe "Sandbox member lookups", type: :request do
         :status,
         PermitApplication.statuses[:newly_submitted]
       )
-      collaborator =
-        jurisdiction.collaborators.find_by(user_id: staff.id) ||
-          create(:collaborator, user: staff, collaboratorable: jurisdiction)
+      collaborator = jurisdiction.collaborators.find_by!(user_id: staff.id)
       create(
         :permit_collaboration,
         permit_application: application,
-        collaborator: collaborator,
-        collaboration_type: :review
+        collaborator: collaborator
       )
     end
 

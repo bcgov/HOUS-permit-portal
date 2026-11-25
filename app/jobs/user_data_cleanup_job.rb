@@ -70,7 +70,6 @@ class UserDataCleanupJob
       .discarded
       .where(discarded_at: ..cutoff_time)
       .find_each do |user|
-        handle_user_resources(user)
         user.destroy!
       rescue ActiveRecord::InvalidForeignKey,
              ActiveRecord::RecordNotDestroyed => e
@@ -82,37 +81,6 @@ class UserDataCleanupJob
           "[UserDataCleanupJob] Unexpected error deleting user #{user.id}: #{e.message}"
         )
       end
-  end
-
-  def handle_user_resources(user)
-    # Ensure all models are loaded so PublicRecordable.recordable_models is fully populated.
-    # In development/test, Rails uses lazy loading, so models that include PublicRecordable
-    # won't register themselves until their class file is loaded.
-    Rails.application.eager_load! unless Rails.application.config.eager_load
-
-    PublicRecordable.recordable_models.each do |model_class|
-      # Skip if the model doesn't have a user association (shouldn't happen if using the concern correctly)
-      association_name = model_class.public_recordable_user_association
-      next unless association_name
-
-      # Construct the foreign key from the association name
-      foreign_key = "#{association_name}_id"
-
-      # Find records belonging to this user
-      # We need to use the association name to query, or manually construct the where clause
-      # Since we don't know the inverse association name on User (e.g. created_step_codes vs step_codes),
-      # we query the model directly.
-      model_class
-        .where(foreign_key => user.id)
-        .find_each do |record|
-          if record.public_record?
-            record.take_user_snapshots!
-            record.update_column(foreign_key, nil)
-            # Reindex if the model is searchable to ensure consistency
-            record.reindex if record.respond_to?(:search_data)
-          end
-        end
-    end
   end
 
   def day_window_ending(current_time, target_days_ago)

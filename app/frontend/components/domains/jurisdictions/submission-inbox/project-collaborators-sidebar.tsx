@@ -20,7 +20,6 @@ import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 import { IPermitProject } from "../../../../models/permit-project"
 import { useMst } from "../../../../setup/root"
-import { ECollaborationType } from "../../../../types/enums"
 import { SharedAvatar } from "../../../shared/user/shared-avatar"
 
 interface IProps {
@@ -166,11 +165,9 @@ const ProjectReviewCollaboratorsSection = observer(function ProjectReviewCollabo
   const takenIds = new Set(collaborations.map((c) => c.collaborator.id))
 
   useEffect(() => {
-    collaboratorStore.setSearchContext(ECollaborationType.review)
     collaboratorStore.search()
 
     return () => {
-      collaboratorStore.setSearchContext(null)
       collaboratorStore.setQuery(null)
     }
   }, [])

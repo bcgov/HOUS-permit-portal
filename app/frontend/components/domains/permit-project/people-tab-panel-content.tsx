@@ -1,0 +1,417 @@
+import {
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  FormControl,
+  Heading,
+  HStack,
+  Icon,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Popover,
+  PopoverArrow,
+  PopoverBody,
+  PopoverContent,
+  PopoverTrigger,
+  Text,
+  VStack,
+} from "@chakra-ui/react"
+import { DotsThreeVertical, Info, Plus, Users } from "@phosphor-icons/react"
+import { observer } from "mobx-react-lite"
+import React, { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Navigate, useMatch, useNavigate, useSearchParams } from "react-router-dom"
+import { useSearch } from "../../../hooks/use-search"
+import { IPermitProject } from "../../../models/permit-project"
+import { useMst } from "../../../setup/root"
+import { EProjectAccess, EProjectContactDesignation, EProjectMembershipStatus } from "../../../types/enums"
+import { IProjectPerson } from "../../../types/types"
+import { Paginator } from "../../shared/base/inputs/paginator"
+import { PerPageSelect } from "../../shared/base/inputs/per-page-select"
+import { ModelSearchInput } from "../../shared/base/model-search-input"
+import { SharedSpinner } from "../../shared/base/shared-spinner"
+import { CheckboxFilter } from "../../shared/filters/checkbox-filter"
+import { GridHeader } from "../../shared/grid/grid-header"
+import { SearchGrid } from "../../shared/grid/search-grid"
+import { SearchGridItem } from "../../shared/grid/search-grid-item"
+import { SearchGridRow } from "../../shared/grid/search-grid-row"
+import { RouterLinkButton } from "../../shared/navigation/router-link-button"
+import { ProjectAccessTag } from "../../shared/permit-projects/project-access-tag"
+import { AddProjectPersonForm } from "./add-project-person-form"
+import { PersonDetailsPanel } from "./person-details-panel"
+
+const PEOPLE_GRID_TEMPLATE_COLUMNS = "2fr 1.5fr 1fr 1fr 60px"
+
+interface IProps {
+  permitProject: IPermitProject
+  readOnly?: boolean
+}
+
+export const PeopleTabPanelContent = observer(({ permitProject, readOnly = false }: IProps) => {
+  const isNew = Boolean(useMatch("/projects/:permitProjectId/people/new"))
+  if (isNew && !permitProject.currentUserAccess?.invitePeople) {
+    return <Navigate to={`/projects/${permitProject.id}/people`} replace />
+  }
+  if (isNew) return <AddProjectPersonForm permitProject={permitProject} />
+
+  return <PeopleList permitProject={permitProject} readOnly={readOnly} />
+})
+
+const PeopleList = observer(({ permitProject, readOnly = false }: IProps) => {
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const { projectPeopleStore, permitProjectStore, userStore } = useMst()
+  const currentUser = userStore.currentUser
+  const {
+    tablePeople,
+    isSearching,
+    accessFilter,
+    setAccessFilter,
+    roleFilter,
+    setRoleFilter,
+    roleTags,
+    search,
+    resetFilters,
+    currentPage,
+    totalPages,
+    totalCount,
+    countPerPage,
+    handleCountPerPageChange,
+    handlePageChange,
+    updateProjectPerson,
+    shareProjectContactDetails,
+    reinviteProjectPerson,
+    destroyProjectPerson,
+    primaryContactName,
+    alternateContactNames,
+  } = projectPeopleStore
+  const [selectedPerson, setSelectedPerson] = useState<IProjectPerson | null>(null)
+  const [startSharing, setStartSharing] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [searchParams, setSearchParams] = useSearchParams()
+  const wantsShareContact = !readOnly && searchParams.get("shareContact") === "1"
+
+  useSearch(projectPeopleStore, [permitProject.id])
+
+  useEffect(() => {
+    setSelectedPerson(null)
+    setStartSharing(false)
+  }, [permitProject.id])
+
+  useEffect(() => {
+    if (!wantsShareContact || isSearching) return
+    const self = tablePeople.find((person) => person.userId && person.userId === currentUser?.id)
+    if (!self) return
+    setSelectedPerson(self)
+    setStartSharing(true)
+    const next = new URLSearchParams(searchParams)
+    next.delete("shareContact")
+    setSearchParams(next, { replace: true })
+  }, [wantsShareContact, isSearching, tablePeople, currentUser?.id, searchParams, setSearchParams])
+
+  useEffect(() => {
+    if (!selectedPerson || isSearching || isSaving) return
+    if (!tablePeople.some((person) => person.id === selectedPerson.id)) {
+      setSelectedPerson(null)
+    }
+  }, [tablePeople, isSearching, isSaving, selectedPerson])
+
+  const selectPerson = (person: IProjectPerson) => {
+    setSelectedPerson(person)
+  }
+
+  const handleSave = async (changes: {
+    roleTags?: string[]
+    contactDesignation?: EProjectContactDesignation
+    access?: EProjectAccess
+    allowInvite?: boolean
+  }) => {
+    if (!selectedPerson) return
+    const changingOwnAccess = Boolean(
+      selectedPerson.userId === currentUser?.id && (changes.access || changes.allowInvite !== undefined)
+    )
+    setIsSaving(true)
+    const updated = await updateProjectPerson(selectedPerson.id, changes)
+    if (changingOwnAccess && updated) {
+      await permitProjectStore.fetchPermitProject(permitProject.id)
+    }
+    setIsSaving(false)
+    setSelectedPerson(updated)
+  }
+
+  const handleShareContact = async (details: { projectContactEmail?: string; projectContactPhone?: string }) => {
+    if (!selectedPerson) return false
+    setIsSaving(true)
+    const updated = await shareProjectContactDetails(selectedPerson.id, details)
+    setIsSaving(false)
+    if (!updated) return false
+    setSelectedPerson(updated)
+    return true
+  }
+
+  const handleReinvite = async () => {
+    if (!selectedPerson) return false
+    setIsSaving(true)
+    const updated = await reinviteProjectPerson(selectedPerson.id)
+    setIsSaving(false)
+    if (updated) {
+      setSelectedPerson(updated)
+      return true
+    }
+    return false
+  }
+
+  const handleRemove = async () => {
+    if (!selectedPerson) return
+    const leavingSelf =
+      selectedPerson.status === EProjectMembershipStatus.active && selectedPerson.userId === currentUser?.id
+    setIsSaving(true)
+    const removed = await destroyProjectPerson(selectedPerson.id)
+    setIsSaving(false)
+    if (!removed) return
+    if (leavingSelf) {
+      navigate("/projects")
+      return
+    }
+    setSelectedPerson(null)
+  }
+
+  const projectAccess = permitProject.currentUserAccess
+  const selectedIsActive = selectedPerson?.status === EProjectMembershipStatus.active
+  const leavingSelf = selectedIsActive && Boolean(selectedPerson?.userId && selectedPerson.userId === currentUser?.id)
+  // The API also refuses the last Full member.
+  const canRemoveSelected =
+    leavingSelf || (selectedIsActive ? !!projectAccess?.manageMemberStanding : !!projectAccess?.invitePeople)
+
+  const accessOptions = Object.values(EProjectAccess).map((access) => ({
+    value: access,
+    label: t(`permitProject.people.access.${access}`),
+  }))
+  const roleOptions = roleTags.map((tag) => ({ value: tag, label: tag }))
+
+  return (
+    <Flex align="stretch" h="full" minH={0} overflow="hidden" bg="greys.white">
+      <Flex direction="column" flex={1} minW={0} h="full" minH={0} overflowY="auto" p={10}>
+        <VStack align="stretch" spacing={4} w="full">
+          <Flex align="center" justify="space-between">
+            <Flex align="center" gap={4}>
+              <Users size={32} />
+              <Heading as="h2" size="lg" mb={0}>
+                {t("permitProject.details.people")}
+              </Heading>
+            </Flex>
+            {!readOnly &&
+              (projectAccess?.invitePeople ? (
+                <RouterLinkButton
+                  variant="primary"
+                  leftIcon={<Icon as={Plus} />}
+                  to={`/projects/${permitProject.id}/people/new`}
+                >
+                  {t("permitProject.people.addPerson")}
+                </RouterLinkButton>
+              ) : (
+                <Popover trigger="hover" placement="bottom-end" isLazy openDelay={200}>
+                  <PopoverTrigger>
+                    <Box as="span" display="inline-block">
+                      <Button variant="primary" leftIcon={<Icon as={Plus} />} isDisabled>
+                        {t("permitProject.people.addPerson")}
+                      </Button>
+                    </Box>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    bg="gray.700"
+                    color="whiteAlpha.900"
+                    border="none"
+                    borderRadius="sm"
+                    boxShadow="md"
+                    fontSize="sm"
+                    fontWeight="medium"
+                    w="auto"
+                    maxW="280px"
+                    sx={{ "--popper-arrow-bg": "var(--chakra-colors-gray-700)" }}
+                  >
+                    <PopoverArrow bg="gray.700" />
+                    <PopoverBody px={2} py={1}>
+                      {t("permitProject.people.inviteDisabled")}
+                    </PopoverBody>
+                  </PopoverContent>
+                </Popover>
+              ))}
+          </Flex>
+
+          <Flex direction="column" gap={4} w="full">
+            <FormControl w="full">
+              <ModelSearchInput
+                searchModel={projectPeopleStore}
+                inputProps={{ placeholder: t("permitProject.people.searchPlaceholder"), width: "full" }}
+                inputGroupProps={{ width: "full" }}
+              />
+            </FormControl>
+            <Flex justifyContent="space-between" w="full">
+              <HStack>
+                <CheckboxFilter
+                  value={accessFilter.slice()}
+                  onChange={(value) => {
+                    setAccessFilter(value)
+                    search()
+                  }}
+                  onReset={() => {
+                    setAccessFilter([])
+                    search()
+                  }}
+                  options={accessOptions}
+                  title={t("permitProject.people.accessFilter")}
+                />
+                <CheckboxFilter
+                  value={roleFilter.slice()}
+                  onChange={(value) => {
+                    setRoleFilter(value)
+                    search()
+                  }}
+                  onReset={() => {
+                    setRoleFilter([])
+                    search()
+                  }}
+                  options={roleOptions}
+                  title={t("permitProject.people.roleFilter")}
+                />
+              </HStack>
+              <Button variant="link" size="sm" flexShrink={0} ml="auto" onClick={resetFilters}>
+                {t("submissionInbox.clearAllFilters")}
+              </Button>
+            </Flex>
+          </Flex>
+
+          <SearchGrid
+            templateColumns={readOnly ? "2fr 1.5fr 1fr 1fr" : PEOPLE_GRID_TEMPLATE_COLUMNS}
+            gridRowClassName="project-people-grid-row"
+            isEmpty={!isSearching && tablePeople.length === 0}
+            emptyTitle={t("permitProject.people.emptyTitle")}
+            emptyDescription={t("permitProject.people.emptyDescription")}
+            emptyIcon={<Users size={18} />}
+          >
+            <Box display="contents" role="row">
+              {(["name", "role", "access", "status"] as const).map((column) => (
+                <GridHeader key={column}>
+                  <Text px={4}>{t(`permitProject.people.columns.${column}`)}</Text>
+                </GridHeader>
+              ))}
+              {!readOnly && <GridHeader role="columnheader" />}
+            </Box>
+            {isSearching ? (
+              <Flex gridColumn="1 / -1" justify="center" align="center" minH="200px">
+                <SharedSpinner />
+              </Flex>
+            ) : (
+              tablePeople.map((person) => (
+                <SearchGridRow
+                  key={person.id}
+                  onClick={() => selectPerson(person)}
+                  bg={selectedPerson?.id === person.id ? "semantic.infoLight" : undefined}
+                >
+                  <SearchGridItem>
+                    <Flex align="center" gap={2.5}>
+                      <Avatar
+                        name={person.name}
+                        size="sm"
+                        bg="semantic.warningLight"
+                        color="text.primary"
+                        fontSize="sm"
+                      />
+                      <Flex direction="column" align="flex-start">
+                        <Text>
+                          {person.name}
+                          {person.userId && person.userId === currentUser?.id
+                            ? ` ${t("permitProject.people.you")}`
+                            : ""}
+                        </Text>
+                        {person.status === EProjectMembershipStatus.active &&
+                          person.contactDesignation === EProjectContactDesignation.primary && (
+                            <Text fontSize="xs" color="text.secondary">
+                              {t("permitProject.people.primaryContact")}
+                            </Text>
+                          )}
+                      </Flex>
+                    </Flex>
+                  </SearchGridItem>
+                  <SearchGridItem>{person.roleTags.join(", ")}</SearchGridItem>
+                  <SearchGridItem>{person.access && <ProjectAccessTag access={person.access} />}</SearchGridItem>
+                  <SearchGridItem>
+                    {person.status === EProjectMembershipStatus.expired
+                      ? t("permitProject.people.statusExpired")
+                      : person.status === EProjectMembershipStatus.pending
+                        ? t("permitProject.people.statusPending")
+                        : t("permitProject.people.statusActive")}
+                  </SearchGridItem>
+                  {!readOnly && (
+                    <SearchGridItem justifyContent="flex-end" px={2}>
+                      <Menu>
+                        <MenuButton
+                          as={IconButton}
+                          aria-label={t("ui.options")}
+                          icon={<DotsThreeVertical size={20} />}
+                          variant="ghost"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <MenuList boxShadow="elevations.elevation04" borderColor="border.base" minW="220px">
+                          <MenuItem
+                            icon={<Info size={16} />}
+                            fontSize="sm"
+                            onClick={(event) => {
+                              event.stopPropagation()
+                              selectPerson(person)
+                            }}
+                          >
+                            {t("permitProject.people.details")}
+                          </MenuItem>
+                        </MenuList>
+                      </Menu>
+                    </SearchGridItem>
+                  )}
+                </SearchGridRow>
+              ))
+            )}
+          </SearchGrid>
+          <Flex w="full" justifyContent="space-between">
+            <PerPageSelect
+              handleCountPerPageChange={handleCountPerPageChange}
+              countPerPage={countPerPage}
+              totalCount={totalCount}
+            />
+            <Paginator
+              current={currentPage}
+              total={totalCount}
+              totalPages={totalPages}
+              pageSize={countPerPage}
+              handlePageChange={handlePageChange}
+              showLessItems
+            />
+          </Flex>
+        </VStack>
+      </Flex>
+      {selectedPerson && (
+        <PersonDetailsPanel
+          person={selectedPerson}
+          isSelf={!readOnly && Boolean(selectedPerson.userId && selectedPerson.userId === currentUser?.id)}
+          canEditRoleTags={!readOnly && selectedPerson.canEditRoleTags}
+          canManageStanding={!readOnly && !!projectAccess?.manageMemberStanding}
+          canResend={!readOnly && !!projectAccess?.invitePeople}
+          canRemove={!readOnly && canRemoveSelected}
+          primaryContactName={primaryContactName}
+          alternateContactNames={alternateContactNames.slice()}
+          isSaving={isSaving}
+          startSharing={startSharing && selectedPerson.userId === currentUser?.id}
+          onClose={() => setSelectedPerson(null)}
+          onSave={handleSave}
+          onShareContact={readOnly ? undefined : handleShareContact}
+          onReinvite={handleReinvite}
+          onRemove={handleRemove}
+        />
+      )}
+    </Flex>
+  )
+})

@@ -13,6 +13,22 @@ RSpec.describe "Api::PermitProjects", type: :request do
 
   before { sign_in owner }
 
+  def full_member_of_another_project
+    outsider = create(:user, :submitter)
+    other_application =
+      create(
+        :permit_application,
+        submitter: outsider,
+        jurisdiction: jurisdiction
+      )
+    expect(
+      other_application.permit_project.project_memberships.find_by!(
+        user: outsider
+      )
+    ).to be_full
+    [outsider, other_application]
+  end
+
   describe "POST /api/permit_projects/search", search: true do
     it "returns paginated results for the owner" do
       create_list(:permit_project, 3, owner: owner)
@@ -40,6 +56,25 @@ RSpec.describe "Api::PermitProjects", type: :request do
       returned_ids = json_response["data"].map { |proj| proj["id"] }
       expect(returned_ids).to include(permit_project.id)
       expect(returned_ids).not_to include(*other_projects.map(&:id))
+    end
+
+    it "excludes a project where the user is Full only on a different project" do
+      outsider, other_application = full_member_of_another_project
+      PermitProject.reindex
+      sign_in outsider
+
+      post "/api/permit_projects/search",
+           params: {
+             page: 1,
+             per_page: 50
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      returned_ids = json_response["data"].map { |proj| proj["id"] }
+      expect(returned_ids).to include(other_application.permit_project.id)
+      expect(returned_ids).not_to include(permit_project.id)
     end
 
     it "only shows projects with active meetings when active_meeting is only_show" do
@@ -94,7 +129,8 @@ RSpec.describe "Api::PermitProjects", type: :request do
              permit_project: {
                title: "Project Alpha",
                jurisdiction_id: permit_project.jurisdiction_id,
-               owner_id: other_user.id
+               owner_id: other_user.id,
+               project_contact_email: "alpha@example.com"
              }
            },
            headers: headers,
@@ -111,7 +147,8 @@ RSpec.describe "Api::PermitProjects", type: :request do
                title: "No PID Project",
                jurisdiction_id: permit_project.jurisdiction_id,
                latitude: 49.691403,
-               longitude: -123.147794
+               longitude: -123.147794,
+               project_contact_phone: "2505551212"
              }
            },
            headers: headers,
@@ -121,6 +158,45 @@ RSpec.describe "Api::PermitProjects", type: :request do
       created = PermitProject.find(json_response.dig("data", "id"))
       expect(created.latitude).to eq(BigDecimal("49.691403"))
       expect(created.longitude).to eq(BigDecimal("-123.147794"))
+    end
+
+    it "stores submitted project contact details on the owner membership" do
+      owner.update!(phone_number: "2505551212")
+
+      post "/api/permit_projects",
+           params: {
+             permit_project: {
+               title: "Contact Project",
+               jurisdiction_id: permit_project.jurisdiction_id,
+               project_contact_email: "project-only@example.com"
+             }
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:created)
+      created = PermitProject.find(json_response.dig("data", "id"))
+      membership = created.project_memberships.find_by!(user: owner)
+      expect(membership.contact_designation).to eq("primary")
+      expect(membership.project_contact_email).to eq("project-only@example.com")
+      expect(membership.project_contact_email).not_to eq(owner.email)
+      expect(membership.project_contact_phone).to be_nil
+    end
+
+    it "rejects a project when no project contact method is submitted" do
+      expect do
+        post "/api/permit_projects",
+             params: {
+               permit_project: {
+                 title: "No Contact",
+                 jurisdiction_id: permit_project.jurisdiction_id
+               }
+             },
+             headers: headers,
+             as: :json
+      end.not_to change(PermitProject, :count)
+
+      expect(response).to have_http_status(:unprocessable_content)
     end
 
     it "returns validation errors for invalid payloads" do
@@ -158,7 +234,53 @@ RSpec.describe "Api::PermitProjects", type: :request do
       expect(json_response.dig("data", "title")).to eq("New Title")
     end
 
-    it "forbids non-owners" do
+    it "lets another Full member rename the project" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :full
+      )
+      sign_in member
+
+      patch "/api/permit_projects/#{permit_project.id}",
+            params: {
+              permit_project: {
+                title: "From a member"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "title")).to eq("From a member")
+    end
+
+    it "forbids an Expanded member from renaming the project" do
+      member = create(:user, :submitter)
+      create(
+        :project_membership,
+        permit_project: permit_project,
+        user: member,
+        access: :expanded
+      )
+      sign_in member
+
+      patch "/api/permit_projects/#{permit_project.id}",
+            params: {
+              permit_project: {
+                title: "Nope"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_project.reload.title).not_to eq("Nope")
+    end
+
+    it "forbids a user who is not a member" do
       sign_in other_user
 
       patch "/api/permit_projects/#{permit_project.id}",
@@ -172,6 +294,35 @@ RSpec.describe "Api::PermitProjects", type: :request do
 
       expect(response).to have_http_status(:forbidden)
     end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      sign_in outsider
+
+      patch "/api/permit_projects/#{permit_project.id}",
+            params: {
+              permit_project: {
+                title: "Nope"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:forbidden)
+      expect(permit_project.reload.title).not_to eq("Nope")
+
+      patch "/api/permit_projects/#{other_application.permit_project.id}",
+            params: {
+              permit_project: {
+                title: "Mine"
+              }
+            },
+            headers: headers,
+            as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(other_application.permit_project.reload.title).to eq("Mine")
+    end
   end
 
   describe "GET /api/permit_projects/:id" do
@@ -184,6 +335,23 @@ RSpec.describe "Api::PermitProjects", type: :request do
       expect(response).to have_http_status(:ok)
       expect(json_response.dig("data", "id")).to eq(permit_project.id)
       expect(json_response.dig("data", "notes", 0, "id")).to eq(note.id)
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      sign_in outsider
+
+      get "/api/permit_projects/#{permit_project.id}", headers: headers
+
+      expect(response).to have_http_status(:forbidden)
+
+      get "/api/permit_projects/#{other_application.permit_project.id}",
+          headers: headers
+
+      expect(response).to have_http_status(:ok)
+      expect(json_response.dig("data", "id")).to eq(
+        other_application.permit_project.id
+      )
     end
   end
 
@@ -257,6 +425,17 @@ RSpec.describe "Api::PermitProjects", type: :request do
       expect(response).to have_http_status(:ok)
       expect(owner.pinned_projects.reload.count).to eq(1)
     end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      expect {
+        post "/api/permit_projects/#{permit_project.id}/pin", headers: headers
+      }.not_to change(PinnedProject, :count)
+
+      expect(response).to have_http_status(:forbidden)
+    end
   end
 
   describe "DELETE /api/permit_projects/:id/unpin" do
@@ -268,19 +447,16 @@ RSpec.describe "Api::PermitProjects", type: :request do
       expect(response).to have_http_status(:ok)
       expect(owner.pinned_projects.reload.count).to eq(0)
     end
-  end
 
-  describe "GET /api/permit_projects/:id/submission_collaborator_options" do
-    it "returns submission collaborator options" do
-      allow_any_instance_of(PermitProject).to receive(
-        :submission_collaborators
-      ).and_return([])
+    it "denies a Full member of a different project" do
+      owner.pinned_projects.create(permit_project: permit_project)
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
 
-      get "/api/permit_projects/#{permit_project.id}/submission_collaborator_options",
-          headers: headers
+      delete "/api/permit_projects/#{permit_project.id}/unpin", headers: headers
 
-      expect(response).to have_http_status(:ok)
-      expect(json_response["data"]).to eq([])
+      expect(response).to have_http_status(:forbidden)
+      expect(owner.pinned_projects.reload.count).to eq(1)
     end
   end
 
@@ -313,6 +489,17 @@ RSpec.describe "Api::PermitProjects", type: :request do
 
       expect(response).to have_http_status(:ok)
       expect(json_response).to include("data", "meta")
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, _other_application = full_member_of_another_project
+      sign_in outsider
+
+      post "/api/permit_projects/#{permit_project.id}/permit_applications/search",
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:forbidden)
     end
   end
 
@@ -362,6 +549,18 @@ RSpec.describe "Api::PermitProjects", type: :request do
       reviewer = create(:user, :reviewer, jurisdiction:)
       colleague = create(:user, :reviewer, jurisdiction:)
       outsider = create(:user, :reviewer)
+      primary_user = create(:user, :submitter)
+      primary =
+        create(
+          :project_membership,
+          permit_project: permit_project,
+          user: primary_user,
+          access: :full
+        )
+      primary.update!(
+        contact_designation: :primary,
+        project_contact_email: "primary@example.com"
+      )
       sign_in reviewer
 
       post "/api/permit_projects/#{permit_project.id}/permit_applications",
@@ -379,7 +578,8 @@ RSpec.describe "Api::PermitProjects", type: :request do
       expect(response).to have_http_status(:ok)
       application = PermitApplication.find(json_response["data"].first["id"])
       expect(application.created_by).to eq(jurisdiction)
-      expect(application.submitter).to eq(owner)
+      expect(application.submitter).to eq(primary_user)
+      expect(application.submitter_membership).to eq(primary)
       expect(application.nickname).to be_nil
       expect(json_response["data"].first["created_by"]).to eq(
         "id" => jurisdiction.id,
@@ -575,6 +775,44 @@ RSpec.describe "Api::PermitProjects", type: :request do
 
       expect(response).to have_http_status(:bad_request)
       expect(json_response.dig("meta", "message", "message")).to be_present
+    end
+
+    it "denies a Full member of a different project" do
+      outsider, other_application = full_member_of_another_project
+      sign_in outsider
+
+      expect {
+        post "/api/permit_projects/#{permit_project.id}/permit_applications",
+             params: {
+               permit_applications: [
+                 {
+                   template_version_id: template_version.id,
+                   jurisdiction_id: permit_project.jurisdiction_id
+                 }
+               ]
+             },
+             headers: headers,
+             as: :json
+      }.not_to change { permit_project.permit_applications.count }
+
+      expect(response).to have_http_status(:forbidden)
+
+      post "/api/permit_projects/#{other_application.permit_project.id}/permit_applications",
+           params: {
+             permit_applications: [
+               {
+                 template_version_id: template_version.id,
+                 jurisdiction_id: other_application.jurisdiction_id
+               }
+             ]
+           },
+           headers: headers,
+           as: :json
+
+      expect(response).to have_http_status(:ok)
+      expect(other_application.permit_project.permit_applications.count).to eq(
+        2
+      )
     end
   end
 end

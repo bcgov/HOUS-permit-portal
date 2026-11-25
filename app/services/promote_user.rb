@@ -40,7 +40,8 @@ class PromoteUser
         invited_user.destroy!
         existing_user.jurisdiction_ids = jurisdiction_ids
         existing_user.save!
-        discard_live_owned_projects
+        # REVIEW STAFF PROJECT MEMBER TODO: see PermitProject#release_member!.
+        release_live_projects
       end
     end
   end
@@ -49,18 +50,27 @@ class PromoteUser
     invited_user.overheating_codes.update_all(creator_id: existing_user.id)
   end
 
-  def discard_live_owned_projects
-    existing_user.permit_projects.live.kept.find_each do |project|
-      project.discard!
-      project.permit_applications.kept.discard_all
-    end
+  def release_live_projects
+    project_ids =
+      existing_user.permit_projects.live.kept.ids |
+        existing_user
+          .project_memberships
+          .joins(:permit_project)
+          .merge(PermitProject.kept.live)
+          .pluck(:permit_project_id)
+
+    PermitProject
+      .kept
+      .live
+      .where(id: project_ids)
+      .find_each { |project| project.release_member!(existing_user) }
   end
 
   def merge_collaborations
     invited_user.collaborations.each do |invited_user_collaborator|
       existing_user_collaborator =
         existing_user.collaborations.find_by(
-          collaboratorable: invited_user_collaborator.collaboratorable
+          jurisdiction_id: invited_user_collaborator.jurisdiction_id
         )
 
       # if the existing_user is not already a collaborator on the same record
@@ -80,8 +90,6 @@ class PromoteUser
           existing_user_collaborator.permit_collaborations.kept.find_by(
             permit_application:
               invited_user_permit_collaboration.permit_application,
-            collaboration_type:
-              invited_user_permit_collaboration.collaboration_type,
             collaborator_type:
               invited_user_permit_collaboration.collaborator_type,
             assigned_requirement_block_id:

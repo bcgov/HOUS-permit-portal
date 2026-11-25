@@ -10,7 +10,6 @@ module Api::Concerns::Search::ProjectPermitApplications
         { nickname: :word_middle },
         { full_address: :word_middle },
         { template_tags: :word_middle },
-        { submitter: :word_middle },
         { status: :word_middle },
         { review_delegatee_name: :word_middle }
       ],
@@ -20,7 +19,12 @@ module Api::Concerns::Search::ProjectPermitApplications
         permit_application_search_params[:per_page].presence ||
           Kaminari.config.default_per_page,
       includes: PermitApplication::SEARCH_INCLUDES,
-      scope_results: ->(relation) { policy_scope(relation) }
+      scope_results: ->(relation) do
+        scoped = policy_scope(relation)
+        return scoped unless accessible_only?
+
+        PermitApplicationPolicy::Scope.new(pundit_user, scoped).resolve_viewable
+      end
     }
 
     @permit_application_search =
@@ -36,14 +40,14 @@ module Api::Concerns::Search::ProjectPermitApplications
     params.permit(
       :query,
       :show_archived,
+      :accessible_only,
       :page,
       :per_page,
       filters: [
         :requirement_template_id,
         :template_version_id,
         { status: [] },
-        :has_collaborator,
-        { submission_delegatee_id: [] }
+        :has_collaborator
       ],
       sort: %i[field direction]
     )
@@ -84,8 +88,6 @@ module Api::Concerns::Search::ProjectPermitApplications
         and_conditions << { requirement_template_id: value.split(",") }
       when :status
         and_conditions << { status: value }
-      when :submission_delegatee_id
-        and_conditions << { submission_delegatee_id: value }
       else
         and_conditions << { key => value }
       end
@@ -97,6 +99,12 @@ module Api::Concerns::Search::ProjectPermitApplications
   def discarded
     ActiveModel::Type::Boolean.new.cast(
       permit_application_search_params[:show_archived] || false
+    )
+  end
+
+  def accessible_only?
+    ActiveModel::Type::Boolean.new.cast(
+      permit_application_search_params[:accessible_only]
     )
   end
 end

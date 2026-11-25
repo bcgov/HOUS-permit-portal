@@ -116,13 +116,14 @@ User.find_or_create_by(omniauth_username: "submitter") do |user|
 end
 
 4.times do |i|
-  User.find_or_create_by(email: "submitter_#{i + 1}@example.com") do |user|
-    user.role = :submitter
-    user.first_name = "Submitter"
-    user.last_name = "Number#{i + 1}"
-    user.password = "P@ssword1"
-    user.confirmed_at = Time.now
-  end
+  user = User.find_or_initialize_by(email: "submitter_#{i + 1}@example.com")
+  user.role = :submitter
+  user.first_name = "Submitter"
+  user.last_name = "Number#{i + 1}"
+  user.password = "P@ssword1"
+  user.confirmed_at ||= Time.current
+  user.skip_confirmation_notification!
+  user.save!
 end
 
 # invite a usable super admin
@@ -330,6 +331,9 @@ if PermitApplication.first.blank?
     "Rubber duck command center"
   ]
 
+  # PIDs below are made up. Skip the ParcelMap lookup PermitProject runs when pid changes.
+  PermitProject.skip_callback(:save, :before, :fetch_coordinates)
+
   60.times do |index|
     current_jurisdiction =
       index < 45 ? north_van : jurisdictions.first(10).sample
@@ -362,8 +366,8 @@ if PermitApplication.first.blank?
         )
       PermitApplication.create!(
         nickname: nickname,
-        submitter: submitter_user,
         permit_project: permit_project,
+        submitter: submitter_user,
         template_version: template_version
       )
     end
@@ -372,8 +376,8 @@ if PermitApplication.first.blank?
     rand(1..2).times do
       draft_tv = published_template_versions.sample
       PermitApplication.create!(
-        submitter: submitter_user,
         permit_project: permit_project,
+        submitter: submitter_user,
         template_version: draft_tv,
         status: :new_draft
       )
@@ -541,8 +545,8 @@ if north_van.present?
       pa =
         PermitApplication.create!(
           nickname: "Inbox test — permit #{idx + 1}",
-          submitter: submitter_for_inbox_test,
           permit_project: inbox_test_project,
+          submitter: submitter_for_inbox_test,
           template_version: tv
         )
       seed_pa_status.call(
@@ -781,6 +785,85 @@ if north_van_projects.size >= 10
   puts "  ✓ Seeded #{seeded_meeting_count} project meeting requests for submitter (#{submitter&.omniauth_username || "n/a"})"
 end
 
+puts "Seeding project memberships..."
+
+submitter_owner = User.find_by(email: "submitter@example.com")
+member_users =
+  (1..4).map { |i| User.find_by!(email: "submitter_#{i}@example.com") }
+
+if submitter_owner.blank? || north_van.blank?
+  puts "  (skipped project memberships: need submitter@example.com and North Vancouver)"
+else
+  owner_projects =
+    PermitProject.where(owner: submitter_owner).order(:created_at, :id).to_a
+  if owner_projects.empty?
+    owner_projects = [
+      PermitProject.create!(
+        owner: submitter_owner,
+        jurisdiction: north_van,
+        title: "Submitter house",
+        full_address: "200 West 1st Street, North Vancouver, BC"
+      )
+    ]
+  end
+
+  half_projects = owner_projects.last((owner_projects.size / 2.0).ceil)
+  half_members = member_users.first((member_users.size / 2.0).ceil)
+  ProjectMembership.where(
+    permit_project: owner_projects - half_projects,
+    user: half_members
+  ).destroy_all
+  member_profiles = [
+    [:full, :none, ["Architect"]],
+    [:expanded, :alternate, ["Coordinating registered professional"]],
+    [:limited, :none, ["Builder"]],
+    [:limited, :none, []]
+  ]
+
+  half_projects.each do |project|
+    half_members.each_with_index do |user, index|
+      access, designation, roles = member_profiles[index]
+      membership =
+        ProjectMembership.find_or_initialize_by(
+          user: user,
+          permit_project: project
+        )
+      membership.access = access
+      membership.contact_designation = designation
+      membership.role_list = roles
+      if designation != :none && membership.project_contact_email.blank? &&
+           membership.project_contact_phone.blank?
+        membership.project_contact_email = user.email
+      end
+      membership.save!
+    end
+  end
+
+  submitter_1 = member_users[0]
+  owned_project =
+    PermitProject.find_or_initialize_by(
+      owner: submitter_1,
+      title: "Submitter 1 house"
+    )
+  if owned_project.new_record?
+    owned_project.jurisdiction = north_van
+    owned_project.full_address = "100 West 1st Street, North Vancouver, BC"
+    owned_project.save!
+  end
+
+  # A kept application keeps reporting samples from also handing this account
+  # a second owned project.
+  template_version = TemplateVersion.published_on_kept_templates.first
+  if template_version && owned_project.permit_applications.none?
+    PermitApplication.create!(
+      nickname: "Submitter 1 house",
+      permit_project: owned_project,
+      submitter: submitter_1,
+      template_version: template_version
+    )
+  end
+end
+
 # Charts omit themselves below Reports::Base::SMALL_N. After db:reset the rest of
 # this file leaves one submitter, one submitting jurisdiction, and no Part 9
 # step codes — which is why Super Admin reporting shows "Too few records (1)".
@@ -806,8 +889,8 @@ else
       application =
         PermitApplication.create!(
           nickname: "Reporting sample",
-          submitter: owner,
           permit_project: project,
+          submitter: owner,
           template_version: reporting_templates.sample
         )
       seed_pa_status.call(application, :newly_submitted)
@@ -815,7 +898,12 @@ else
     end
 
   submitter_ids_with_apps =
-    PermitApplication.kept.live.distinct.pluck(:submitter_id)
+    PermitApplication
+      .kept
+      .live
+      .joins(:submitter_membership)
+      .distinct
+      .pluck("project_memberships.user_id")
   jurisdiction_ids_with_submissions =
     SubmissionVersion
       .joins(permit_application: :permit_project)

@@ -23,68 +23,69 @@ class StepCodePolicy < ApplicationPolicy
     user.super_admin?
   end
 
+  # A standalone Step Code belongs to its creator.
+  # On an application, any block grant opens it. An application grant edits it.
+  # A block grant edits it only when the energy block is granted.
   def create?
     return false unless user
-
-    # If creating a standalone Step Code (no permit application), any logged-in user may create
     return true if record.permit_application.nil?
 
-    record.permit_application.submitter == user ||
-      collaborator_can_edit_step_code_block?
+    step_code_editable?(record.permit_application)
   end
 
+  # Not limited to the Step Code creator.
   def destroy?
-    same_sandbox? && (record.creator == user || record.submitter == user)
+    return false unless user && same_sandbox?
+    return standalone_creator? if record.permit_application.nil?
+
+    project_access_for(record.permit_application).delete_step_code?
   end
 
   def restore?
-    same_sandbox? && (record.creator == user || record.submitter == user)
+    destroy?
   end
 
+  # A block grant or an application grant opens it.
+  # Editing from a block grant still needs the energy block.
   def show?
-    return false unless user
-    return false unless same_sandbox?
+    return false unless user && same_sandbox?
+    application = record.permit_application
+    return standalone_creator? if application.nil?
 
-    return true if user == record.creator
-
-    return true if record.permit_application&.submitter == user
-
-    return true if collaborator_can_edit_step_code_block?
-
-    if user.review_staff? &&
-         user.member_of?(record.permit_application&.jurisdiction)
-      return true
-    end
-
-    false
+    project_access_for(application).view_application? ||
+      application.application_granted_to?(user) ||
+      application.block_granted_to?(user) ||
+      (user.review_staff? && user.member_of?(application.jurisdiction))
   end
 
   def update?
-    return false unless user
-    return false unless same_sandbox?
+    return false unless user && same_sandbox?
+    return standalone_creator? if record.permit_application.nil?
 
-    (user == record.creator) ||
-      (record.permit_application&.submitter == user) ||
-      collaborator_can_edit_step_code_block?
+    step_code_editable?(record.permit_application)
   end
 
   def reassign_to?(target_permit_application)
-    return false unless user
+    return false unless user && target_permit_application
 
-    target_permit_application&.submitter == user ||
-      collaborator_can_edit_step_code_block_on?(target_permit_application)
+    step_code_editable?(target_permit_application)
   end
 
   private
 
-  def collaborator_can_edit_step_code_block?
-    record.permit_application&.user_can_edit_step_code_block?(
-      user_id: user.id
-    ) || false
+  def standalone_creator?
+    record.creator == user
   end
 
-  def collaborator_can_edit_step_code_block_on?(pa)
-    pa&.user_can_edit_step_code_block?(user_id: user.id) || false
+  def project_access_for(permit_application)
+    access.on(permit_application.permit_project)
+  end
+
+  def step_code_editable?(permit_application)
+    return true if project_access_for(permit_application).edit_application?
+    return true if permit_application.application_granted_to?(user)
+
+    permit_application.user_can_edit_step_code_block?(user_id: user.id)
   end
 
   def same_sandbox?
@@ -102,7 +103,7 @@ class StepCodePolicy < ApplicationPolicy
         PermitApplicationPolicy::Scope.new(
           UserContext.new(user, sandbox),
           PermitApplication.all
-        ).resolve
+        ).resolve_viewable
 
       standalone_step_codes =
         scope.where(permit_application_id: nil, creator: user)
