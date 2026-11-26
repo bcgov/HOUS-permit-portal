@@ -173,3 +173,4 @@ When in doubt, treat it as Path B — it's the safe default and never destroys a
 | Dump DB                   | `mariadb-dump -uroot -p'<pw>' --add-drop-table --routines --triggers matomo > backup.sql` |
 | Restore DB                | `cat backup.sql \| oc exec -i ... -- mariadb -uroot -p'<pw>' matomo`                      |
 | Suspend a cron job        | `oc patch cronjob <name> -p '{"spec":{"suspend":true}}' --type=merge`                     |
+

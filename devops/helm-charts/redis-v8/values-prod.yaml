@@ -1,0 +1,20 @@
+redis:
+  # Reject writes on an isolated former primary while Sentinel converges.
+  extraFlags: ["--min-replicas-to-write", "1", "--min-replicas-max-lag", "5"]
+  image:
+    repository: bb18ab-prod/redis
+  sentinel:
+    image:
+      repository: bb18ab-prod/redis
+    quorum: 2
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  replicaCount: 3
+  persistence:
+    size: 1Gi
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi

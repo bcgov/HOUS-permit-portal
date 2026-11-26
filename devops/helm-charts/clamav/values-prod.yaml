@@ -1,0 +1,27 @@
+# Production Environment Overrides for ClamAV Helm Chart
+# Usage: helm install/upgrade clamav -f values.yaml -f values-prod.yaml -n bb18ab-prod
+
+OPENSHIFT_NAMESPACE: bb18ab
+STAGE: prod
+
+clamav:
+  image: "bb18ab-prod/clamav-scanner"
+  registry: image-registry.apps.silver.devops.gov.bc.ca
+  replicaCount: 2  # Can be scaled up to 2-3 for load distribution (pod anti-affinity prevents same node)
+
+  resources:
+    requests:
+      cpu: "10m"
+
+  persistentVolume:
+    size: "500Mi"
+
+  freshclam:
+    mirrors:
+      - https://clamav-mirror.apps.silver.devops.gov.bc.ca
+
+cronJob:
+  image:
+    repository: "image-registry.apps.silver.devops.gov.bc.ca/bb18ab-prod/clamav-scanner"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3

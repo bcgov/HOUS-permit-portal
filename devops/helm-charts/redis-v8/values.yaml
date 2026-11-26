@@ -1,0 +1,43 @@
+redis:
+  targetPlatform: openshift
+  architecture: replication
+  global:
+    imageRegistry: image-registry.openshift-image-registry.svc:5000
+  image:
+    tag: &redisImage "8.10.3@sha256:1f88291b4c57bdf249f02eb085a8669889b2d2954e91d4de5118a5da6b78dd53"
+  initContainer:
+    resources:
+      requests:
+        cpu: 25m
+        memory: 64Mi
+  auth:
+    enabled: false
+    sentinel: false
+  sentinel:
+    enabled: true
+    image:
+      tag: *redisImage
+    masterName: redisMasterSet
+    downAfterMilliseconds: 60000
+    failoverTimeout: 180000
+  persistence:
+    enabled: true
+  extraConfig: |
+    appendonly yes
+    save ""
+    maxmemory-policy noeviction
+  networkPolicy:
+    enabled: true
+    # The application and the Redis clients run in the same OpenShift project.
+    allowExternal: false
+    egressEnabled: false
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: redis-v8
+                app.kubernetes.io/name: redis
+            topologyKey: kubernetes.io/hostname

@@ -1,0 +1,18 @@
+redis:
+  image:
+    repository: bb18ab-dev/redis
+  sentinel:
+    image:
+      repository: bb18ab-dev/redis
+    quorum: 1
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+  replicaCount: 1
+  persistence:
+    size: 500Mi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi

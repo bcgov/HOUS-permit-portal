@@ -15,4 +15,8 @@ data:
     pm.min_spare_servers = {{ $fpm.min_spare_servers | default 5 }}
     pm.max_spare_servers = {{ $fpm.max_spare_servers | default 75 }}
     php_admin_value[memory_limit] = {{ $fpm.memory_limit | default "2048M" }}
+    ; PHP2Shell (CVE-2026-109619) workaround from php.net's 2026-10-21 advisory:
+    ; session upload-progress is unauthenticated attack surface and Matomo never
+    ; uses it. php_admin_* cannot be overridden by ini_set()/.user.ini.
+    php_admin_flag[session.upload_progress.enabled] = {{ ternary "on" "off" (dig "sessionUploadProgress" false $fpm) }}
     pm.status_path = {{ $fpm.status_path | default "/status" }}
