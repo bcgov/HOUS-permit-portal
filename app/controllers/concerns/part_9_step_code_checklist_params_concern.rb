@@ -83,7 +83,6 @@ module Part9StepCodeChecklistParamsConcern
           {
             space_heating_cooling_lines: %i[
               details
-              variant
               performance_value
               performance_type
             ]

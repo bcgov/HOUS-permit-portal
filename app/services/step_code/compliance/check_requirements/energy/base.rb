@@ -1,5 +1,6 @@
 class StepCode::Compliance::CheckRequirements::Energy::Base
-  KWH_PER_GJ = 227.78
+  # 1 GJ = 277.78 kWh (MEUI/TEDI reported in kWh/m²·year; Hot2000 totals in GJ).
+  KWH_PER_GJ = 277.78
 
   def initialize(checklist:, step:)
     @checklist = checklist
@@ -10,6 +11,10 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
     @total_heated_floor_area ||=
       total(:above_grade_heated_floor_area) +
         total(:below_grade_heated_floor_area)
+  end
+
+  def hdd
+    @hdd ||= checklist.data_entries.maximum(:hdd)
   end
 
   private
@@ -24,11 +29,15 @@ class StepCode::Compliance::CheckRequirements::Energy::Base
     checklist.data_entries.sum(field)
   end
 
+  def average(field)
+    checklist.data_entries.average(field).to_f
+  end
+
   def tedi_reference
     @tedi_reference ||=
       ThermalEnergyDemandIntensityReference.find_by(
         "hdd @> (:hdd)::int AND step = :step",
-        hdd: total(:hdd),
+        hdd: hdd,
         step: step
       )
   end

@@ -3,10 +3,13 @@
 A chart to provision a [Crunchy Postgres](https://www.crunchydata.com/) cluster.
 
 ## Configuration
+
 Apply base configuration from values.yaml and make the necessary overrides in custom-values-example.yaml
+
 ```Bash
 helm upgrade --install new-hippo-ha . -f values.yaml -f custom-values-example.yaml
 ```
+
 ### Crunchy Options
 
 | Parameter          | Description            | Default            |
@@ -40,34 +43,35 @@ helm upgrade --install new-hippo-ha . -f values.yaml -f custom-values-example.ya
 [pgBackRest site](https://pgbackrest.org/)
 [Crunchy pgBackRest docs](https://access.crunchydata.com/documentation/pgbackrest/latest/)
 
-| Parameter                                            | Description                                                   | Default                |
-| ---------------------------------------------------- | ------------------------------------------------------------- | ---------------------- |
-| `pgBackRest.image`                                   | Crunchy pgBackRest                                            |                        |
-| `pgBackRest.retention`                               | Number of backups/days to keep depending on retentionFullType | `2`                    |
-| `pgBackRest.retentionFullType`                       | Either 'count' or 'time'                                      | `count`                |
-| `pgBackRest.repos.schedules.full`                    | Full backup schedule                                          | `0 8 * * *`            |
-| `pgBackRest.repos.schedules.incremental`             | Incremental backup schedule                                   | `0 0,4,12,16,20 * * *` |
-| `pgBackRest.repos.schedules.volume.addessModes`      | Access modes                                                  | `ReadWriteOnce`        |
-| `pgBackRest.repos.schedules.volume.storage`          | PVC size                                                  | `128Mi`                 |
-| `pgBackRest.repos.schedules.volume.storageClassName` | Storage class name modes                                      | `netapp-file-backup`   |
-| `pgBackRest.repoHost.requests.cpu`                   | CPU requests                                                  | `1m`                   |
-| `pgBackRest.repoHost.requests.memory`                | Memory requests                                               | `64Mi`                 |
-| `pgBackRest.repoHost.limits.cpu`                     | CPU limits                                                    | `50m`                  |
-| `pgBackRest.repoHost.limits.memory`                  | Memory limits                                                 | `128Mi`                |
-| `pgBackRest.sidecars.requests.cpu`                   | sidecars CPU requests                                         | `1m`                   |
-| `pgBackRest.sidecars.requests.memory`                | sidecars Memory requests                                      | `64Mi`                 |
-| `pgBackRest.sidecars.limits.cpu`                     | sidecars CPU limits                                           | `50m`                  |
-| `pgBackRest.sidecars.limits.memory`                  | sidecars Memory limits                                        | `128Mi`                |
-| `pgBackRest.s3.enabled`                  | Enables the s3 repo backups                                        | `false`                 |
-| `pgBackRest.s3.createS3Secret`                  | Creates the s3 secret based on key and keySecret                                        | `true`                 |
-| `pgBackRest.s3.s3Secret`                  | The secret name to be created or read from                                       | `s3-pgbackrest`                 |
-| `pgBackRest.s3.s3Path`                  | The path inside the bucket where the backups will be saved to, set it to `/` to use the root of the bucket.                                        | `/dbbackup`                 |
-| `pgBackRest.s3.s3UriStyle`                  | Style of URL to use for S3 communication. [More Info](https://pgbackrest.org/configuration.html#section-repository/option-repo-s3-uri-style)                                       | `path`                 |
-| `pgBackRest.s3.bucket`                  | The bucket to use for backups                                        | `bucketName`                 |
-| `pgBackRest.s3.endpoint`                  | The endpoint to use, for example s3.ca-central-1.amazonaws.com                                       | `endpointName`                 |
-| `pgBackRest.s3.region`                  | The region to use, not necessary if your S3 system does not specify one                                       | `ca-central-1`                 |
-| `pgBackRest.s3.key`                  | The key to use to access the bucket. MUST BE KEPT SECRET                                        | `s3KeyValue`                 |
-| `pgBackRest.s3.keySecret`                  | The key secret for the key set above. MUST BE KEPT SECRET                                        | `s3SecretValue`                 |
+| Parameter                                            | Description                                                                                                                                  | Default                |
+| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
+| `pgBackRest.image`                                   | Crunchy pgBackRest                                                                                                                           |                        |
+| `pgBackRest.retention`                               | Number of backups/days to keep depending on retentionFullType                                                                                | `2`                    |
+| `pgBackRest.retentionFullType`                       | Either 'count' or 'time'                                                                                                                     | `count`                |
+| `pgBackRest.repos.schedules.full`                    | Full backup schedule                                                                                                                         | `0 8 * * *`            |
+| `pgBackRest.repos.schedules.incremental`             | Incremental backup schedule                                                                                                                  | `0 0,4,12,16,20 * * *` |
+| `pgBackRest.repos.schedules.volume.addessModes`      | Access modes                                                                                                                                 | `ReadWriteOnce`        |
+| `pgBackRest.repos.schedules.volume.storage`          | PVC size                                                                                                                                     | `128Mi`                |
+| `pgBackRest.repos.schedules.volume.storageClassName` | Storage class name modes                                                                                                                     | `netapp-file-backup`   |
+| `pgBackRest.repoHost.requests.cpu`                   | CPU requests                                                                                                                                 | `1m`                   |
+| `pgBackRest.repoHost.requests.memory`                | Memory requests                                                                                                                              | `64Mi`                 |
+| `pgBackRest.repoHost.limits.cpu`                     | CPU limits                                                                                                                                   | `50m`                  |
+| `pgBackRest.repoHost.limits.memory`                  | Memory limits                                                                                                                                | `128Mi`                |
+| `pgBackRest.sidecars.requests.cpu`                   | sidecars CPU requests                                                                                                                        | `1m`                   |
+| `pgBackRest.sidecars.requests.memory`                | sidecars Memory requests                                                                                                                     | `64Mi`                 |
+| `pgBackRest.sidecars.limits.cpu`                     | sidecars CPU limits                                                                                                                          | `50m`                  |
+| `pgBackRest.sidecars.limits.memory`                  | sidecars Memory limits                                                                                                                       | `128Mi`                |
+| `pgBackRest.s3.enabled`                              | Enables the s3 repo backups                                                                                                                  | `false`                |
+| `pgBackRest.s3.createS3Secret`                       | Creates the s3 secret based on key and keySecret                                                                                             | `true`                 |
+| `pgBackRest.s3.s3Secret`                             | The secret name to be created or read from                                                                                                   | `s3-pgbackrest`        |
+| `pgBackRest.s3.s3Path`                               | The path inside the bucket where the backups will be saved to, set it to `/` to use the root of the bucket.                                  | `/dbbackup`            |
+| `pgBackRest.s3.s3UriStyle`                           | Style of URL to use for S3 communication. [More Info](https://pgbackrest.org/configuration.html#section-repository/option-repo-s3-uri-style) | `path`                 |
+| `pgBackRest.s3.bucket`                               | The bucket to use for backups                                                                                                                | `bucketName`           |
+| `pgBackRest.s3.endpoint`                             | The endpoint to use, for example s3.ca-central-1.amazonaws.com                                                                               | `endpointName`         |
+| `pgBackRest.s3.region`                               | The region to use, not necessary if your S3 system does not specify one                                                                      | `ca-central-1`         |
+| `pgBackRest.s3.key`                                  | The key to use to access the bucket. MUST BE KEPT SECRET                                                                                     | `s3KeyValue`           |
+| `pgBackRest.s3.keySecret`                            | The key secret for the key set above. MUST BE KEPT SECRET                                                                                    | `s3SecretValue`        |
+
 ---
 
 ### Patroni
@@ -139,29 +143,29 @@ This feature allows you to set up a daily CronJob that restores data from a sour
 
 ### Configuration
 
-| Parameter                                      | Description                                           | Default                |
-| ---------------------------------------------- | ----------------------------------------------------- | ---------------------- |
-| `dataRestore.enabled`                          | Enable the data restore CronJob                      | `false`                |
-| `dataRestore.schedule`                         | Cron schedule for the restore job                    | `"0 2 * * *"`          |
-| `dataRestore.image`                            | pgBackRest image to use for restore                  | `crunchy-pgbackrest`   |
-| `dataRestore.secretName`                       | K8s secret containing S3 credentials (reuse existing)| `s3-pgbackrest`        |
-| `dataRestore.repo.name`                        | Repository name (repo1, repo2, etc.)                 | `repo2`                |
-| `dataRestore.repo.path`                        | S3 path prefix                                       | `/habackup`            |
-| `dataRestore.repo.s3.bucket`                   | Source S3 bucket name                                | `bucketName`           |
-| `dataRestore.repo.s3.endpoint`                 | S3 endpoint URL                                      | Object store endpoint  |
-| `dataRestore.repo.s3.region`                   | S3 region                                            | `not-used`             |
-| `dataRestore.repo.s3.uriStyle`                 | S3 URI style (path or host)                          | `path`                 |
-| `dataRestore.stanza`                           | pgBackRest stanza name                               | `db`                   |
-| `dataRestore.target.clusterName`               | Target cluster name (defaults to current cluster)    | `""`                   |
-| `dataRestore.target.database`                  | Target database name                                 | `postgres`             |
-| `dataRestore.resources.requests.cpu`           | CPU requests for restore job                         | `100m`                 |
-| `dataRestore.resources.requests.memory`        | Memory requests for restore job                      | `256Mi`                |
-| `dataRestore.resources.limits.cpu`             | CPU limits for restore job                           | `500m`                 |
-| `dataRestore.resources.limits.memory`          | Memory limits for restore job                        | `512Mi`                |
-| `dataRestore.successfulJobsHistoryLimit`       | Number of successful jobs to keep in history         | `3`                    |
-| `dataRestore.failedJobsHistoryLimit`           | Number of failed jobs to keep in history             | `1`                    |
-| `dataRestore.restartPolicy`                    | Pod restart policy for failed jobs                   | `OnFailure`            |
-| `dataRestore.additionalArgs`                   | Additional pgbackrest arguments                      | `[]`                   |
+| Parameter                                | Description                                           | Default               |
+| ---------------------------------------- | ----------------------------------------------------- | --------------------- |
+| `dataRestore.enabled`                    | Enable the data restore CronJob                       | `false`               |
+| `dataRestore.schedule`                   | Cron schedule for the restore job                     | `"0 2 * * *"`         |
+| `dataRestore.image`                      | pgBackRest image to use for restore                   | `crunchy-pgbackrest`  |
+| `dataRestore.secretName`                 | K8s secret containing S3 credentials (reuse existing) | `s3-pgbackrest`       |
+| `dataRestore.repo.name`                  | Repository name (repo1, repo2, etc.)                  | `repo2`               |
+| `dataRestore.repo.path`                  | S3 path prefix                                        | `/habackup`           |
+| `dataRestore.repo.s3.bucket`             | Source S3 bucket name                                 | `bucketName`          |
+| `dataRestore.repo.s3.endpoint`           | S3 endpoint URL                                       | Object store endpoint |
+| `dataRestore.repo.s3.region`             | S3 region                                             | `not-used`            |
+| `dataRestore.repo.s3.uriStyle`           | S3 URI style (path or host)                           | `path`                |
+| `dataRestore.stanza`                     | pgBackRest stanza name                                | `db`                  |
+| `dataRestore.target.clusterName`         | Target cluster name (defaults to current cluster)     | `""`                  |
+| `dataRestore.target.database`            | Target database name                                  | `postgres`            |
+| `dataRestore.resources.requests.cpu`     | CPU requests for restore job                          | `100m`                |
+| `dataRestore.resources.requests.memory`  | Memory requests for restore job                       | `256Mi`               |
+| `dataRestore.resources.limits.cpu`       | CPU limits for restore job                            | `500m`                |
+| `dataRestore.resources.limits.memory`    | Memory limits for restore job                         | `512Mi`               |
+| `dataRestore.successfulJobsHistoryLimit` | Number of successful jobs to keep in history          | `3`                   |
+| `dataRestore.failedJobsHistoryLimit`     | Number of failed jobs to keep in history              | `1`                   |
+| `dataRestore.restartPolicy`              | Pod restart policy for failed jobs                    | `OnFailure`           |
+| `dataRestore.additionalArgs`             | Additional pgbackrest arguments                       | `[]`                  |
 
 ### Usage Example
 
@@ -170,7 +174,7 @@ The configuration reuses existing S3 secrets and follows the same patterns as `d
 ```yaml
 dataRestore:
   enabled: true
-  schedule: "0 2 * * *"  # Daily at 2 AM
+  schedule: "0 2 * * *" # Daily at 2 AM
   # Reuse existing S3 secret from dataSource or pgBackRest.s3
   secretName: "dev-s3-pgbackrest"
   repo:

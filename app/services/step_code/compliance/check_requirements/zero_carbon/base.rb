@@ -2,9 +2,13 @@
 # EF: Emission Factor
 
 class StepCode::Compliance::CheckRequirements::ZeroCarbon::Base
-  ELECTRICITY_EF = 0.011
-  NATURAL_GAS_EF = 0.18
-  PROPANE_EF = 0.2155
+  # SME: Assume Hot2000 fuel consumption is GJ/year (Part 9 E/F UI + Excel checklist).
+  # Checklist EFs: electricity/gas as kg CO₂e/kWh × KWH_PER_GJ → kg/GJ;
+  # propane already kg CO₂e/GJ (59.87).
+  KWH_PER_GJ = StepCode::Compliance::CheckRequirements::Energy::Base::KWH_PER_GJ
+  ELECTRICITY_EF = 0.011 * KWH_PER_GJ
+  NATURAL_GAS_EF = 0.18 * KWH_PER_GJ
+  PROPANE_EF = 59.87
 
   attr_reader :checklist, :step
 

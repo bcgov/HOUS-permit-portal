@@ -125,6 +125,7 @@ class StepCode::Part9::BuildingCharacteristicsHot2000Mapper
     line(details: detail_parts.join("; "))
   end
 
+  # HUB-5472: Emit flat open lines (no principal/secondary variant tagging).
   def space_heating_cooling_lines
     lines = []
     lines.concat(type_1_heating_lines)
@@ -197,7 +198,6 @@ class StepCode::Part9::BuildingCharacteristicsHot2000Mapper
 
       line(
         details: equipment_details(name, system),
-        variant: :principal,
         performance_type: :afue,
         performance_value:
           decimal(system.at("Specifications")&.[]("efficiency"))
@@ -218,7 +218,6 @@ class StepCode::Part9::BuildingCharacteristicsHot2000Mapper
         if heating_efficiency.present?
           lines << line(
             details: details,
-            variant: :secondary,
             performance_type:
               boolean_attribute?(heating_efficiency, "isCop") ? :cop : :hspf,
             performance_value: decimal(heating_efficiency["value"])
@@ -227,7 +226,6 @@ class StepCode::Part9::BuildingCharacteristicsHot2000Mapper
         if cooling_efficiency.present?
           lines << line(
             details: "#{details} cooling",
-            variant: :secondary,
             performance_type:
               boolean_attribute?(cooling_efficiency, "isCop") ? :cop : :seer,
             performance_value: decimal(cooling_efficiency["value"])
@@ -251,7 +249,6 @@ class StepCode::Part9::BuildingCharacteristicsHot2000Mapper
               text_at(system, "Equipment/EnergySource/English"),
               text_at(system, "Equipment/Type/English")
             ),
-          variant: :secondary,
           performance_type: :afue,
           performance_value:
             decimal(system.at("Specifications")&.[]("efficiency"))

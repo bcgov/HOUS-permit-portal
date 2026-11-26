@@ -25,18 +25,50 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::Airtightness do
     allow(subject).to receive(:nlr_requirement) { nlr_requirement }
   end
 
-  context "when total ACH meets the energy step requirement" do
+  context "when ACH meets the energy step requirement" do
     let(:data_entries_attributes) { [{ ach: 22 }, { ach: 22 }] }
 
     it_behaves_like PASSING_STEP_CODE
+
+    it "does not sum ACH across data entries" do
+      expect(compliance_checker.ach).to eq(22)
+    end
   end
 
-  context "when total NLA meets the energy step requirement" do
+  context "when multiple data entries have different ACH values" do
+    # Excel Calculator Proposed total = AVERAGE(ACH), not volume-weighted.
+    let(:data_entries_attributes) do
+      [{ ach: 10, building_volume: 100 }, { ach: 20, building_volume: 900 }]
+    end
+
+    it "averages ACH across suite/model rows" do
+      expect(compliance_checker.ach).to eq(15)
+    end
+  end
+
+  context "when NLA meets the energy step requirement" do
     let(:data_entries_attributes) do
       [{ ach: 32, nla: 18 }, { ach: 32, nla: 18 }]
     end
 
     it_behaves_like PASSING_STEP_CODE
+
+    it "does not sum NLA across data entries" do
+      expect(compliance_checker.nla).to eq(18)
+    end
+  end
+
+  context "when multiple data entries have different NLA values" do
+    let(:data_entries_attributes) do
+      [
+        { ach: 32, nla: 10, building_envelope_surface_area: 100 },
+        { ach: 32, nla: 20, building_envelope_surface_area: 900 }
+      ]
+    end
+
+    it "averages NLA across suite/model rows" do
+      expect(compliance_checker.nla).to eq(15)
+    end
   end
 
   context "when NLR meets the energy step requirement" do
@@ -54,6 +86,25 @@ RSpec.describe StepCode::Compliance::CheckRequirements::Energy::Airtightness do
     end
 
     it_behaves_like PASSING_STEP_CODE
+  end
+
+  context "when multiple data entries contribute to NLR" do
+    let(:data_entries_attributes) do
+      [
+        { ach: 36, building_volume: 360, building_envelope_surface_area: 100 },
+        { ach: 72, building_volume: 360, building_envelope_surface_area: 100 }
+      ]
+    end
+
+    it "averages per-suite NLR values (Excel Proposed total)" do
+      # Each: volume * ach * 1000 / 3600 / surface → 36 and 72
+      expect(compliance_checker.nlr).to eq(54)
+    end
+
+    it "still sums volume and surface for display totals" do
+      expect(compliance_checker.volume).to eq(720)
+      expect(compliance_checker.surface_area).to eq(200)
+    end
   end
 
   context "when ACH, NLA, and NLR all do not meet energy step requirement" do

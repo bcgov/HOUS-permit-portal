@@ -10,7 +10,7 @@ class StepCode::Part9::Energy::ComplianceBlueprint < Blueprinter::Base
   field :max_step
 
   field :fwdr do |compliance, _options|
-    compliance.checklist.data_entries.sum(:fwdr)
+    compliance.checklist.data_entries.average(:fwdr)
   end
 
   field :location do |compliance, _options|
@@ -18,7 +18,7 @@ class StepCode::Part9::Energy::ComplianceBlueprint < Blueprinter::Base
   end
 
   field :heating_degree_days do |compliance, _options|
-    compliance.checklist.data_entries.sum(:hdd)
+    compliance.checklist.data_entries.maximum(:hdd)
   end
 
   field :software_name do |compliance, _options|

@@ -165,7 +165,9 @@ export const InfoDocumentModal = ({ isOpen, onClose, document, onSubmit }: IInfo
           }}
         >
           <ModalHeader>
-            {document ? translate("infoDocuments.management.editTitle") : translate("infoDocuments.management.addTitle")}
+            {document
+              ? translate("infoDocuments.management.editTitle")
+              : translate("infoDocuments.management.addTitle")}
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>

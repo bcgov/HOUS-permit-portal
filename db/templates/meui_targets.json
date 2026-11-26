@@ -1,0 +1,2018 @@
+[
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 130
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 108
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 81
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 67
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 55
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 50
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 98
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 86
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 64
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 50
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 41
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 40
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 70
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 59
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 43
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 32
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 26
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 25
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 165
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 136
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 99
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 77
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 62
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 55
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 133
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 114
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 82
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 60
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 49
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 45
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 105
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 87
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 61
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 42
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 34
+  },
+  {
+    "hdd": "Less than 3000",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 30
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 147
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 125
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 98
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 84
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 72
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 65
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 110
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 98
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 76
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 62
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 53
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 50
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 77
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 66
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 50
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 39
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 33
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 30
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 182
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 153
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 116
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 94
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 79
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 70
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 145
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 126
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 94
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 72
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 61
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 55
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 112
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 94
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 68
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 49
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 41
+  },
+  {
+    "hdd": "3000 to 3999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 35
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 161
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 139
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 112
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 98
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 86
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 75
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 119
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 107
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 85
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 71
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 62
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 55
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 91
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 80
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 64
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 53
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 47
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 40
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 196
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 167
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 130
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 108
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 93
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 80
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 154
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 135
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 103
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 81
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 70
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 60
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 126
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 108
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 82
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 63
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 55
+  },
+  {
+    "hdd": "4000 to 4999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 45
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 185
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 163
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 136
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 122
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 110
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 95
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 138
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 126
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 104
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 90
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 81
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 70
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 110
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 99
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 83
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 72
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 66
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 55
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 220
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 191
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 154
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 132
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 117
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 100
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 173
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 154
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 122
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 100
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 89
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 75
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 145
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 127
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 101
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 82
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 74
+  },
+  {
+    "hdd": "5000 to 5999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 60
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 209
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 187
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 160
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 146
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 134
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 115
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 157
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 145
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 123
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 109
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 100
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 85
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 124
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 113
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 97
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 86
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 80
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 65
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 244
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 215
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 178
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 156
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 141
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 120
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 192
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 173
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 141
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 119
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 108
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 90
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 159
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 141
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 115
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 96
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 88
+  },
+  {
+    "hdd": "6000 to 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 70
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 228
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 206
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 179
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 165
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 153
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 130
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 176
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 164
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 142
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 128
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 119
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 100
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 138
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 127
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 111
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 100
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 94
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "Not More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 75
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "<= 50",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "51 to 75",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "76 to 120",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "121 to 165",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "166 to 210",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 2,
+    "area": "> 210",
+    "meui": null
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "<= 50",
+    "meui": 263
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "51 to 75",
+    "meui": 234
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "76 to 120",
+    "meui": 197
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "121 to 165",
+    "meui": 175
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "166 to 210",
+    "meui": 160
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 3,
+    "area": "> 210",
+    "meui": 135
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "<= 50",
+    "meui": 211
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "51 to 75",
+    "meui": 192
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "76 to 120",
+    "meui": 160
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "121 to 165",
+    "meui": 138
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "166 to 210",
+    "meui": 127
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 4,
+    "area": "> 210",
+    "meui": 105
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "<= 50",
+    "meui": 173
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "51 to 75",
+    "meui": 155
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "76 to 120",
+    "meui": 129
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "121 to 165",
+    "meui": 110
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "166 to 210",
+    "meui": 102
+  },
+  {
+    "hdd": "More than 6999",
+    "cooling": "More than 50%",
+    "step": 5,
+    "area": "> 210",
+    "meui": 80
+  }
+]
