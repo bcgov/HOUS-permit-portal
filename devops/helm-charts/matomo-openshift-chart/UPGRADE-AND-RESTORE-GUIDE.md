@@ -164,20 +164,6 @@ When in doubt, treat it as Path B — it's the safe default and never destroys a
 
 ## 6. Quick reference
 
-<<<<<<< HEAD
-| Check | Command |
-|---|---|
-| Current codebase version | `./console core:version` (inside `matomo` container) |
-| Current DB schema version | `SELECT option_value FROM matomo_option WHERE option_name='version_core';` |
-| Helm revision history | `helm history matomo -n <namespace>` |
-| Roll back Helm release | `helm rollback matomo <revision> -n <namespace>` |
-| Dump DB | `mariadb-dump -uroot -p'<pw>' --add-drop-table --routines --triggers matomo > backup.sql` |
-| Restore DB | `cat backup.sql \| oc exec -i ... -- mariadb -uroot -p'<pw>' matomo` |
-| Suspend a cron job | `oc patch cronjob <name> -p '{"spec":{"suspend":true}}' --type=merge` |
-
-
----
-=======
 | Check                     | Command                                                                                   |
 | ------------------------- | ----------------------------------------------------------------------------------------- |
 | Current codebase version  | `./console core:version` (inside `matomo` container)                                      |
@@ -187,4 +173,4 @@ When in doubt, treat it as Path B — it's the safe default and never destroys a
 | Dump DB                   | `mariadb-dump -uroot -p'<pw>' --add-drop-table --routines --triggers matomo > backup.sql` |
 | Restore DB                | `cat backup.sql \| oc exec -i ... -- mariadb -uroot -p'<pw>' matomo`                      |
 | Suspend a cron job        | `oc patch cronjob <name> -p '{"spec":{"suspend":true}}' --type=merge`                     |
->>>>>>> 8f994595dfd266829d47c42390a731ac8bf40267
+
