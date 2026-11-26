@@ -154,6 +154,7 @@ matomo:
     max_requests: 500
     process_idle_timeout: "480s"
     memory_limit: "2048M"
+    sessionUploadProgress: false  # PHP2Shell (CVE-2026-109619) workaround; keep off
     status_path: "/status"
   # Post install for helm chart. Starts a post-install-job.
   postInstallSleepTime: 5
@@ -217,6 +218,10 @@ matomo:
       schedule: "0 * * * *"
       activeDeadlineSeconds: 43200
       command: ./console scheduled-tasks:run
+      sessionOptimize:
+        enabled: true
+        dayOfWeek: 7   # ISO weekday, UTC: 1=Mon ... 7=Sun
+        hour: 3        # 0-23, UTC
       resources: {}
       # PHP overrides for the scheduled-tasks job (purge can be memory-heavy).
       php:
@@ -344,6 +349,7 @@ matomo:
       min_spare_servers: 5
       max_spare_servers: 75
       memory_limit: "2048M"
+      sessionUploadProgress: false  # PHP2Shell (CVE-2026-109619) workaround; keep off
       status_path: "/status"
     ingressClassName: ""
     ingress:
