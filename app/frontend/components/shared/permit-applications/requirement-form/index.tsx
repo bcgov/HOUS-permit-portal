@@ -375,6 +375,22 @@ export const RequirementForm = observer(
     }
     if (!formIsDirty) pinnedSubmissionRef.current = null
     const submissionForForm = pinnedSubmissionRef.current ?? unsavedSubmissionData
+    const viewedSubmissionAt =
+      isViewingPastRequests && selectedSubmissionVersion
+        ? selectedSubmissionVersion.createdAt
+        : permitApplication.latestSubmissionVersion?.createdAt
+    const viewedSentence = viewedSubmissionAt
+      ? t("permitApplication.show.revision.viewingSubmission", {
+          viewedAt: format(viewedSubmissionAt, "MMM d, yyyy 'at' h:mm a"),
+        })
+      : undefined
+    const submittedSentence = permitApplication.submittedAt
+      ? t("permitApplication.show.wasSubmitted", {
+          date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
+          jurisdictionName: jurisdiction.qualifiedName,
+        })
+      : undefined
+    const submittedDescription = [viewedSentence, submittedSentence].filter(Boolean).join("\n\n")
     return (
       <>
         <Flex
@@ -467,14 +483,9 @@ export const RequirementForm = observer(
             />
           )}
           {showResubmissionSummary &&
-          resubmissionSummaryIsVisible(permitApplication) ? null : permitApplication?.isSubmitted ? (
-            <CustomMessageBox
-              description={t("permitApplication.show.wasSubmitted", {
-                date: format(permitApplication.submittedAt, "MMM d, yyyy h:mm a"),
-                jurisdictionName: jurisdiction.qualifiedName,
-              })}
-              status={EFlashMessageStatus.info}
-            />
+          resubmissionSummaryIsVisible(permitApplication) ? null : permitApplication?.isSubmitted &&
+            submittedDescription ? (
+            <CustomMessageBox description={submittedDescription} status={EFlashMessageStatus.info} />
           ) : !readOnlyProp ? (
             <CustomMessageBox
               title={

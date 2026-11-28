@@ -77,6 +77,8 @@ class RequirementTemplate < ApplicationRecord
         end
 
   after_commit :refresh_search_index, if: :saved_change_to_discarded_at
+  after_commit :clear_published_template_version_ids_cache,
+               if: :saved_change_to_discarded_at
 
   include Discard::Model
 
@@ -552,6 +554,10 @@ class RequirementTemplate < ApplicationRecord
 
   def refresh_search_index
     RequirementTemplate.search_index.refresh
+  end
+
+  def clear_published_template_version_ids_cache
+    TemplateVersion.clear_published_ids_cache
   end
 
   def validate_nickname_uniqueness

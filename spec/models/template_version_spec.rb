@@ -97,6 +97,22 @@ RSpec.describe TemplateVersion, type: :model do
       end
     end
 
+    context "when the requirement template is discarded" do
+      it "does not create integration mappings" do
+        create(:sub_district, external_api_state: "j_on")
+        template = create(:requirement_template)
+        template.discard!
+
+        expect {
+          create(
+            :template_version,
+            status: :published,
+            requirement_template: template
+          )
+        }.not_to change(IntegrationMapping, :count)
+      end
+    end
+
     context "when the template version status has not changed" do
       let(:template_version) { create(:template_version, status: :published) }
 
@@ -107,6 +123,32 @@ RSpec.describe TemplateVersion, type: :model do
           IntegrationMapping.count
         }
       end
+    end
+  end
+
+  describe ".cached_published_ids" do
+    it "excludes a published version once its requirement template is discarded" do
+      kept = create(:template_version, status: :published)
+      discarded_template = create(:requirement_template)
+      discarded_version =
+        create(
+          :template_version,
+          status: :published,
+          requirement_template: discarded_template
+        )
+      Rails.cache.clear
+
+      expect(described_class.cached_published_ids).to include(
+        kept.id,
+        discarded_version.id
+      )
+
+      discarded_template.discard!
+
+      expect(described_class.cached_published_ids).to include(kept.id)
+      expect(described_class.cached_published_ids).not_to include(
+        discarded_version.id
+      )
     end
   end
 end

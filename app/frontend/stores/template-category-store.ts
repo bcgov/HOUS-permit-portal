@@ -51,6 +51,12 @@ export const TemplateCategoryStoreModel = types
         if (!categoryIds.has(id)) self.templateCategoryMap.delete(id)
       })
       self.mergeUpdateAll(categories, "templateCategoryMap")
+      categories.forEach((category) => {
+        if (!category.requirementTemplates) return
+
+        const ids = category.requirementTemplates.map((template) => template.id)
+        self.templateCategoryMap.get(category.id)?.setRequirementTemplateIds(ids)
+      })
       self.rootStore.requirementTemplateStore.mergeUpdateAll(uncategorizedTemplates, "requirementTemplateMap")
       self.uncategorizedRequirementTemplateIds = cast(uncategorizedTemplates.map((template) => template.id))
 

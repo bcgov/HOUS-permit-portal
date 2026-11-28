@@ -71,6 +71,16 @@ RSpec.describe Api::TemplateVersionsController, type: :controller do
   end
 
   describe "GET #index" do
+    it "omits versions whose requirement template is discarded" do
+      target_template.discard!
+
+      get :index, params: { status: "published" }
+
+      ids = json_response["data"].pluck("id")
+      expect(ids).to include(source_version.id)
+      expect(ids).not_to include(target_version.id)
+    end
+
     it "serializes jurisdiction-scoped settings for template versions" do
       customization.update!(disabled: true, requires_project_meeting: true)
 
@@ -88,6 +98,54 @@ RSpec.describe Api::TemplateVersionsController, type: :controller do
 
       expect(template_payload["disabled_by_jurisdiction"]).to be(true)
       expect(template_payload["requires_project_meeting"]).to be(true)
+    end
+  end
+
+  describe "GET #standardization_preview" do
+    it "omits discarded templates from the published and public draft lists" do
+      discarded_template = create(:requirement_template)
+      discarded_published =
+        create(
+          :template_version,
+          status: :published,
+          requirement_template: discarded_template
+        )
+      discarded_draft =
+        create(
+          :template_version,
+          status: :draft,
+          publicly_previewable: true,
+          requirement_template: discarded_template
+        )
+      discarded_template.discard!
+      kept_template = create(:requirement_template)
+      kept_published =
+        create(
+          :template_version,
+          status: :published,
+          requirement_template: kept_template
+        )
+      kept_draft =
+        create(
+          :template_version,
+          status: :draft,
+          publicly_previewable: true,
+          requirement_template: kept_template
+        )
+
+      get :standardization_preview
+
+      published_ids =
+        json_response.dig("data", "published_template_versions").pluck("id")
+      draft_ids =
+        json_response.dig(
+          "data",
+          "publicly_previewable_template_versions"
+        ).pluck("id")
+      expect(published_ids).to include(kept_published.id)
+      expect(published_ids).not_to include(discarded_published.id)
+      expect(draft_ids).to include(kept_draft.id)
+      expect(draft_ids).not_to include(discarded_draft.id)
     end
   end
 

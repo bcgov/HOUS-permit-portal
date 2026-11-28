@@ -61,6 +61,7 @@ export const ReviewAndSendRequestsScreen = observer(
     }
 
     const handleSend = async () => {
+      if (addApplications !== "yes" && addApplications !== "no") return
       setIsSaving(true)
       const ok = await saveNote()
       if (!ok) {
@@ -135,7 +136,7 @@ export const ReviewAndSendRequestsScreen = observer(
         </FormControl>
 
         <Flex gap={4} mt={8}>
-          <Button variant="primary" onClick={handleSend} isLoading={isSaving}>
+          <Button variant="primary" onClick={handleSend} isLoading={isSaving} isDisabled={!addApplications}>
             <Flex as="span" align="center" gap={2}>
               {t("permitApplication.show.revision.send")}
               <Flex

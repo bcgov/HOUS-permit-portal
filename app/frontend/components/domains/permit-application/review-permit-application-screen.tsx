@@ -19,7 +19,7 @@ import { observer } from "mobx-react-lite"
 import React, { useEffect, useRef, useState } from "react"
 import { useController, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { usePermitApplication } from "../../../hooks/resources/use-permit-application"
 import { stickyBelowNavBar } from "../../../styles/nav-bar-offset"
 import { ECollaborationType, EPermitApplicationStatus } from "../../../types/enums"
@@ -53,6 +53,9 @@ export const ReviewPermitApplicationScreen = observer(() => {
     formRef,
   })
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const isReviewingSend = searchParams.get("review-and-send") === "true"
+  const pushedReviewSend = useRef(false)
   const { control, reset, handleSubmit } = useForm<IReferenceNumberForm>({
     defaultValues: {
       referenceNumber: currentPermitApplication?.referenceNumber || "",
@@ -69,7 +72,6 @@ export const ReviewPermitApplicationScreen = observer(() => {
   const { isOpen: isContactsOpen, onOpen: onContactsOpen, onClose: onContactsClose } = useDisclosure()
 
   const [hideRevisionList, setHideRevisionList] = useState(false)
-  const [isReviewingSend, setIsReviewingSend] = useState(false)
   const [isRetriggeringWebhook, setIsRetriggeringWebhook] = useState(false)
   const [isStartingReview, setIsStartingReview] = useState(false)
 
@@ -97,6 +99,35 @@ export const ReviewPermitApplicationScreen = observer(() => {
       container.classList.remove("revision-mode")
     }
   }, [currentPermitApplication?.revisionMode])
+
+  useEffect(() => {
+    if (!isReviewingSend) pushedReviewSend.current = false
+  }, [isReviewingSend])
+
+  const openReviewSend = () => {
+    pushedReviewSend.current = true
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current)
+      next.set("review-and-send", "true")
+      return next
+    })
+  }
+
+  const closeReviewSend = () => {
+    if (pushedReviewSend.current) {
+      pushedReviewSend.current = false
+      navigate(-1)
+      return
+    }
+    setSearchParams(
+      (current) => {
+        const next = new URLSearchParams(current)
+        next.delete("review-and-send")
+        return next
+      },
+      { replace: true }
+    )
+  }
 
   if (error) return <ErrorScreen error={error} />
   if (!currentPermitApplication?.isFullyLoaded) return <LoadingScreen />
@@ -355,10 +386,10 @@ export const ReviewPermitApplicationScreen = observer(() => {
         {isReviewingSend ? (
           <ReviewAndSendRequestsScreen
             permitApplication={currentPermitApplication}
-            onBack={() => setIsReviewingSend(false)}
+            onBack={closeReviewSend}
             onExitRevisionMode={() => {
-              setIsReviewingSend(false)
               setRevisionMode(false)
+              closeReviewSend()
             }}
           />
         ) : (
@@ -367,7 +398,7 @@ export const ReviewPermitApplicationScreen = observer(() => {
               <RevisionSideBar
                 permitApplication={currentPermitApplication}
                 onCancel={() => setRevisionMode(false)}
-                onReviewSend={() => setIsReviewingSend(true)}
+                onReviewSend={openReviewSend}
                 sendRevisionContainerRef={sendRevisionContainerRef}
               />
             ) : (

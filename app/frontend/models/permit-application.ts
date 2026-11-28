@@ -258,6 +258,8 @@ export const PermitApplicationModel = types.snapshotProcessor(
     }))
     .views((self) => ({
       get pastSubmissionVersionOptions() {
+        if (self.submissionVersions.length <= 1) return []
+
         const latestVersion = self.latestSubmissionVersion
         return self.submissionVersions
           .filter((submissionVersion) => submissionVersion.id !== latestVersion?.id)

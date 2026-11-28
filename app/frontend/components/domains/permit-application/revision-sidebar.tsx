@@ -71,13 +71,17 @@ export const RevisionSideBar = observer(
     } = permitApplication
 
     const [tabIndex, setTabIndex] = useState(0)
+    const hasPastSubmissions = pastSubmissionVersionOptions.length > 0
+
     const handleSetTabIndex = (index: number) => {
+      if (index === 1 && !hasPastSubmissions) return
+
       setTabIndex(index)
       setIsViewingPastRequests(index === 1)
-      if (index === 0) {
+      if (index === 1) {
+        setSelectedSubmissionVersion(pastSubmissionVersionOptions[0].value)
+      } else {
         setSelectedSubmissionVersion(latestSubmissionVersion)
-      } else if (index === 1) {
-        setSelectedSubmissionVersion(pastSubmissionVersionOptions?.[0]?.value ?? null)
       }
     }
 
@@ -323,7 +327,13 @@ export const RevisionSideBar = observer(
           >
             <TabList borderBottom="1px solid" borderColor="border.dark" mt={4}>
               <Tab {...revisionTabProps}>{t("permitApplication.show.revision.newRevision")}</Tab>
-              <Tab {...revisionTabProps}>{t("permitApplication.show.revision.pastRequests")}</Tab>
+              <Tab
+                {...revisionTabProps}
+                isDisabled={!hasPastSubmissions}
+                _disabled={{ opacity: 0.4, cursor: "not-allowed" }}
+              >
+                {t("permitApplication.show.revision.pastRequests")}
+              </Tab>
             </TabList>
             <TabPanels as={Flex} direction="column" flex={1} overflowY="auto">
               <TabPanel flex={1}>
